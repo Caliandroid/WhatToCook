@@ -32,9 +32,22 @@
         android:text="Large Text"
         android:id="@+id/tvAnzahl" />
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="New Button"
-        android:id="@+id/bZurueck" />
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ZURÜCK"
+            android:id="@+id/bZurueck" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Editieren"
+            android:id="@+id/bEditieren" />
+
+    </LinearLayout>
 </LinearLayout>

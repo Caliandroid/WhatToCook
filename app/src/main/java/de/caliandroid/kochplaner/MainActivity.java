@@ -1,5 +1,6 @@
 package de.caliandroid.kochplaner;
 
+import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
@@ -41,7 +42,7 @@ import java.util.Set;
 import static android.content.SharedPreferences.*;
 import static android.view.View.INVISIBLE;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener, Toolbar.OnMenuItemClickListener {
     public static final String MY_PREFS = "MyPrefs";
     DBHelper helper;
     ArrayList<Rezept> rezepte = new ArrayList();
@@ -52,6 +53,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     //NICHT MEHR IM EINSATZ:  ArrayAdapter<String> myArrayAdapter;
     SharedPreferences sharedpreferences;
     SharedPreferences.Editor editor ;
+    public static Activity activity;
+
+
+
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
      * See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -61,6 +66,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        activity=this;
 
         //Check if DB already exists (first run)
         helper = new DBHelper(this);
@@ -83,6 +89,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        toolbar.setOnMenuItemClickListener(this);
 
         myListView = (ListView) findViewById(R.id.listView);
         //myListView.setOnItemClickListener(this); Nicht mehr benötigt, da in CustomAdapter integriert
@@ -136,7 +143,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_editRezept) {
             return true;
         }
 
@@ -163,8 +170,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 //myArrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, getStringArray(rezepte));
 
-               // myListView.setAdapter(myArrayAdapter);
-                //myArrayAdapter.notifyDataSetChanged();
                 dataAdapter = new MyCustomAdapter(this,R.layout.row, rezepte);
                 myListView.setAdapter(dataAdapter);
                 dataAdapter.notifyDataSetChanged();
@@ -180,12 +185,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
 
         }
+
     }
 
-    /**
+    /** Nicht mehr in Verwendung, wurde durch startEditAnsicht ersetzt
      * Öffnet die Detailansicht und wird in der OnItemClick Methode innerhalb des CustomAdapter aufgerufen
      * @param rezept
-     */
+
     public void startRezeptAnsicht(Rezept rezept){
         Intent i = new Intent(this,RezeptAnsicht.class);
         i.putExtra("titel", rezept.getTitel());
@@ -193,7 +199,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         i.putExtra("anleitung",rezept.getAnleitung());
         i.putExtra("anzahl",rezept.getAnzahl());
         startActivityForResult(i, 1);
+    }*/
+
+    /**
+     * Öffnet die Detailansicht und wird in der OnItemClick Methode innerhalb des CustomAdapter aufgerufen
+     * @param rezept
+     */
+    public void startEditAnsicht(Rezept rezept, Class e){
+        Intent i = new Intent(this,e);
+        if(rezept==null){
+            startActivityForResult(i, 1);
+
+        }
+        else {
+            i.putExtra("id", rezept.getId());
+            i.putExtra("titel", rezept.getTitel());
+            i.putExtra("zutaten", rezept.getZutaten());
+            i.putExtra("anleitung", rezept.getAnleitung());
+            i.putExtra("anzahl", rezept.getAnzahl());
+            startActivityForResult(i, 1);
+        }
     }
+
 
 
 
@@ -218,6 +245,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         helper.close();
 
     }
+
+    @Override
+    public boolean onMenuItemClick(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_editRezept) {
+            //starte leere Rezepteingabe
+            startEditAnsicht(null,AddEditRezept.class);
+            return true;
+        }
+        return false;
+    }
+
 
 
     /**
@@ -277,7 +316,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         TextView tv = (TextView)v;
                         Rezept rezept = (Rezept) tv.getTag();
                         //Öffne RezeptAnsicht mit Inhalt des Rezepts
-                        startRezeptAnsicht(rezept);
+                       // startRezeptAnsicht(rezept);
+                        startEditAnsicht(rezept,RezeptAnsicht.class);
 
 
 
@@ -291,8 +331,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             else {
                 holder = (ViewHolder) convertView.getTag();
             }
-
-            //TODO hier hakt es nach Verkleinerung der ArrayListe, weil es hier nicht anzukommen scheint.
             Rezept rezept = rezepte.get(position);
             holder.name.setText(rezept.getTitel());
             holder.selected.setChecked(rezept.isSelected());
