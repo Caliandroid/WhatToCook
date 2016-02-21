@@ -3,4 +3,10 @@
     <string name="action_settings">Settings</string>
     <string name="title">Kochplaner</string>
     <string name="generate_button">Neue Kochwoche planen</string>
+    <string-array name="typen_array">
+        <item>Vegetarisch</item>
+        <item>Fleisch</item>
+        <item>Fisch</item>
+    </string-array>
+
 </resources>

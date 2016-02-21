@@ -34,6 +34,9 @@ public class Rezept {
     public String getAnleitung(){
         return this.anleitung;
     }
+    public int getTyp(){
+        return  this.typ;
+    }
     public boolean isSelected() {
         return selected;
     }

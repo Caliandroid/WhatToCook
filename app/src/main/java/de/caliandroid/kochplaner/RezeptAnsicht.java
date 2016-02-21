@@ -59,7 +59,8 @@ public class RezeptAnsicht extends AppCompatActivity implements View.OnClickList
             i.putExtra("titel", this.getIntent().getStringExtra("titel"));
             i.putExtra("zutaten",  this.getIntent().getStringExtra("zutaten"));
             i.putExtra("anleitung",  this.getIntent().getStringExtra("anleitung"));
-            i.putExtra("anzahl", this.getIntent().getIntExtra("anzahl",0));
+            i.putExtra("anzahl", this.getIntent().getIntExtra("anzahl", 0));
+            i.putExtra("typ",this.getIntent().getIntExtra("typ",0));
             startActivityForResult(i, 1);
 
 

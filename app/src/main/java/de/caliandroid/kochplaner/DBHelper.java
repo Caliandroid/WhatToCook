@@ -30,6 +30,7 @@ public class DBHelper extends SQLiteOpenHelper {
     //COLUMN Names
     // Table ingredients
     static final String TABELLE = "rezepte";
+    static final String ID = "_id";
     static final String TITEL = "titel";
     static final String ZUTATEN = "zutaten";
     static final String ANLEITUNG = "anleitung";
@@ -239,6 +240,70 @@ public class DBHelper extends SQLiteOpenHelper {
         SQLiteDatabase db =this.getWritableDatabase();
        // db.rawQuery("UPDATE rezepte set anzahl=anzahl+1 WHERE _id = ?", new String[]{String.valueOf(myID)});
         db.execSQL("UPDATE rezepte set anzahl=anzahl+1 WHERE _id = ?", new String[]{String.valueOf(myID)});
+    }
+
+    /**
+     *
+     * @param id
+     * @param titel
+     * @param zutaten
+     * @param anleitung
+     * @param typ
+     * @param anzahl
+     */
+    public void updateRezept(int id,String titel, String zutaten, String anleitung, int typ, int anzahl){
+        SQLiteDatabase db = this.getWritableDatabase();
+        String sID =String.valueOf(id);
+
+
+
+        ContentValues values = new ContentValues();
+        values.put(TITEL,titel);
+        values.put(ZUTATEN,zutaten);
+        values.put(ANLEITUNG,anleitung);
+        values.put(TYP,typ);
+        values.put(ANZAHL,anzahl);
+
+        try{
+            db.update(TABELLE,  values,"_id = ?",new String[]{sID}); //
+
+        }
+        catch(SQLiteException e){
+            e.printStackTrace();
+        }
+        db.close();
+
+    }
+
+    /**
+     * WICHTIG VORAB PRÜFEN, dass der Titel noch nicht verwendet wird
+     * @param titel
+     * @param zutaten
+     * @param anleitung
+     * @param typ
+     * @param anzahl
+     */
+    public void insertRezept(String titel, String zutaten, String anleitung, int typ, int anzahl){
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        // 2. create ContentValues to add key "column"/value
+        ContentValues values = new ContentValues();
+        values.put(TITEL,titel);
+        values.put(ZUTATEN,zutaten);
+        values.put(ANLEITUNG,anleitung);
+        values.put(TYP,typ);
+        values.put(ANZAHL,anzahl);
+
+        // 3. insert
+        try{
+            db.insert(TABELLE, null, values); //
+        }
+        catch(SQLiteException e){
+            e.printStackTrace();
+        }
+        db.close();
+
+
     }
 
 

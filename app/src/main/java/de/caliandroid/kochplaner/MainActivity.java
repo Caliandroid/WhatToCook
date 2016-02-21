@@ -188,21 +188,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
-    /** Nicht mehr in Verwendung, wurde durch startEditAnsicht ersetzt
-     * Öffnet die Detailansicht und wird in der OnItemClick Methode innerhalb des CustomAdapter aufgerufen
-     * @param rezept
-
-    public void startRezeptAnsicht(Rezept rezept){
-        Intent i = new Intent(this,RezeptAnsicht.class);
-        i.putExtra("titel", rezept.getTitel());
-        i.putExtra("zutaten", rezept.getZutaten());
-        i.putExtra("anleitung",rezept.getAnleitung());
-        i.putExtra("anzahl",rezept.getAnzahl());
-        startActivityForResult(i, 1);
-    }*/
 
     /**
-     * Öffnet die Detailansicht und wird in der OnItemClick Methode innerhalb des CustomAdapter aufgerufen
+     * Öffnet die Detailansicht oder EditAnsicht und wird in der OnItemClick Methode innerhalb des CustomAdapter aufgerufen
      * @param rezept
      */
     public void startEditAnsicht(Rezept rezept, Class e){
@@ -217,6 +205,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             i.putExtra("zutaten", rezept.getZutaten());
             i.putExtra("anleitung", rezept.getAnleitung());
             i.putExtra("anzahl", rezept.getAnzahl());
+            i.putExtra("typ",rezept.getTyp());
             startActivityForResult(i, 1);
         }
     }
