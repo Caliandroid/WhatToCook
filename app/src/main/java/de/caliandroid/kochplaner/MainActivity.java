@@ -3,6 +3,7 @@ package de.caliandroid.kochplaner;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -11,6 +12,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -53,7 +55,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     //NICHT MEHR IM EINSATZ:  ArrayAdapter<String> myArrayAdapter;
     SharedPreferences sharedpreferences;
     SharedPreferences.Editor editor ;
-    public static Activity activity;
+    public static Activity activity; //damit in Subclassen die Referenz zu dieser Klasse vorhanden ist
 
 
 
@@ -154,32 +156,44 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.button) {
-            Toast.makeText(getApplicationContext(),
-                    "Button geklickt", Toast.LENGTH_LONG)
-                    .show();
+            //AlertDialog
+            AlertDialog.Builder alert = new AlertDialog.Builder(this);
+            alert.setTitle("Neue Woche planen?");
+            alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    helper = new DBHelper(MainActivity.activity);
+                    try {
+                        // helper.createDB();
+                        rezepte = helper.getKochplan();
 
-            //Für die ListView
-            helper = new DBHelper(this);
-            try {
-                // helper.createDB();
-                rezepte =helper.getKochplan();
 
+                        //myArrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, getStringArray(rezepte));
 
-                //myArrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, getStringArray(rezepte));
-
-                dataAdapter = new MyCustomAdapter(this,R.layout.row, rezepte);
-                myListView.setAdapter(dataAdapter);
-                dataAdapter.notifyDataSetChanged();
+                        dataAdapter = new MyCustomAdapter(MainActivity.activity, R.layout.row, rezepte); //MainActivity.activity anstelle von this
+                        myListView.setAdapter(dataAdapter);
+                        dataAdapter.notifyDataSetChanged();
                 /*editor = getSharedPreferences(MY_PREFS, MODE_PRIVATE).edit();
                 Worker myWorker = new Worker();
                 editor.putString("plannedIDs", myWorker.getIDs(rezepte));
                 editor.commit();*/
 
 
+                    } catch (SQLiteException e) {
+                        throw e;
+                    }
+                }
+            });
 
-            } catch (SQLiteException e) {
-                throw e;
-            }
+            alert.setNegativeButton("Cancel",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            //nix
+                        }
+                    });
+
+            alert.show();
+
+            //Toast.makeText(getApplicationContext(),"Button geklickt", Toast.LENGTH_LONG).show();
 
         }
 

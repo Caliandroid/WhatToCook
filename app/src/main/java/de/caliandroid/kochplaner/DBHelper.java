@@ -189,6 +189,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
 
         }
+        db.close();
 
         return rezepte;
 
@@ -230,7 +231,7 @@ public class DBHelper extends SQLiteOpenHelper {
             rezept=(Rezept)i.next();
             System.out.println(rezept.getTitel());
         }
-
+        db.close();
         return rezepte;
 
     }
@@ -293,7 +294,7 @@ public class DBHelper extends SQLiteOpenHelper {
             rezept=(Rezept)i.next();
             System.out.println(rezept.getTitel());
         }
-
+        db.close();
         return rezepte;
 
     }
@@ -337,6 +338,7 @@ public class DBHelper extends SQLiteOpenHelper {
         catch(SQLiteException e){
             e.printStackTrace();
         }
+        db.close();
     }
 
     /**
@@ -365,6 +367,7 @@ public class DBHelper extends SQLiteOpenHelper {
         catch(SQLiteException e){
             e.printStackTrace();
         }
+        db.close();
 
 
     }

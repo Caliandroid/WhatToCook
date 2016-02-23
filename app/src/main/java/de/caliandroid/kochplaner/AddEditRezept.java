@@ -1,9 +1,13 @@
 package de.caliandroid.kochplaner;
 
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.sqlite.SQLiteException;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -16,7 +20,7 @@ import android.widget.Toast;
 /**
  * Created by stefan on 20.02.16.
  */
-public class AddEditRezept extends AppCompatActivity implements View.OnClickListener {
+public class AddEditRezept extends AppCompatActivity implements View.OnClickListener, View.OnKeyListener {
 
     private EditText etTitel,etZutaten,etAnleitung,etAnzahl;
     private int rezeptID;
@@ -63,18 +67,6 @@ public class AddEditRezept extends AppCompatActivity implements View.OnClickList
             etAnzahl.setText("0");
         }
 
-        /*tvTitel=(TextView)findViewById(R.id.tvRezeptTitel);
-        tvZutaten=(TextView)findViewById(R.id.tvZutaten);
-        tvAnleitung=(TextView)findViewById(R.id.tvAnleitung);
-        tvAnzahl=(TextView)findViewById(R.id.tvAnzahl);
-
-        //Daten holen
-        tvTitel.setText(getIntent().getStringExtra("titel"));
-        tvZutaten.setText("ZUTATEN:\n"+getIntent().getStringExtra("zutaten")+"\n\n");
-        tvAnleitung.setText("ANLEITUNG:\n"+getIntent().getStringExtra("anleitung"));
-        tvAnzahl.setText("Bisher gekocht: "+String.valueOf(getIntent().getIntExtra("anzahl",0))+" mal");*/
-
-
 
 
     }
@@ -119,5 +111,36 @@ public class AddEditRezept extends AppCompatActivity implements View.OnClickList
             }
 
         }
+    }
+    //Dialog
+    public void onBackPressed() {
+        AlertDialog.Builder alert = new AlertDialog.Builder(this);
+        alert.setTitle("Ohne Speichern zurück?");
+        // alert.setMessage("Message");
+
+        alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                finish();
+            }
+        });
+
+        alert.setNegativeButton("Cancel",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                    }
+                });
+
+        alert.show();
+
+    }
+
+    //falls der Back Hard- oder Software Button gedrückt wurde
+    @Override
+    public boolean onKey(View v, int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            onBackPressed();
+
+        }
+        return true;
     }
 }
