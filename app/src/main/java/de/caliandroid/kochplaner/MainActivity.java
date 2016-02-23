@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -265,6 +266,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private class MyCustomAdapter extends ArrayAdapter<Rezept> {
 
         //private ArrayList<Rezept> rezepte1;
+        int i=0; //für die Farben in der Liste
 
         public MyCustomAdapter(Context context, int textViewResourceId,
                                ArrayList<Rezept> rezepte) {
@@ -289,21 +291,41 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 holder = new ViewHolder();
                 holder.name = (TextView) convertView.findViewById(R.id.textView1);
+                holder.name.setTextSize(22);
                 holder.selected = (CheckBox) convertView.findViewById(R.id.checkBox1);
                 convertView.setTag(holder);
 
                 holder.selected.setOnClickListener(new View.OnClickListener() {
                     public void onClick(View v) {
-                        CheckBox cb = (CheckBox) v;
-                        Rezept rezept = (Rezept) cb.getTag();
-                        Toast.makeText(getApplicationContext(), cb.getText() + "wurde gekocht", Toast.LENGTH_LONG).show();
+                        final CheckBox cb = (CheckBox) v;
+                        final Rezept rezept = (Rezept) cb.getTag();
                         rezept.setSelected(cb.isChecked());
                         if (rezept.isSelected()) {
-                            //falls selektiert, dann entfernen und Häufigkeit hochsetzen
-                            //System.out.println("Rezept an Pos " + position + "  soll entfernt werden " + rezept.getTitel() + " Anzahl wird erhöht auf=" + rezept.getAnzahl());
-                            helper.updateHaeufigkeit(rezept.getId());
-                            rezepte.remove(position);
-                            dataAdapter.notifyDataSetChanged(); //da AL rezepte verkürzt wurde
+
+                            //AlertDialog - um Tippfehler auszuschließen
+                            AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.activity);
+                            alert.setTitle(rezept.getTitel()+" gekocht?");
+                            alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int whichButton) {
+                                    //falls selektiert, dann entfernen und Häufigkeit hochsetzen
+                                    helper.updateHaeufigkeit(rezept.getId());
+                                    rezepte.remove(position);
+                                    Toast.makeText(getApplicationContext(), rezept.getTitel() + " gekocht :)", Toast.LENGTH_LONG).show();
+                                    dataAdapter.notifyDataSetChanged(); //da AL rezepte verkürzt wurde
+
+                                }
+                            });
+
+                            alert.setNegativeButton("Cancel",
+                                    new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int whichButton) {
+                                            //deselektieren
+                                            cb.setChecked(false);
+                                        }
+                                    });
+
+                            alert.show();
+
 
 
                         }
@@ -319,10 +341,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                        // startRezeptAnsicht(rezept);
                         startEditAnsicht(rezept,RezeptAnsicht.class);
 
-
-
-
-
                     }
 
                 });
@@ -333,9 +351,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
             Rezept rezept = rezepte.get(position);
             holder.name.setText(rezept.getTitel());
+            if( i % 2 ==0){
+                holder.name.setBackgroundColor(Color.LTGRAY);
+            }
             holder.selected.setChecked(rezept.isSelected());
             holder.selected.setTag(rezept);
             holder.name.setTag(rezept);
+            i++;
+
             return convertView;
 
 
