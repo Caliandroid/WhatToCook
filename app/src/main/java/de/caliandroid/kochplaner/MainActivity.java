@@ -162,10 +162,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             helper = new DBHelper(this);
             try {
                 // helper.createDB();
-                rezepte = helper.getSelectedRezepte(0, 4);
-                // helper.getSelectedRezepte(1,2);
-                // helper.getSelectedRezepte(2, 1);
-                //
+                rezepte =helper.getKochplan();
 
 
                 //myArrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, getStringArray(rezepte));

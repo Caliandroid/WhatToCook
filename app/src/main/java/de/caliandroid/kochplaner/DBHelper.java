@@ -187,7 +187,9 @@ public class DBHelper extends SQLiteOpenHelper {
                 System.out.println("C scheint leer zu sein");
             }
 
+
         }
+
         return rezepte;
 
     }
@@ -228,6 +230,70 @@ public class DBHelper extends SQLiteOpenHelper {
             rezept=(Rezept)i.next();
             System.out.println(rezept.getTitel());
         }
+
+        return rezepte;
+
+    }
+
+    /**
+     * Holt die Rezepte anhand der Häufigkeit aus der DB mit Berücksichtigung des Typs (vegetarisch, Fleisch, Fisch etc.)
+     * @return rezepte
+     */
+    public ArrayList <Rezept> getKochplan() {
+        SQLiteDatabase db =this.getReadableDatabase();
+        Rezept rezept;
+        ArrayList<Rezept> rezepte=new ArrayList();
+        //query() Methode
+
+        //die Variablen
+        String dbName ="rezepte";
+        String [] columnNames = {"_id","TITEL","ZUTATEN","ANLEITUNG","TYP","ANZAHL"};
+        String whereClause ="typ=?";
+        String[]selectionArgs={String.valueOf(0)};
+        String  order="ANZAHL ASC";
+        String limit ="4";
+        Cursor c= db.query(dbName,columnNames,whereClause,selectionArgs,null,null,order,limit);
+        c.moveToFirst();
+        while (!c.isAfterLast()) {
+            //(int id,String titel,String anleitung, String zutaten,int typ, int anzahl){
+
+            rezept = new Rezept(c.getInt(0),c.getString(1),c.getString(2),c.getString(3),c.getInt(4),c.getInt(5),false);
+            rezepte.add(rezept);
+            c.moveToNext();
+        }
+        //Abfrage wiederholen für 2x Fleisch und 1xFisch
+        selectionArgs[0]="1";
+        limit="2";
+        c= db.query(dbName,columnNames,whereClause,selectionArgs,null,null,order,limit);
+        c.moveToFirst();
+        while (!c.isAfterLast()) {
+            //(int id,String titel,String anleitung, String zutaten,int typ, int anzahl){
+
+            rezept = new Rezept(c.getInt(0),c.getString(1),c.getString(2),c.getString(3),c.getInt(4),c.getInt(5),false);
+            rezepte.add(rezept);
+            c.moveToNext();
+        }
+        selectionArgs[0]="2";
+        limit="1";
+        c= db.query(dbName,columnNames,whereClause,selectionArgs,null,null,order,limit);
+        c.moveToFirst();
+        while (!c.isAfterLast()) {
+            //(int id,String titel,String anleitung, String zutaten,int typ, int anzahl){
+
+            rezept = new Rezept(c.getInt(0),c.getString(1),c.getString(2),c.getString(3),c.getInt(4),c.getInt(5),false);
+            rezepte.add(rezept);
+            c.moveToNext();
+        }
+
+
+        //Rezepte zufällig anordnen
+        Collections.shuffle(rezepte, new Random(System.nanoTime()));
+        Iterator i = rezepte.iterator();
+        while(i.hasNext()){
+            rezept=(Rezept)i.next();
+            System.out.println(rezept.getTitel());
+        }
+
         return rezepte;
 
     }
@@ -271,8 +337,6 @@ public class DBHelper extends SQLiteOpenHelper {
         catch(SQLiteException e){
             e.printStackTrace();
         }
-        db.close();
-
     }
 
     /**
@@ -301,7 +365,6 @@ public class DBHelper extends SQLiteOpenHelper {
         catch(SQLiteException e){
             e.printStackTrace();
         }
-        db.close();
 
 
     }
