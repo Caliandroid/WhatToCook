@@ -372,6 +372,56 @@ public class DBHelper extends SQLiteOpenHelper {
 
     }
 
+    public Rezept replaceRezept(Rezept r, String ids) {
+        SQLiteDatabase db =this.getReadableDatabase();
+        Rezept rezept =null;
+        StringBuffer fragezeichen=new StringBuffer();
+        String []tempSplit=ids.split(",");
+
+        int anzahlFragezeichen = tempSplit.length;
+        for (int i=0;i<anzahlFragezeichen;i++){
+            if(i==0){
+                fragezeichen.append("?");}
+            else{
+                fragezeichen.append(",?");}
+        }
+
+        String[]selectionArgs = new String[anzahlFragezeichen+1];
+        for(int i=0;i<=anzahlFragezeichen;i++){
+            if(i==0){
+                selectionArgs[i]=String.valueOf(r.getTyp());
+            }
+            else{
+                selectionArgs[i]=tempSplit[i-1];
+            }
+
+        }
+
+
+
+
+        //die Variablen
+        String dbName ="rezepte";
+        String [] columnNames = {"_id","TITEL","ZUTATEN","ANLEITUNG","TYP","ANZAHL"};
+        String whereClause = TYP+" = ? and "+ID+"  not in ("+fragezeichen+")";
+        //String[]selectionArgs={String.valueOf(r.getTyp()), ids};
+        String  order="ANZAHL ASC";
+        String limit =(String.valueOf(1));
+
+        Cursor c= db.query(dbName,columnNames,whereClause,selectionArgs,null,null,order,limit);
+        c.moveToFirst();
+        while (!c.isAfterLast()) {
+                   rezept = new Rezept(c.getInt(0),c.getString(1),c.getString(2),c.getString(3),c.getInt(4),c.getInt(5),false);
+            System.out.println("Habe ein neues Rezept für dich= "+rezept.getTitel());
+            c.moveToNext();
+
+        }
+
+        db.close();
+        return rezept;
+
+    }
+
 
 
 

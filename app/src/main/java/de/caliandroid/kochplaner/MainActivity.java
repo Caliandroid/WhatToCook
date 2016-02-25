@@ -18,6 +18,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -45,7 +46,7 @@ import java.util.Set;
 import static android.content.SharedPreferences.*;
 import static android.view.View.INVISIBLE;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener, Toolbar.OnMenuItemClickListener {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener, Toolbar.OnMenuItemClickListener, View.OnTouchListener {
     public static final String MY_PREFS = "MyPrefs";
     DBHelper helper;
     ArrayList<Rezept> rezepte = new ArrayList();
@@ -57,6 +58,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     SharedPreferences sharedpreferences;
     SharedPreferences.Editor editor ;
     public static Activity activity; //damit in Subclassen die Referenz zu dieser Klasse vorhanden ist
+    String restoredIDs;
 
 
 
@@ -80,7 +82,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
 
         SharedPreferences prefs = getSharedPreferences(MY_PREFS, MODE_PRIVATE);
-        String restoredIDs = prefs.getString("plannedIDs", null);
+        restoredIDs = prefs.getString("plannedIDs", null);
         //nur falls etwas zum Wiederherstellen existiert
         if (restoredIDs!=null && !restoredIDs.isEmpty()) {
             helper = new DBHelper(this);
@@ -102,10 +104,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         myListView.setAdapter(dataAdapter);
 
         dataAdapter.notifyDataSetChanged();
-        //myArrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, getStringArray(rezepte));
-        //myListView.setAdapter(myArrayAdapter);
-        //myArrayAdapter.notifyDataSetChanged();
-
+        myListView.setOnTouchListener(this);
 
 
 
@@ -217,7 +216,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             i.putExtra("zutaten", rezept.getZutaten());
             i.putExtra("anleitung", rezept.getAnleitung());
             i.putExtra("anzahl", rezept.getAnzahl());
-            i.putExtra("typ",rezept.getTyp());
+            i.putExtra("typ", rezept.getTyp());
             startActivityForResult(i, 1);
         }
     }
@@ -258,6 +257,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return false;
     }
 
+    @Override
+    public boolean onTouch(View v, MotionEvent event) {
+
+        //wird aktuell nicht genutzt;
+        return false;
+    }
 
 
     /**
@@ -304,7 +309,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                             //AlertDialog - um Tippfehler auszuschließen
                             AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.activity);
-                            alert.setTitle(rezept.getTitel()+" gekocht?");
+                            alert.setTitle("Wurde " + rezept.getTitel() + " gekocht?");
                             alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int whichButton) {
                                     //falls selektiert, dann entfernen und Häufigkeit hochsetzen
@@ -327,7 +332,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             alert.show();
 
 
-
                         }
 
                     }
@@ -335,12 +339,52 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 });
                 holder.name.setOnClickListener(new View.OnClickListener() {
                     public void onClick(View v) {
-                        TextView tv = (TextView)v;
+                        TextView tv = (TextView) v;
                         Rezept rezept = (Rezept) tv.getTag();
                         //Öffne RezeptAnsicht mit Inhalt des Rezepts
-                       // startRezeptAnsicht(rezept);
-                        startEditAnsicht(rezept,RezeptAnsicht.class);
+                        // startRezeptAnsicht(rezept);
+                        startEditAnsicht(rezept, RezeptAnsicht.class);
 
+                    }
+
+                });
+                holder.name.setOnLongClickListener(new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View v) {
+                        //TODO Rezept an dieser Stelle austauschen
+                        final  TextView tv = (TextView)v;
+                        final Rezept rezept = (Rezept) tv.getTag();
+                        if (rezept!=null) {
+
+                            //AlertDialog - um Tippfehler auszuschließen
+                            AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.activity);
+                            alert.setTitle("Keine Lust auf "+ rezept.getTitel() + " ?");
+                            alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int whichButton) {
+                                    //neues Rezept gleichen Typs laden (unter der Berücksichtung der bereits geplannten Rezepte in der Liste
+
+                                    rezepte.add(rezepte.indexOf(rezept),helper.replaceRezept(rezept, restoredIDs));
+                                    rezepte.remove(rezept);
+                                    Toast.makeText(getApplicationContext(), "Rezept ausgetauscht", Toast.LENGTH_LONG).show();
+                                    dataAdapter.notifyDataSetChanged(); //da AL rezepte verkürzt wurde
+
+
+                                }
+                            });
+
+                            alert.setNegativeButton("Cancel",
+                                    new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int whichButton) {
+                                            //nichts zu tun
+
+                                        }
+                                    });
+
+                            alert.show();
+
+
+                        }
+                        return true; //falls hier false übergeben wird, ist der Callback nicht verbraucht und löst auch noch den onClickListener aus.
                     }
 
                 });
