@@ -234,13 +234,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onStop() {
         super.onStop();
-        System.out.println("OnSTOP");
         //an dieser Stelle die Änderungen speichern
-        editor = getSharedPreferences(MY_PREFS, MODE_PRIVATE).edit();
-        Worker myWorker = new Worker();
-        editor.putString("plannedIDs", myWorker.getIDs(rezepte));
-        editor.commit();
-        System.out.println("Ids= "+myWorker.getIDs(rezepte));
+        saveSharedPrefs();
         //DB Verbindung schließen
         helper.close();
 
@@ -262,6 +257,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         //wird aktuell nicht genutzt;
         return false;
+    }
+
+    public void saveSharedPrefs(){
+        //an dieser Stelle die Änderungen speichern
+        editor = getSharedPreferences(MY_PREFS, MODE_PRIVATE).edit();
+        Worker myWorker = new Worker();
+        editor.putString("plannedIDs", myWorker.getIDs(rezepte));
+        editor.commit();
     }
 
 
@@ -342,7 +345,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         TextView tv = (TextView) v;
                         Rezept rezept = (Rezept) tv.getTag();
                         //Öffne RezeptAnsicht mit Inhalt des Rezepts
-                        // startRezeptAnsicht(rezept);
                         startEditAnsicht(rezept, RezeptAnsicht.class);
 
                     }
@@ -362,11 +364,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int whichButton) {
                                     //neues Rezept gleichen Typs laden (unter der Berücksichtung der bereits geplannten Rezepte in der Liste
+                                    Worker myWorker=new Worker();
+                                        rezepte.add(rezepte.indexOf(rezept), helper.replaceRezept(rezept,myWorker.getIDs(rezepte)));
+                                        rezepte.remove(rezept);
+                                        Toast.makeText(getApplicationContext(), "Rezept ausgetauscht", Toast.LENGTH_LONG).show();
+                                        dataAdapter.notifyDataSetChanged(); //da AL rezepte verkürzt wurde
+                                        //saveSharedPrefs();//da ID's verändert wurden
 
-                                    rezepte.add(rezepte.indexOf(rezept),helper.replaceRezept(rezept, restoredIDs));
-                                    rezepte.remove(rezept);
-                                    Toast.makeText(getApplicationContext(), "Rezept ausgetauscht", Toast.LENGTH_LONG).show();
-                                    dataAdapter.notifyDataSetChanged(); //da AL rezepte verkürzt wurde
 
 
                                 }
