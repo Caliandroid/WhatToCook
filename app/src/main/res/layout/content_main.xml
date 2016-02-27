@@ -36,6 +36,8 @@
         android:id="@+id/listView"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
-        android:layout_below="@+id/button" />
+        android:layout_below="@+id/button"
+        android:divider="#205d24"
+        android:dividerHeight="10dp" />
 
 </RelativeLayout>

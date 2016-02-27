@@ -1,5 +1,6 @@
 package de.caliandroid.kochplaner;
 
+import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
@@ -9,9 +10,15 @@ import android.view.View;
 public class Settings extends AppCompatActivity implements View.OnClickListener{
 
 
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.settings);
+    }
 
     @Override
     public void onClick(View v) {
+
 
     }
 }

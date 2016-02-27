@@ -241,12 +241,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public boolean onMenuItemClick(MenuItem item) {
-        int id = item.getItemId();
-        if (id == R.id.action_editRezept) {
+
+        if (item.getItemId() == R.id.action_editRezept) {
             //starte leere Rezepteingabe
             startEditAnsicht(null,AddEditRezept.class);
             return true;
         }
+        if (item.getItemId() == R.id.action_settings) {
+            //starte  Settings
+            Intent i = new Intent(this,Settings.class);
+            startActivityForResult(i, 1);
+            return true;
+        }
+
         return false;
     }
 
@@ -266,10 +273,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    protected synchronized  void onActivityResult(int requestCode, int resultCode, Intent data) {
         // Aktuell nur ausgelöst, sollte ein Rezept gelöscht worden sein, man erhält als ResultCode die ID
+        //synchronized hinzugefügt, damit es vor Erstellung der ListView ablaufen kann -> funktioniert!
         if(resultCode>=0){
             //Liste der geplanten Rezepte erneut einlesen, das nicht mehr existierende wird dabei verworfen und entfernt -
+            Worker worker= new Worker();
+           rezepte= worker.bereinigeListe(rezepte,resultCode);
             rezepte = helper.getGeplanteRezepte(restoredIDs);
             dataAdapter.notifyDataSetChanged();
 
@@ -309,7 +319,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 holder = new ViewHolder();
                 holder.name = (TextView) convertView.findViewById(R.id.textView1);
-                holder.name.setTextSize(22);
+                holder.name.setTextSize(23);
                 holder.selected = (CheckBox) convertView.findViewById(R.id.checkBox1);
                 convertView.setTag(holder);
 
@@ -414,9 +424,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             //Das Programm stürzt ab und beim nächsten Laden paßt es wieder.
             Rezept rezept = rezepte.get(position);
             holder.name.setText(rezept.getTitel());
+            /*
+            * Colorierung klappt nicht so recht TODO
             if( i % 2 ==0){
+
                 holder.name.setBackgroundColor(Color.LTGRAY);
-            }
+            }*/
             holder.selected.setChecked(rezept.isSelected());
             holder.selected.setTag(rezept);
             holder.name.setTag(rezept);

@@ -1,5 +1,9 @@
 package de.caliandroid.kochplaner;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -66,6 +70,44 @@ public class Worker {
     }
 
     //TODO Importer und Exporter zu CSV
+
+    public ArrayList<Rezept> bereinigeListe(ArrayList<Rezept>rezepte, int id){
+        Rezept r;
+        Iterator i = rezepte.iterator();
+        while(i.hasNext()){
+            r = (Rezept)i.next();
+            if(r.getId()==id){
+                rezepte.remove(r);
+            }
+
+        }
+        return rezepte;
+
+    }
+
+    public int[] importCSVRezepte(String path, String delimiter) throws IOException{
+        int[]results=new int[2];
+        File myFile = new File(path);
+
+        if(myFile.exists()){
+            String line;
+            String[]temp;
+            FileReader fr;
+            fr = new FileReader(myFile);
+            BufferedReader br=new BufferedReader(fr);
+            while ((line = br.readLine()) != null){
+                temp= line.split(delimiter);
+                if(temp.length==6){
+                    //TODO versuche ein Rezeptobjekt zu erstellen
+                }
+
+            }
+
+        }
+
+
+        return results;
+    }
 
 
 }
