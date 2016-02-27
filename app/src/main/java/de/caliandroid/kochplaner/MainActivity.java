@@ -86,9 +86,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //nur falls etwas zum Wiederherstellen existiert
         if (restoredIDs!=null && !restoredIDs.isEmpty()) {
             helper = new DBHelper(this);
-            //TODO An dieser Stelle gerät die Reihenfolge durcheinander (manchmal).
             rezepte = helper.getGeplanteRezepte(restoredIDs);
-            //System.out.println("restauriertes AL size="+rezepte.size());
         }
 
 
@@ -267,6 +265,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         editor.commit();
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // Aktuell nur ausgelöst, sollte ein Rezept gelöscht worden sein, man erhält als ResultCode die ID
+        if(resultCode>=0){
+            //Liste der geplanten Rezepte erneut einlesen, das nicht mehr existierende wird dabei verworfen und entfernt -
+            rezepte = helper.getGeplanteRezepte(restoredIDs);
+            dataAdapter.notifyDataSetChanged();
+
+
+        }
+    }
+
 
     /**
      * Angepaßter Adapter, der die Rezepte samt einer Auswahlcheckbox anzeigen soll
@@ -279,7 +289,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         public MyCustomAdapter(Context context, int textViewResourceId,
                                ArrayList<Rezept> rezepte) {
             super(context, textViewResourceId, rezepte);
-           // benötige keine lokale Version, da ich direkt mit der AL rezepte arbeiten kann
+            // benötige keine lokale Version, da ich direkt mit der AL rezepte arbeiten kann
            // this.rezepte1 = new ArrayList<Rezept>(); this.rezepte1.addAll(rezepte);
         }
 
@@ -397,6 +407,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             else {
                 holder = (ViewHolder) convertView.getTag();
             }
+
+
+            //TODO Wenn ein Rezept komplett aus der DB gelöscht wurde aber in den geplanten Rezepten existiert,
+            //gibt es eine java.lang.NullPointerException: Attempt to invoke virtual method 'int android.view.View.getImportantForAccessibility()' on a null object reference
+            //Das Programm stürzt ab und beim nächsten Laden paßt es wieder.
             Rezept rezept = rezepte.get(position);
             holder.name.setText(rezept.getTitel());
             if( i % 2 ==0){

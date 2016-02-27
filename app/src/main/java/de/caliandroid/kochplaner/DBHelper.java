@@ -3,6 +3,7 @@ package de.caliandroid.kochplaner;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.CursorIndexOutOfBoundsException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -186,6 +187,9 @@ public class DBHelper extends SQLiteOpenHelper {
                 e.printStackTrace();
                 System.out.println("C scheint leer zu sein");
             }
+            catch(CursorIndexOutOfBoundsException e){
+                e.printStackTrace(); System.out.println("Hinweis: Eine gerade gelöschte ID ist bei den geplanten Rezepten dabei\\nWird beim nächsten Speichern autom. bereinigt");
+            }
 
 
         }
@@ -252,8 +256,8 @@ public class DBHelper extends SQLiteOpenHelper {
         String whereClause ="typ=?";
         String[]selectionArgs={String.valueOf(0)};
         String  order="ANZAHL ASC";
-        String limit ="4";
-        Cursor c= db.query(dbName,columnNames,whereClause,selectionArgs,null,null,order,limit);
+        String limit = "4";
+        Cursor c = db.query(dbName, columnNames, whereClause,selectionArgs,null,null,order,limit);
         c.moveToFirst();
         while (!c.isAfterLast()) {
             //(int id,String titel,String anleitung, String zutaten,int typ, int anzahl){
@@ -311,28 +315,22 @@ public class DBHelper extends SQLiteOpenHelper {
 
     /**
      *
-     * @param id
-     * @param titel
-     * @param zutaten
-     * @param anleitung
-     * @param typ
-     * @param anzahl
+     * @param r
      */
-    public void updateRezept(int id,String titel, String zutaten, String anleitung, int typ, int anzahl){
+    public void updateRezept(Rezept r){
         SQLiteDatabase db = this.getWritableDatabase();
-        String sID =String.valueOf(id);
-
-
-
+        String sID =String.valueOf(r.getId());
         ContentValues values = new ContentValues();
-        values.put(TITEL,titel);
-        values.put(ZUTATEN,zutaten);
-        values.put(ANLEITUNG,anleitung);
-        values.put(TYP,typ);
-        values.put(ANZAHL,anzahl);
+        values.put(TITEL,r.getTitel());
+        values.put(ZUTATEN,r.getZutaten());
+        values.put(ANLEITUNG,r.getAnleitung());
+        values.put(TYP,r.getTyp());
+        values.put(ANZAHL,r.getAnzahl());
+        String whereClause= "_id = ?";
+        String[]whereArgs= {sID};
 
         try{
-            db.update(TABELLE,  values,"_id = ?",new String[]{sID}); //
+            db.update(TABELLE, values, whereClause, whereArgs); //
 
         }
         catch(SQLiteException e){
@@ -342,23 +340,19 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     /**
-     * WICHTIG VORAB PRÜFEN, dass der Titel noch nicht verwendet wird
-     * @param titel
-     * @param zutaten
-     * @param anleitung
-     * @param typ
-     * @param anzahl
+     *
+     * @param r
      */
-    public void insertRezept(String titel, String zutaten, String anleitung, int typ, int anzahl){
+    public void insertRezept(Rezept r){
         SQLiteDatabase db = this.getWritableDatabase();
 
         // 2. create ContentValues to add key "column"/value
         ContentValues values = new ContentValues();
-        values.put(TITEL,titel);
-        values.put(ZUTATEN,zutaten);
-        values.put(ANLEITUNG,anleitung);
-        values.put(TYP,typ);
-        values.put(ANZAHL,anzahl);
+        values.put(TITEL,r.getTitel());
+        values.put(ZUTATEN,r.getZutaten());
+        values.put(ANLEITUNG,r.getAnleitung());
+        values.put(TYP,r.getTyp());
+        values.put(ANZAHL,r.getAnzahl());
 
         // 3. insert
         try{
@@ -370,6 +364,22 @@ public class DBHelper extends SQLiteOpenHelper {
         db.close();
 
 
+    }
+
+    public void deleteRezept(int id){
+        SQLiteDatabase db = this.getWritableDatabase();
+        String sID =String.valueOf(id);
+        String whereClause="_id=?";
+        String []whereArgs={sID};
+
+        try{
+            db.delete(TABELLE,whereClause,whereArgs);
+
+        }
+        catch(SQLiteException e){
+            e.printStackTrace();
+        }
+        db.close();
     }
 
     public Rezept replaceRezept(Rezept r, String ids) {
@@ -419,6 +429,49 @@ public class DBHelper extends SQLiteOpenHelper {
 
         db.close();
         return rezept;
+
+    }
+
+    /**
+     * Prüft, ob Titel in Kombi mit Typ schon existiert
+     * @param r
+     * @param
+     * @return
+     */
+    public boolean doesAlreadyExist(Rezept r){
+        SQLiteDatabase db =this.getReadableDatabase();
+        //die Variablen
+        String dbName ="rezepte";
+        String [] columnNames = {"_id","TITEL","ZUTATEN","ANLEITUNG","TYP","ANZAHL"};
+        String whereClause = TITEL+" = ? and "+TYP+" = ?";
+        String[]selectionArgs={r.getTitel(), String.valueOf(r.getTyp())  };
+        Cursor c= db.query(dbName,columnNames,whereClause,selectionArgs,null,null,null,null);
+
+        if(c.getCount()>0){
+            //für update Methode gilt die Regel, dass auch hier false übergeben wird, wenn ID vom übergebenen Rezept mit dem gefunden übereinstimmt
+            //so läßt sich verhindern, dass anderweitig ohne Prüfung ein vorhandenes Rezept so umbenannt wird, dass es eine Duplette gibt.
+            c.moveToFirst();
+            while (!c.isAfterLast()) {
+                Rezept rezept = new Rezept(c.getInt(0),c.getString(1),c.getString(2),c.getString(3),c.getInt(4),c.getInt(5),false);
+                if(rezept.getId()==r.getId()){
+                    db.close();
+                    return false; //existiert schon, aber da gleiche ID läuft eine Prüfung für ein Update
+                }
+                c.moveToNext();
+
+            }
+
+            db.close();
+            return true;
+        }
+        else{
+            db.close();
+            return false;
+        }
+
+
+
+
 
     }
 
