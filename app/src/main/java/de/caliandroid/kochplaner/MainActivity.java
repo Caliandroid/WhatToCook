@@ -116,7 +116,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .setAction("Action", null).show();
 
                 //Mail senden
-                Worker worker =new Worker();
+                Worker worker =new Worker(getApplicationContext());
                 Intent intent = new Intent(Intent.ACTION_SEND);
                 intent.setType("text/html");
                 intent.putExtra(Intent.EXTRA_EMAIL, "sarah@caliandro.de,stefan@caliandro.de");
@@ -267,9 +267,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void saveSharedPrefs(){
         //an dieser Stelle die Änderungen speichern
         editor = getSharedPreferences(MY_PREFS, MODE_PRIVATE).edit();
-        Worker myWorker = new Worker();
+        Worker myWorker = new Worker(this);
         editor.putString("plannedIDs", myWorker.getIDs(rezepte));
         editor.commit();
+
     }
 
     @Override
@@ -278,7 +279,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //synchronized hinzugefügt, damit es vor Erstellung der ListView ablaufen kann -> funktioniert!
         if(resultCode>=0){
             //Liste der geplanten Rezepte erneut einlesen, das nicht mehr existierende wird dabei verworfen und entfernt -
-            Worker worker= new Worker();
+            Worker worker= new Worker(this);
            rezepte= worker.bereinigeListe(rezepte,resultCode);
             rezepte = helper.getGeplanteRezepte(restoredIDs);
             dataAdapter.notifyDataSetChanged();
@@ -384,7 +385,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int whichButton) {
                                     //neues Rezept gleichen Typs laden (unter der Berücksichtung der bereits geplannten Rezepte in der Liste
-                                    Worker myWorker=new Worker();
+                                    Worker myWorker=new Worker(activity);
                                         rezepte.add(rezepte.indexOf(rezept), helper.replaceRezept(rezept,myWorker.getIDs(rezepte)));
                                         rezepte.remove(rezept);
                                         Toast.makeText(getApplicationContext(), "Rezept ausgetauscht", Toast.LENGTH_LONG).show();

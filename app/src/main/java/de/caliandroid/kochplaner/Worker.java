@@ -1,9 +1,17 @@
 package de.caliandroid.kochplaner;
 
+import android.content.Context;
+import android.content.res.AssetFileDescriptor;
+import android.content.res.AssetManager;
+import android.os.Environment;
+import android.util.Log;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -11,8 +19,11 @@ import java.util.Iterator;
  * Created by cali on 31.01.16.
  */
 public class Worker {
+    private Context myContext;
 
-    public Worker(){};
+    public Worker(Context myContext){
+        this.myContext=myContext;
+    }; //brauche für manche Funktionen das Contextobjekt der aufrufenden Klasse
 
     /**
      * Holt sich die ID's als kommaseparierter String zur Speicherung und Restaurierung bei App-Neustart
@@ -69,7 +80,6 @@ public class Worker {
 
     }
 
-    //TODO Importer und Exporter zu CSV
 
     public ArrayList<Rezept> bereinigeListe(ArrayList<Rezept>rezepte, int id){
         Rezept r;
@@ -85,27 +95,93 @@ public class Worker {
 
     }
 
-    public int[] importCSVRezepte(String path, String delimiter) throws IOException{
-        int[]results=new int[2];
-        File myFile = new File(path);
+    public int[] importCSVRezepte(String fileName, String delimiter) throws IOException{
+        Log.v("Start","Import gestartet (CSV)");
+        int[]results={0,0};
+        AssetManager manager = myContext.getApplicationContext().getAssets();
+        InputStream inStream = null;
 
-        if(myFile.exists()){
-            String line;
-            String[]temp;
-            FileReader fr;
-            fr = new FileReader(myFile);
-            BufferedReader br=new BufferedReader(fr);
-            while ((line = br.readLine()) != null){
+        //FileReader fr = new FileReader(descriptor.getFileDescriptor());
+        inStream = manager.open(fileName);
+        BufferedReader br=new BufferedReader(new InputStreamReader(inStream));
+        String line;
+        String[]temp;
+        Rezept r;
+        DBHelper dbhelper=new DBHelper(MainActivity.activity); //TODO Welches Context Objekt wäre angemessen?
+
+
+        while ((line = br.readLine()) != null){
                 temp= line.split(delimiter);
-                if(temp.length==6){
+
+                if(temp.length==5){
                     //TODO versuche ein Rezeptobjekt zu erstellen
+                    r= new Rezept(-1,temp[0],temp[1],temp[2],Integer.valueOf(temp[3]),Integer.valueOf(temp[4]),false);
+                    if(!dbhelper.doesAlreadyExist(r)){
+                        dbhelper.insertRezept(r);
+                        Log.v("CSV Import" , "Rezept " + r.getTitel() + " erfolgreich importiert");
+                        results[0]=+1;
+
+                    }
+                    else{
+                        Log.v("INFO","Rezept existiert schon in DB:: "+line);
+                        results[1]=+1;
+                    }
+
+
+
+                }
+                else{
+                    Log.v("Error","Konnte nichts lesen in Zeile:: "+line+"\nDer Split hat die Länge="+temp.length);
+                    results[1]=+1;
                 }
 
+        }
+        br.close();
+        inStream.close();
+        return results;
+    }
+    public int[] importCSVRezepteFromSDCard(String path,String fileName, String delimiter) throws IOException{
+        Log.v("Start","Import gestartet (CSV)");
+        int[]results={0,0};
+
+        //File file = new File(Environment.getExternalStorageDirectory(),"import.csv"); <-- gibt mir /storage/emulated/0/ anstelle der realen SD Card
+        File file = new File(path,"import.csv");
+        FileReader fr= new FileReader(file);
+        BufferedReader br=new BufferedReader(fr);
+        String line;
+        String[]temp;
+        Rezept r;
+        DBHelper dbhelper=new DBHelper(MainActivity.activity); //TODO Welches Context Objekt wäre angemessen?
+
+
+        while ((line = br.readLine()) != null){
+            temp= line.split(delimiter);
+
+            if(temp.length==5){
+                //TODO versuche ein Rezeptobjekt zu erstellen
+                r= new Rezept(-1,temp[0],temp[1],temp[2],Integer.valueOf(temp[3]),Integer.valueOf(temp[4]),false);
+                if(!dbhelper.doesAlreadyExist(r)){
+                    dbhelper.insertRezept(r);
+                    Log.v("CSV Import" , "Rezept " + r.getTitel() + " erfolgreich importiert");
+                    results[0]=+1;
+
+                }
+                else{
+                    Log.v("INFO","Rezept existiert schon in DB:: "+line);
+                    results[1]=+1;
+                }
+
+
+
+            }
+            else{
+                Log.v("Error","Konnte nichts lesen in Zeile:: "+line+"\nDer Split hat die Länge="+temp.length);
+                results[1]=+1;
             }
 
         }
-
-
+        br.close();
+        fr.close();
         return results;
     }
 

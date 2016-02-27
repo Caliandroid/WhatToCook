@@ -382,6 +382,13 @@ public class DBHelper extends SQLiteOpenHelper {
         db.close();
     }
 
+    /**
+     * Tauscht ein Rezept per Knopfdruck aus
+     * TODO das ausgetauschte Rezept sollte nicht sofort beim zweiten Aufruf dieser Funktion wieder erscheinen, daher muss es temporär geblockt werden
+     * @param r
+     * @param ids
+     * @return
+     */
     public Rezept replaceRezept(Rezept r, String ids) {
         SQLiteDatabase db =this.getReadableDatabase();
         Rezept rezept =null;
@@ -406,6 +413,7 @@ public class DBHelper extends SQLiteOpenHelper {
             }
 
         }
+
 
 
 
