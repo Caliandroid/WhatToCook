@@ -83,40 +83,49 @@ public class AddEditRezept extends AppCompatActivity implements View.OnClickList
 
     @Override
     public void onClick(View v) {
-        DBHelper helper = new DBHelper(this);
-        if(v.getId()==R.id.bEditRezept){
-            if(bInsert){//NEUES REZEPT
-                Rezept r = new Rezept(-1,etTitel.getText().toString(), etZutaten.getText().toString(), etAnleitung.getText().toString(), spType.getSelectedItemPosition(), Integer.valueOf(etAnzahl.getText().toString()),false);
-                if(!helper.doesAlreadyExist(r)) {
-                    helper.insertRezept(r);
-                    //TODO einen Toast anzeigen, dann Ansicht schließen
-                    Toast.makeText(getApplicationContext(), "Erfolgreich gespeichert", Toast.LENGTH_LONG).show();
-                    setResult(0);
-                    finish();
-                }
-                else{
-                    Toast.makeText(getApplicationContext(), "Es gibt schon ein Rezept mit diesem Titel (Typ "+spType.getSelectedItem()+")", Toast.LENGTH_LONG).show();
+
+        //TODO INHALT PRÜFEN!
+        if( !(etTitel.getText().toString().isEmpty() || etZutaten.getText().toString().isEmpty() || etAnleitung.getText().toString().isEmpty())) {
+            //sollte Anzahl nicht gesetzt sein wird 0 gesetzt
+            if(etAnzahl.getText().toString().isEmpty()){
+                etAnzahl.setText("0");
+            }
+
+            DBHelper helper = new DBHelper(this);
+            if (v.getId() == R.id.bEditRezept) {
+                if (bInsert) {//NEUES REZEPT
+                    Rezept r = new Rezept(-1, etTitel.getText().toString(), etZutaten.getText().toString(), etAnleitung.getText().toString(), spType.getSelectedItemPosition(), Integer.valueOf(etAnzahl.getText().toString()), false);
+                    if (!helper.doesAlreadyExist(r)) {
+                        helper.insertRezept(r);
+                        //TODO einen Toast anzeigen, dann Ansicht schließen
+                        Toast.makeText(getApplicationContext(), "Erfolgreich gespeichert", Toast.LENGTH_LONG).show();
+                        setResult(-1);
+                        finish();
+                    } else {
+                        Toast.makeText(getApplicationContext(), "Es gibt schon ein Rezept mit diesem Titel (Typ " + spType.getSelectedItem() + ")", Toast.LENGTH_LONG).show();
+                    }
+
+                } else {
+                    // UPDATE eines Rezepts
+                    Rezept r = new Rezept(getIntent().getIntExtra("id", -1), etTitel.getText().toString(), etZutaten.getText().toString(), etAnleitung.getText().toString(), spType.getSelectedItemPosition(), Integer.valueOf(etAnzahl.getText().toString()), false);
+                    if (!helper.doesAlreadyExist(r)) { //Duplettengenerierung bei Update vermeiden
+                        helper.updateRezept(r);
+                        Toast.makeText(getApplicationContext(), "Erfolgreich aktualisiert", Toast.LENGTH_LONG).show();
+                        setResult(-1);
+                        Intent i = new Intent(this, MainActivity.class);
+                        finish();
+                        startActivity(i);
+
+                    } else {
+                        Toast.makeText(getApplicationContext(), "Es gibt schon ein anderes Gericht mit diesem Titel (Typ " + spType.getSelectedItem() + ")", Toast.LENGTH_LONG).show();
+                    }
+
                 }
 
             }
-            else {
-                // UPDATE eines Rezepts
-                Rezept r = new Rezept(getIntent().getIntExtra("id", -1), etTitel.getText().toString(), etZutaten.getText().toString(), etAnleitung.getText().toString(), spType.getSelectedItemPosition(), Integer.valueOf(etAnzahl.getText().toString()), false);
-                if (!helper.doesAlreadyExist(r)) { //Duplettengenerierung bei Update vermeiden
-                helper.updateRezept(r);
-                Toast.makeText(getApplicationContext(), "Erfolgreich aktualisiert", Toast.LENGTH_LONG).show();
-                setResult(0);
-                Intent i = new Intent(this, MainActivity.class);
-                finish();
-                startActivity(i);
-
-                }
-                else{
-                    Toast.makeText(getApplicationContext(), "Es gibt schon ein anderes Gericht mit diesem Titel (Typ "+spType.getSelectedItem()+")", Toast.LENGTH_LONG).show();
-                }
-
-            }
-
+        }
+        else{
+            Toast.makeText(getApplicationContext(), "Titel, Zutaten und Anleitungen müssen eingegeben werden!", Toast.LENGTH_LONG).show();
         }
     }
     //Dialog

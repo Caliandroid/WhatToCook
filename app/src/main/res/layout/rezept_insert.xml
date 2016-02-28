@@ -27,7 +27,8 @@
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/etTitel" />
+        android:id="@+id/etTitel"
+        android:inputType="text" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -70,7 +71,8 @@
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/etAnzahl" />
+        android:id="@+id/etAnzahl"
+        android:inputType="number" />
 
     <Spinner
         android:layout_width="match_parent"

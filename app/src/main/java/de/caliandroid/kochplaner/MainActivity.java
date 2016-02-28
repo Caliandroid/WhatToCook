@@ -281,10 +281,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             //Liste der geplanten Rezepte erneut einlesen, das nicht mehr existierende wird dabei verworfen und entfernt -
             Worker worker= new Worker(this);
            rezepte= worker.bereinigeListe(rezepte,resultCode);
-            rezepte = helper.getGeplanteRezepte(restoredIDs);
+            // rezepte = helper.getGeplanteRezepte(restoredIDs); TODO Testen, ob nötig oder nicht
             dataAdapter.notifyDataSetChanged();
-
-
         }
     }
 
@@ -306,6 +304,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         private class ViewHolder{
             TextView name;
+
             CheckBox selected;
         }
         @Override
