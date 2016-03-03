@@ -61,6 +61,13 @@
         android:layout_weight="0.24"
         android:nestedScrollingEnabled="true" />
 
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Foto"
+        android:id="@+id/bKamera" />
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

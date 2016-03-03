@@ -26,7 +26,7 @@ public class AddEditRezept extends AppCompatActivity implements View.OnClickList
     private int rezeptID;
     private Spinner spType;
     boolean bInsert=true; //steuert, ob es ein Update oder ein Neu Insert wird
-    Button button;
+    Button button, bKamera;
 
 
 
@@ -40,6 +40,8 @@ public class AddEditRezept extends AppCompatActivity implements View.OnClickList
         etAnzahl=(EditText)findViewById(R.id.etAnzahl);
         button =(Button)findViewById(R.id.bEditRezept);
         button.setOnClickListener(this);
+        bKamera =(Button)findViewById(R.id.bKamera);
+        bKamera.setOnClickListener(this);
         spType = (Spinner)findViewById(R.id.spType);
         //Array ist in den String Values
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
@@ -83,6 +85,7 @@ public class AddEditRezept extends AppCompatActivity implements View.OnClickList
 
     @Override
     public void onClick(View v) {
+        int CameraData = 0;
 
         //TODO INHALT PRÜFEN!
         if( !(etTitel.getText().toString().isEmpty() || etZutaten.getText().toString().isEmpty() || etAnleitung.getText().toString().isEmpty())) {
@@ -92,6 +95,7 @@ public class AddEditRezept extends AppCompatActivity implements View.OnClickList
             }
 
             DBHelper helper = new DBHelper(this);
+
             if (v.getId() == R.id.bEditRezept) {
                 if (bInsert) {//NEUES REZEPT
                     Rezept r = new Rezept(-1, etTitel.getText().toString(), etZutaten.getText().toString(), etAnleitung.getText().toString(), spType.getSelectedItemPosition(), Integer.valueOf(etAnzahl.getText().toString()), false);
@@ -126,6 +130,11 @@ public class AddEditRezept extends AppCompatActivity implements View.OnClickList
         }
         else{
             Toast.makeText(getApplicationContext(), "Titel, Zutaten und Anleitungen müssen eingegeben werden!", Toast.LENGTH_LONG).show();
+        }
+        if(v.getId()==R.id.bKamera){
+            Intent i = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+            startActivityForResult(i, CameraData);
+
         }
     }
     //Dialog
