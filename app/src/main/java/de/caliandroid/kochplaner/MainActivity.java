@@ -59,13 +59,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     SharedPreferences.Editor editor ;
     public static Activity activity; //damit in Subclassen die Referenz zu dieser Klasse vorhanden ist
     String restoredIDs;
+    ArrayList blocker=new ArrayList<String>();
 
 
 
-    /**
-     * ATTENTION: This was auto-generated to implement the App Indexing API.
-     * See https://g.co/AppIndexing/AndroidStudio for more information.
-     */
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -385,11 +383,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 public void onClick(DialogInterface dialog, int whichButton) {
                                     //neues Rezept gleichen Typs laden (unter der Berücksichtung der bereits geplannten Rezepte in der Liste
                                     Worker myWorker=new Worker(activity);
-                                        rezepte.add(rezepte.indexOf(rezept), helper.replaceRezept(rezept,myWorker.getIDs(rezepte)));
+                                    Rezept newRezept=helper.replaceRezept(rezept, myWorker.getIDs(rezepte), blocker);
+                                    if(newRezept!=null){
+                                        rezepte.add(rezepte.indexOf(rezept), helper.replaceRezept(rezept, myWorker.getIDs(rezepte), blocker));
                                         rezepte.remove(rezept);
-                                        Toast.makeText(getApplicationContext(), "Rezept ausgetauscht", Toast.LENGTH_LONG).show();
+                                        Toast.makeText(getApplicationContext(), "Rezept ausgetauscht", Toast.LENGTH_SHORT).show();
                                         dataAdapter.notifyDataSetChanged(); //da AL rezepte verkürzt wurde
-                                        //saveSharedPrefs();//da ID's verändert wurden
+                                        blocker.add( String.valueOf(rezept.getId()));
+                                    }
+                                    else{
+                                        Toast.makeText(getApplicationContext(), "Keine weiteren Rezepte zum Austauschen mehr vorhanden, bei erneutem Austausch wird wieder von vorne begonnen", Toast.LENGTH_SHORT).show();
+                                        blocker.clear(); //slle Items entfernen und wieder bei null beginnen
+                                    }
 
 
 

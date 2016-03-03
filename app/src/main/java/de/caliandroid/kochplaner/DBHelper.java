@@ -373,7 +373,7 @@ public class DBHelper extends SQLiteOpenHelper {
         String []whereArgs={sID};
 
         try{
-            db.delete(TABELLE,whereClause,whereArgs);
+            db.delete(TABELLE, whereClause, whereArgs);
 
         }
         catch(SQLiteException e){
@@ -414,10 +414,6 @@ public class DBHelper extends SQLiteOpenHelper {
 
         }
 
-
-
-
-
         //die Variablen
         String dbName ="rezepte";
         String [] columnNames = {"_id","TITEL","ZUTATEN","ANLEITUNG","TYP","ANZAHL"};
@@ -430,6 +426,82 @@ public class DBHelper extends SQLiteOpenHelper {
         c.moveToFirst();
         while (!c.isAfterLast()) {
                    rezept = new Rezept(c.getInt(0),c.getString(1),c.getString(2),c.getString(3),c.getInt(4),c.getInt(5),false);
+            System.out.println("Habe ein neues Rezept für dich= "+rezept.getTitel());
+            c.moveToNext();
+
+        }
+
+        db.close();
+        return rezept;
+
+    }
+
+    /**
+     * Tauscht ein Rezept per Knopfdruck aus - überladene Methode Variante mit Blocker
+     * TODO das ausgetauschte Rezept sollte nicht sofort beim zweiten Aufruf dieser Funktion wieder erscheinen, daher muss es temporär geblockt werden
+     * TODO funktioniert noch nicht
+     * @param r
+     * @param ids Die ID's der aktuell geplanten Rezepte
+     * @param blocker Auf den Blocker kommen temporär die letzte ausgetauschte ID
+     * @return
+     */
+    public Rezept replaceRezept(Rezept r, String ids, ArrayList<String> blocker) {
+        SQLiteDatabase db =this.getReadableDatabase();
+        Rezept rezept =null;
+        StringBuffer fragezeichen=new StringBuffer();
+        String []tempSplit=ids.split(",");
+        int anzahlFragezeichen=0;
+        String[]selectionArgs;
+
+        System.out.println("blocker länge = "+blocker.size());
+
+        anzahlFragezeichen = tempSplit.length+blocker.size(); //um Anzahl der Items in Blocker verlängert
+        selectionArgs = new String[anzahlFragezeichen+1]; //
+
+
+
+        for (int i=0;i<anzahlFragezeichen;i++){
+            if(i==0){
+                fragezeichen.append("?");}
+            else{
+                fragezeichen.append(",?");}
+        }
+
+
+
+        int i2=0;
+        for(int i=0;i<=anzahlFragezeichen;i++){
+            if(i==0){ //das ist der Rezept-Typ
+                selectionArgs[i]=String.valueOf(r.getTyp());
+            }
+            else{
+                if(i<=tempSplit.length) {
+                    System.out.println("in I steht jetzt = "+i);
+                    selectionArgs[i] = tempSplit[i - 1];
+                }
+                else{
+                    System.out.println("in I (else) steht jetzt = " + i);
+                    //jetzt die Inhalte aus dem Blocker einfügen
+                    System.out.println("in Blocker steht "+blocker.get(i2));
+                    selectionArgs[i]= (String)blocker.get(i2);
+                    i2++;
+                }
+            }
+
+        }
+
+        //die Variablen
+        String dbName ="rezepte";
+        String [] columnNames = {"_id","TITEL","ZUTATEN","ANLEITUNG","TYP","ANZAHL"};
+        String whereClause = TYP+" = ? and "+ID+"  not in ("+fragezeichen+")";
+        //String[]selectionArgs={String.valueOf(r.getTyp()), ids};
+        String  order="ANZAHL ASC";
+        String limit =(String.valueOf(1));
+
+        Cursor c= db.query(dbName,columnNames,whereClause,selectionArgs,null,null,order,limit);
+        c.moveToFirst();
+        while (!c.isAfterLast()) {
+            rezept = new Rezept(c.getInt(0),c.getString(1),c.getString(2),c.getString(3),c.getInt(4),c.getInt(5),false);
             System.out.println("Habe ein neues Rezept für dich= "+rezept.getTitel());
             c.moveToNext();
 
