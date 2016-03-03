@@ -131,12 +131,7 @@ public class AddEditRezept extends AppCompatActivity implements View.OnClickList
         else{
             Toast.makeText(getApplicationContext(), "Titel, Zutaten und Anleitungen müssen eingegeben werden!", Toast.LENGTH_LONG).show();
         }
-        //Kamera Foto holen
-        if(v.getId()==R.id.bKamera){
-            Intent i = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-            startActivityForResult(i, CameraData);
 
-        }
     }
     //Dialog
     public void onBackPressed() {
