@@ -54,11 +54,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     Button button;
     ListView myListView;
     MyCustomAdapter dataAdapter;
-    //NICHT MEHR IM EINSATZ:  ArrayAdapter<String> myArrayAdapter;
-    SharedPreferences sharedpreferences;
     SharedPreferences.Editor editor ;
     public static Activity activity; //damit in Subclassen die Referenz zu dieser Klasse vorhanden ist
-    String restoredIDs;
     ArrayList blocker=new ArrayList<String>();
     public static String imageUri; //zur Anwendung in AddEditRezept;
 
@@ -79,14 +76,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } catch (IOException e) {
             throw new Error("Cannot initialize prepopulated db");
         }
+        //TEST Planned Rezepte laden
+        rezepte =helper.getPlannedReceipts(null,null,null,null);
 
-        SharedPreferences prefs = getSharedPreferences(MY_PREFS, MODE_PRIVATE);
-        restoredIDs = prefs.getString("plannedIDs", null);
-        //nur falls etwas zum Wiederherstellen existiert
-        if (restoredIDs!=null && !restoredIDs.isEmpty()) {
-            helper = new DBHelper(this);
-            rezepte = helper.getGeplanteRezepte(restoredIDs);
-        }
+
+
 
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -111,7 +105,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                Snackbar.make(view, "Infomail versenden", Snackbar.LENGTH_SHORT)
                         .setAction("Action", null).show();
 
                 //Mail senden
@@ -136,13 +130,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_editRezept) {
+        if (item.getItemId() == R.id.action_editRezept) {
             return true;
         }
 
@@ -160,20 +149,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 public void onClick(DialogInterface dialog, int whichButton) {
                     helper = new DBHelper(MainActivity.activity);
                     try {
-                        // helper.createDB();
+                        // alle Inhalte in PLANNED entfernen
+                        helper.deleteAllPlanned();
+                        //neue Wochenplanung durchführen
                         rezepte = helper.getKochplan();
-
-
-                        //myArrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, getStringArray(rezepte));
 
                         dataAdapter = new MyCustomAdapter(MainActivity.activity, R.layout.row, rezepte); //MainActivity.activity anstelle von this
                         myListView.setAdapter(dataAdapter);
                         dataAdapter.notifyDataSetChanged();
-                /*editor = getSharedPreferences(MY_PREFS, MODE_PRIVATE).edit();
-                Worker myWorker = new Worker();
-                editor.putString("plannedIDs", myWorker.getIDs(rezepte));
-                editor.commit();*/
-
 
                     } catch (SQLiteException e) {
                         throw e;
@@ -232,8 +215,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onStop() {
         super.onStop();
-        //an dieser Stelle die Änderungen speichern
-        saveSharedPrefs();
+        //saveSharedPrefs();
         //DB Verbindung schließen
         helper.close();
 
@@ -270,6 +252,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return false;
     }
 
+    /**
+     * Wird nicht mehr verwendet, alles in DB gespeichert
+     */
     public void saveSharedPrefs(){
         //an dieser Stelle die Änderungen speichern
         editor = getSharedPreferences(MY_PREFS, MODE_PRIVATE).edit();
@@ -317,7 +302,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         public View getView(final int position, View convertView, ViewGroup parent) {
 
             ViewHolder holder = null;
-            Log.v("ConvertView", String.valueOf(position));
+            //Log.v("ConvertView", String.valueOf(position));
 
             if (convertView == null) {
                 LayoutInflater vi = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -343,6 +328,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 public void onClick(DialogInterface dialog, int whichButton) {
                                     //falls selektiert, dann entfernen und Häufigkeit hochsetzen
                                     helper.updateHaeufigkeit(rezept.getId());
+                                    helper.deletePlanned(rezept.getId());
                                     rezepte.remove(position);
                                     Toast.makeText(getApplicationContext(), rezept.getTitel() + " gekocht :)", Toast.LENGTH_LONG).show();
                                     dataAdapter.notifyDataSetChanged(); //da AL rezepte verkürzt wurde
@@ -393,8 +379,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                     Worker myWorker=new Worker(activity);
                                     Rezept newRezept=helper.replaceRezept(rezept, myWorker.getIDs(rezepte), blocker);
                                     if(newRezept!=null){
-                                        rezepte.add(rezepte.indexOf(rezept), helper.replaceRezept(rezept, myWorker.getIDs(rezepte), blocker));
+                                        rezepte.add(rezepte.indexOf(rezept), newRezept);
                                         rezepte.remove(rezept);
+                                        helper.updatePlannedRezeptID(rezept.getId(),newRezept.getId());
                                         Toast.makeText(getApplicationContext(), "Rezept ausgetauscht", Toast.LENGTH_SHORT).show();
                                         dataAdapter.notifyDataSetChanged(); //da AL rezepte verkürzt wurde
                                         blocker.add( String.valueOf(rezept.getId()));

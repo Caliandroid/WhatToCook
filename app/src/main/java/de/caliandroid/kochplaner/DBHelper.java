@@ -29,16 +29,23 @@ public class DBHelper extends SQLiteOpenHelper {
     private SQLiteDatabase myDB;
     private final Context context;
 
-    //CStatische Werte
-    static final String [] COLUMNS = {"_id","TITEL","ZUTATEN","ANLEITUNG","TYP","ANZAHL","IMAGEURI"};
-    static final String TABELLE = "rezepte";
-    static final String ID = "_id";
-    static final String TITEL = "titel";
-    static final String ZUTATEN = "zutaten";
-    static final String ANLEITUNG = "anleitung";
-    static final String TYP = "typ";
-    static final String ANZAHL= "anzahl";
-    static final String IMAGEURI= "imageUri";
+    //Statische Werte für Tabelle REZEPTE
+    static final String [] TABELLE1_COLUMNS = {"_id","TITEL","ZUTATEN","ANLEITUNG","TYP","ANZAHL","IMAGEURI"};
+    static final String TABELLE1 = "rezepte";
+    static final String TABELLE1_1 = "_id";
+    static final String TABELLE1_2 = "titel";
+    static final String TABELLE1_3 = "zutaten";
+    static final String TABELLE1_4 = "anleitung";
+    static final String TABELLE1_5 = "typ";
+    static final String TABELLE1_6= "anzahl";
+    static final String TABELLE1_7= "imageUri";
+
+    //Statische Werte für Tabelle PLANNED
+    static final String [] TABELLE2_COLUMNS = {"_id","REZEPTID","PREPARED"};
+    static final String TABELLE2 = "planned";
+    static final String TABELLE2_1= "_id";
+    static final String TABELLE2_2 = "rezeptid";
+    static final String TABELLE2_3= "prepared";
 
 
 
@@ -172,7 +179,7 @@ public class DBHelper extends SQLiteOpenHelper {
             String[]selectionArgs ={split[i].toString()};
 
             try {
-                c = db.query(dbName, COLUMNS, whereClause, selectionArgs, null, null, null, null);
+                c = db.query(dbName, TABELLE1_COLUMNS, whereClause, selectionArgs, null, null, null, null);
                 c.moveToFirst();
                 rezept = new Rezept(c.getInt(0), c.getString(1), c.getString(2), c.getString(3), c.getInt(4), c.getInt(5),c.getString(6), false);
                 rezepte.add(rezept);
@@ -213,7 +220,7 @@ public class DBHelper extends SQLiteOpenHelper {
         String  order="ANZAHL ASC";
         String limit =(String.valueOf(tage));
 
-        Cursor c= db.query(dbName,COLUMNS,whereClause,selectionArgs,null,null,order,limit);
+        Cursor c= db.query(dbName,TABELLE1_COLUMNS,whereClause,selectionArgs,null,null,order,limit);
         c.moveToFirst();
         while (!c.isAfterLast()) {
             //(int id,String titel,String anleitung, String zutaten,int typ, int anzahl){
@@ -250,7 +257,7 @@ public class DBHelper extends SQLiteOpenHelper {
         String[]selectionArgs={String.valueOf(0)};
         String  order="ANZAHL ASC";
         String limit = "4";
-        Cursor c = db.query(dbName, COLUMNS, whereClause,selectionArgs,null,null,order,limit);
+        Cursor c = db.query(dbName, TABELLE1_COLUMNS, whereClause,selectionArgs,null,null,order,limit);
         c.moveToFirst();
         while (!c.isAfterLast()) {
             //(int id,String titel,String anleitung, String zutaten,int typ, int anzahl){
@@ -262,7 +269,7 @@ public class DBHelper extends SQLiteOpenHelper {
         //Abfrage wiederholen für 2x Fleisch und 1xFisch
         selectionArgs[0]="1";
         limit="2";
-        c= db.query(dbName,COLUMNS,whereClause,selectionArgs,null,null,order,limit);
+        c= db.query(dbName,TABELLE1_COLUMNS,whereClause,selectionArgs,null,null,order,limit);
         c.moveToFirst();
         while (!c.isAfterLast()) {
             //(int id,String titel,String anleitung, String zutaten,int typ, int anzahl){
@@ -273,7 +280,7 @@ public class DBHelper extends SQLiteOpenHelper {
         }
         selectionArgs[0]="2";
         limit="1";
-        c= db.query(dbName,COLUMNS,whereClause,selectionArgs,null,null,order,limit);
+        c= db.query(dbName,TABELLE1_COLUMNS,whereClause,selectionArgs,null,null,order,limit);
         c.moveToFirst();
         while (!c.isAfterLast()) {
             //(int id,String titel,String anleitung, String zutaten,int typ, int anzahl){
@@ -284,12 +291,13 @@ public class DBHelper extends SQLiteOpenHelper {
         }
 
 
-        //Rezepte zufällig anordnen
+        //Rezepte zufällig anordnen und in der Planned Tabelle eintragen ( in der gleichen Reihenfolge)
         Collections.shuffle(rezepte, new Random(System.nanoTime()));
         Iterator i = rezepte.iterator();
         while(i.hasNext()){
             rezept=(Rezept)i.next();
-            System.out.println(rezept.getTitel());
+            //Füge in Planned ein
+            insertPlanned(rezept);
         }
         db.close();
         return rezepte;
@@ -314,17 +322,17 @@ public class DBHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         String sID =String.valueOf(r.getId());
         ContentValues values = new ContentValues();
-        values.put(TITEL,r.getTitel());
-        values.put(ZUTATEN,r.getZutaten());
-        values.put(ANLEITUNG,r.getAnleitung());
-        values.put(TYP,r.getTyp());
-        values.put(ANZAHL,r.getAnzahl());
-        values.put(IMAGEURI,r.getImageUri());
+        values.put(TABELLE1_2,r.getTitel());
+        values.put(TABELLE1_3,r.getZutaten());
+        values.put(TABELLE1_4,r.getAnleitung());
+        values.put(TABELLE1_5,r.getTyp());
+        values.put(TABELLE1_6,r.getAnzahl());
+        values.put(TABELLE1_7,r.getImageUri());
         String whereClause= "_id = ?";
         String[]whereArgs= {sID};
 
         try{
-            db.update(TABELLE, values, whereClause, whereArgs); //
+            db.update(TABELLE1, values, whereClause, whereArgs); //
 
         }
         catch(SQLiteException e){
@@ -342,23 +350,21 @@ public class DBHelper extends SQLiteOpenHelper {
 
         // 2. create ContentValues to add key "column"/value
         ContentValues values = new ContentValues();
-        values.put(TITEL,r.getTitel());
-        values.put(ZUTATEN,r.getZutaten());
-        values.put(ANLEITUNG,r.getAnleitung());
-        values.put(TYP,r.getTyp());
-        values.put(ANZAHL,r.getAnzahl());
-        values.put(IMAGEURI,r.getImageUri());
+        values.put(TABELLE1_2,r.getTitel());
+        values.put(TABELLE1_3,r.getZutaten());
+        values.put(TABELLE1_4,r.getAnleitung());
+        values.put(TABELLE1_5,r.getTyp());
+        values.put(TABELLE1_6,r.getAnzahl());
+        values.put(TABELLE1_7,r.getImageUri());
 
         // 3. insert
         try{
-            db.insert(TABELLE, null, values); //
+            db.insert(TABELLE1, null, values); //
         }
         catch(SQLiteException e){
             e.printStackTrace();
         }
         db.close();
-
-
     }
 
     public void deleteRezept(int id){
@@ -368,7 +374,7 @@ public class DBHelper extends SQLiteOpenHelper {
         String []whereArgs={sID};
 
         try{
-            db.delete(TABELLE, whereClause, whereArgs);
+            db.delete(TABELLE1, whereClause, whereArgs);
 
         }
         catch(SQLiteException e){
@@ -410,12 +416,12 @@ public class DBHelper extends SQLiteOpenHelper {
         }
 
         //die Variablen
-        String whereClause = TYP+" = ? and "+ID+"  not in ("+fragezeichen+")";
+        String whereClause = TABELLE1_5+" = ? and "+TABELLE1_1+"  not in ("+fragezeichen+")";
         //String[]selectionArgs={String.valueOf(r.getTyp()), ids};
         String  order="ANZAHL ASC";
         String limit =(String.valueOf(1));
 
-        Cursor c= db.query(TABELLE,COLUMNS,whereClause,selectionArgs,null,null,order,limit);
+        Cursor c= db.query(TABELLE1,TABELLE1_COLUMNS,whereClause,selectionArgs,null,null,order,limit);
         c.moveToFirst();
         while (!c.isAfterLast()) {
                    rezept = new Rezept(c.getInt(0),c.getString(1),c.getString(2),c.getString(3),c.getInt(4),c.getInt(5),c.getString(6),false);
@@ -483,13 +489,12 @@ public class DBHelper extends SQLiteOpenHelper {
 
         }
 
-        //die Variablen
-        String whereClause = TYP+" = ? and "+ID+"  not in ("+fragezeichen+")";
+        String whereClause = TABELLE1_5+" = ? and "+TABELLE1_1+"  not in ("+fragezeichen+")";
         //String[]selectionArgs={String.valueOf(r.getTyp()), ids};
         String  order="ANZAHL ASC";
         String limit =(String.valueOf(1));
 
-        Cursor c= db.query(TABELLE,COLUMNS,whereClause,selectionArgs,null,null,order,limit);
+        Cursor c= db.query(TABELLE1,TABELLE1_COLUMNS,whereClause,selectionArgs,null,null,order,limit);
         c.moveToFirst();
         while (!c.isAfterLast()) {
             rezept = new Rezept(c.getInt(0),c.getString(1),c.getString(2),c.getString(3),c.getInt(4),c.getInt(5),c.getString(6),false);
@@ -512,9 +517,9 @@ public class DBHelper extends SQLiteOpenHelper {
     public boolean doesAlreadyExist(Rezept r){
         SQLiteDatabase db =this.getReadableDatabase();
 
-        String whereClause = TITEL+" = ? and "+TYP+" = ?";
+        String whereClause = TABELLE1_2+" = ? and "+TABELLE1_5+" = ?";
         String[]selectionArgs={r.getTitel(), String.valueOf(r.getTyp())  };
-        Cursor c= db.query(TABELLE,COLUMNS,whereClause,selectionArgs,null,null,null,null);
+        Cursor c= db.query(TABELLE1,TABELLE1_COLUMNS,whereClause,selectionArgs,null,null,null,null);
 
         if(c.getCount()>0){
             //für update Methode gilt die Regel, dass auch hier false übergeben wird, wenn ID vom übergebenen Rezept mit dem gefunden übereinstimmt
@@ -556,7 +561,7 @@ public class DBHelper extends SQLiteOpenHelper {
         SQLiteDatabase db =this.getReadableDatabase();
         Rezept rezept;
         ArrayList<Rezept> rezepte=new ArrayList();
-        Cursor c = db.query(TABELLE, COLUMNS, whereClause,selectionArgs,null,null,order,limit);
+        Cursor c = db.query(TABELLE1, TABELLE1_COLUMNS, whereClause,selectionArgs,null,null,order,limit);
         c.moveToFirst();
         while (!c.isAfterLast()) {
             //(int id,String titel,String anleitung, String zutaten,int typ, int anzahl){
@@ -571,13 +576,110 @@ public class DBHelper extends SQLiteOpenHelper {
 
     }
 
+    /**
+     * Fügt in die Planned Tabelle einen Eintrag an.
+     * @param r
+     */
+    public void insertPlanned(Rezept r){
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(TABELLE2_2,r.getId());
+        values.put(TABELLE2_3, 0);
+
+        try{
+            db.insert(TABELLE2, null, values); //
+        }
+        catch(SQLiteException e){
+            e.printStackTrace();
+        }
+        db.close();
+    }
+
+    public ArrayList<Rezept> getPlannedReceipts(String whereClause, String []selectionArgs,String order, String limit){
+        ArrayList<Rezept> rezepte = new ArrayList();
+        SQLiteDatabase db =this.getReadableDatabase();
+        Rezept rezept;
+        Cursor c = db.query(TABELLE2, TABELLE2_COLUMNS, whereClause,selectionArgs,null,null,order,limit);
+        c.moveToFirst();
+        while (!c.isAfterLast()) {
+            //(In c stehen die Spalten int id,int rezeptid, int prepared
+
+            //Rezept aus Tabelle Rezept anhand der Spalte2 aus der Planned Tabelle laden
+            Cursor c2 = db.query(TABELLE1,TABELLE1_COLUMNS,TABELLE1_1 +" =?",new String[]{String.valueOf(c.getInt(1))},null,null,null,null);
+            c2.moveToFirst();
+            while (!c2.isAfterLast()) {
+                rezept = new Rezept(c2.getInt(0), c2.getString(1), c2.getString(2), c2.getString(3), c2.getInt(4), c2.getInt(5), c2.getString(6), false);
+                rezepte.add(rezept);
+                c2.moveToNext();
+            }
+            c.moveToNext();
+        }
+
+        db.close();
+
+
+        return rezepte;
+    }
+
+
+    public void deletePlanned(int rezeptid){
+        SQLiteDatabase db = this.getWritableDatabase();
+        String sID =String.valueOf(rezeptid);
+        String whereClause="rezeptid=?";
+        String []whereArgs={sID};
+
+        try{
+            db.delete(TABELLE2, whereClause, whereArgs);
+        }
+        catch(SQLiteException e){
+            e.printStackTrace();
+        }
+        db.close();
+    }
+
+    public void updatePlannedRezeptID(int alt, int neu){
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(TABELLE2_2,neu);
+        String whereClause= "rezeptid = ?";
+        String[]whereArgs= {String.valueOf(alt)};
+
+        try{
+            db.update(TABELLE2, values, whereClause, whereArgs); //
+
+        }
+        catch(SQLiteException e){
+            e.printStackTrace();
+        }
+        db.close();
+    }
+
+    public void deleteAllPlanned(){
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        try{
+            db.delete(TABELLE2, null, null);
+
+        }
+        catch(SQLiteException e){
+            e.printStackTrace();
+        }
+        db.close();
+
+
+    }
 
 
 
 
 
-    
 
 
 
-}
+
+
+
+
+
+    }
