@@ -12,4 +12,9 @@
         android:orderInCategory="90"
         android:title="Rezept hinzufügen/ändern"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/action_alleRezepte"
+        android:orderInCategory="90"
+        android:title="Rezepte ansehen"
+        app:showAsAction="never" />
 </menu>

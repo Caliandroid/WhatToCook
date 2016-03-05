@@ -19,18 +19,27 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
             android:name=".RezeptAnsicht"
             android:label="@string/app_name" >
         </activity>
+
         <activity
             android:name=".AddEditRezept"
             android:label="@string/app_name" >
         </activity>
+
         <activity
             android:name=".Settings"
             android:label="@string/app_name" >
         </activity>
+
+        <activity
+            android:name=".RezeptAlle"
+            android:label="@string/app_name" >
+        </activity>
+
         <!-- ATTENTION: This was auto-generated to add Google Play services to your project for
              App Indexing.  See https://g.co/AppIndexing/AndroidStudio for more information. -->
         <meta-data

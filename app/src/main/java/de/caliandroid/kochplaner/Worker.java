@@ -3,6 +3,10 @@ package de.caliandroid.kochplaner;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Environment;
 import android.util.Log;
 
@@ -66,12 +70,14 @@ public class Worker {
             sb.append("\n");
             sb.append(rezept.getZutaten());
             sb.append("\n");
-            sb.append("Anleitung:");
-            sb.append("\n");
-            sb.append(rezept.getAnleitung());
-            sb.append("\n");
+            //Anleitung weglassen, sonst platzt die Mail :)
+
+            //sb.append("Anleitung:");
+            //sb.append("\n");
+           // sb.append(rezept.getAnleitung());
+           // sb.append("\n");
             sb.append("########################");
-            sb.append("\n\n");
+            sb.append("\n");
             iTag++;
 
         }
@@ -115,7 +121,7 @@ public class Worker {
 
                 if(temp.length==5){
                     //TODO versuche ein Rezeptobjekt zu erstellen
-                    r= new Rezept(-1,temp[0],temp[1],temp[2],Integer.valueOf(temp[3]),Integer.valueOf(temp[4]),false);
+                    r= new Rezept(-1,temp[0],temp[1],temp[2],Integer.valueOf(temp[3]),Integer.valueOf(temp[4]),null,false);
                     if(!dbhelper.doesAlreadyExist(r)){
                         dbhelper.insertRezept(r);
                         Log.v("CSV Import" , "Rezept " + r.getTitel() + " erfolgreich importiert");
@@ -159,7 +165,7 @@ public class Worker {
 
             if(temp.length==5){
                 //TODO versuche ein Rezeptobjekt zu erstellen
-                r= new Rezept(-1,temp[0],temp[1],temp[2],Integer.valueOf(temp[3]),Integer.valueOf(temp[4]),false);
+                r= new Rezept(-1,temp[0],temp[1],temp[2],Integer.valueOf(temp[3]),Integer.valueOf(temp[4]),null,false);
                 if(!dbhelper.doesAlreadyExist(r)){
                     dbhelper.insertRezept(r);
                     Log.v("CSV Import" , "Rezept " + r.getTitel() + " erfolgreich importiert");
@@ -184,6 +190,26 @@ public class Worker {
         fr.close();
         return results;
     }
+
+    public void deleteFileFromSDCard(Uri uri){
+        File file =new File(uri.getPath());
+        file.delete();
+
+    }
+
+    public String[] getRezeptTitel(ArrayList<Rezept> rezepte){
+        Iterator iterator = rezepte.iterator();
+        String [] rezeptTitel = new String [rezepte.size()];
+        int i=0;
+        Rezept rezept;
+        while(iterator.hasNext()){
+            rezept=(Rezept)iterator.next();
+            rezeptTitel[i]=rezept.getTitel();
+            i++;
+        }
+        return rezeptTitel;
+    }
+
 
 
 }

@@ -61,12 +61,26 @@
         android:layout_weight="0.24"
         android:nestedScrollingEnabled="true" />
 
-    <Button
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Foto"
-        android:id="@+id/bKamera" />
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <Button
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Foto"
+            android:id="@+id/bKamera" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Kein Bild"
+            android:id="@+id/tvImageUri"
+            android:paddingLeft="8dp" />
+
+    </LinearLayout>
 
     <TextView
         android:layout_width="wrap_content"

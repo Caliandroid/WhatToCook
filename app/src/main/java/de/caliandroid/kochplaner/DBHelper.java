@@ -25,11 +25,12 @@ import java.util.Random;
 public class DBHelper extends SQLiteOpenHelper {
 
     private static String DB_PATH = "/data/data/de.caliandroid.kochplaner/databases/";
-    private static String DB_NAME = "kochplaner_db";
+    private static String DB_NAME = "kochplaner.db";
     private SQLiteDatabase myDB;
     private final Context context;
-    //COLUMN Names
-    // Table ingredients
+
+    //CStatische Werte
+    static final String [] COLUMNS = {"_id","TITEL","ZUTATEN","ANLEITUNG","TYP","ANZAHL","IMAGEURI"};
     static final String TABELLE = "rezepte";
     static final String ID = "_id";
     static final String TITEL = "titel";
@@ -37,7 +38,8 @@ public class DBHelper extends SQLiteOpenHelper {
     static final String ANLEITUNG = "anleitung";
     static final String TYP = "typ";
     static final String ANZAHL= "anzahl";
-    static final String ZULETZT= "zuletzt";
+    static final String IMAGEURI= "imageUri";
+
 
 
     public DBHelper(Context context){
@@ -142,12 +144,6 @@ public class DBHelper extends SQLiteOpenHelper {
         }
     }
 
-    public Cursor getRezepte(){
-        SQLiteDatabase db =this.getReadableDatabase();
-        String [] columns=new String[]{"_id",TITEL,ZUTATEN,ANLEITUNG,TYP,ANZAHL};
-        Cursor c=db.query(TABELLE, columns,null,null, null, null, null);
-        return c;
-    }
 
     /**
      * Restauriert die Rezepte ArrayList anhand der gespeicherten ID's
@@ -166,7 +162,6 @@ public class DBHelper extends SQLiteOpenHelper {
         Cursor c;
         //die Variablen
         String dbName ="rezepte";
-        String [] columnNames = {"_id","TITEL","ZUTATEN","ANLEITUNG","TYP","ANZAHL"};
         String whereClause ="_id=?";
 
 
@@ -177,9 +172,9 @@ public class DBHelper extends SQLiteOpenHelper {
             String[]selectionArgs ={split[i].toString()};
 
             try {
-                c = db.query(dbName, columnNames, whereClause, selectionArgs, null, null, null, null);
+                c = db.query(dbName, COLUMNS, whereClause, selectionArgs, null, null, null, null);
                 c.moveToFirst();
-                rezept = new Rezept(c.getInt(0), c.getString(1), c.getString(2), c.getString(3), c.getInt(4), c.getInt(5), false);
+                rezept = new Rezept(c.getInt(0), c.getString(1), c.getString(2), c.getString(3), c.getInt(4), c.getInt(5),c.getString(6), false);
                 rezepte.add(rezept);
 
             }
@@ -213,18 +208,17 @@ public class DBHelper extends SQLiteOpenHelper {
 
         //die Variablen
         String dbName ="rezepte";
-        String [] columnNames = {"_id","TITEL","ZUTATEN","ANLEITUNG","TYP","ANZAHL"};
         String whereClause ="typ=?";
         String[]selectionArgs={String.valueOf(typ)};
         String  order="ANZAHL ASC";
         String limit =(String.valueOf(tage));
 
-        Cursor c= db.query(dbName,columnNames,whereClause,selectionArgs,null,null,order,limit);
+        Cursor c= db.query(dbName,COLUMNS,whereClause,selectionArgs,null,null,order,limit);
         c.moveToFirst();
         while (!c.isAfterLast()) {
             //(int id,String titel,String anleitung, String zutaten,int typ, int anzahl){
 
-            rezept = new Rezept(c.getInt(0),c.getString(1),c.getString(2),c.getString(3),c.getInt(4),c.getInt(5),false);
+            rezept = new Rezept(c.getInt(0),c.getString(1),c.getString(2),c.getString(3),c.getInt(4),c.getInt(5),c.getString(6),false);
             rezepte.add(rezept);
             c.moveToNext();
         }
@@ -252,40 +246,39 @@ public class DBHelper extends SQLiteOpenHelper {
 
         //die Variablen
         String dbName ="rezepte";
-        String [] columnNames = {"_id","TITEL","ZUTATEN","ANLEITUNG","TYP","ANZAHL"};
         String whereClause ="typ=?";
         String[]selectionArgs={String.valueOf(0)};
         String  order="ANZAHL ASC";
         String limit = "4";
-        Cursor c = db.query(dbName, columnNames, whereClause,selectionArgs,null,null,order,limit);
+        Cursor c = db.query(dbName, COLUMNS, whereClause,selectionArgs,null,null,order,limit);
         c.moveToFirst();
         while (!c.isAfterLast()) {
             //(int id,String titel,String anleitung, String zutaten,int typ, int anzahl){
 
-            rezept = new Rezept(c.getInt(0),c.getString(1),c.getString(2),c.getString(3),c.getInt(4),c.getInt(5),false);
+            rezept = new Rezept(c.getInt(0),c.getString(1),c.getString(2),c.getString(3),c.getInt(4),c.getInt(5),c.getString(6),false);
             rezepte.add(rezept);
             c.moveToNext();
         }
         //Abfrage wiederholen für 2x Fleisch und 1xFisch
         selectionArgs[0]="1";
         limit="2";
-        c= db.query(dbName,columnNames,whereClause,selectionArgs,null,null,order,limit);
+        c= db.query(dbName,COLUMNS,whereClause,selectionArgs,null,null,order,limit);
         c.moveToFirst();
         while (!c.isAfterLast()) {
             //(int id,String titel,String anleitung, String zutaten,int typ, int anzahl){
 
-            rezept = new Rezept(c.getInt(0),c.getString(1),c.getString(2),c.getString(3),c.getInt(4),c.getInt(5),false);
+            rezept = new Rezept(c.getInt(0),c.getString(1),c.getString(2),c.getString(3),c.getInt(4),c.getInt(5),c.getString(6),false);
             rezepte.add(rezept);
             c.moveToNext();
         }
         selectionArgs[0]="2";
         limit="1";
-        c= db.query(dbName,columnNames,whereClause,selectionArgs,null,null,order,limit);
+        c= db.query(dbName,COLUMNS,whereClause,selectionArgs,null,null,order,limit);
         c.moveToFirst();
         while (!c.isAfterLast()) {
             //(int id,String titel,String anleitung, String zutaten,int typ, int anzahl){
 
-            rezept = new Rezept(c.getInt(0),c.getString(1),c.getString(2),c.getString(3),c.getInt(4),c.getInt(5),false);
+            rezept = new Rezept(c.getInt(0),c.getString(1),c.getString(2),c.getString(3),c.getInt(4),c.getInt(5),c.getString(6),false);
             rezepte.add(rezept);
             c.moveToNext();
         }
@@ -326,6 +319,7 @@ public class DBHelper extends SQLiteOpenHelper {
         values.put(ANLEITUNG,r.getAnleitung());
         values.put(TYP,r.getTyp());
         values.put(ANZAHL,r.getAnzahl());
+        values.put(IMAGEURI,r.getImageUri());
         String whereClause= "_id = ?";
         String[]whereArgs= {sID};
 
@@ -353,6 +347,7 @@ public class DBHelper extends SQLiteOpenHelper {
         values.put(ANLEITUNG,r.getAnleitung());
         values.put(TYP,r.getTyp());
         values.put(ANZAHL,r.getAnzahl());
+        values.put(IMAGEURI,r.getImageUri());
 
         // 3. insert
         try{
@@ -415,17 +410,15 @@ public class DBHelper extends SQLiteOpenHelper {
         }
 
         //die Variablen
-        String dbName ="rezepte";
-        String [] columnNames = {"_id","TITEL","ZUTATEN","ANLEITUNG","TYP","ANZAHL"};
         String whereClause = TYP+" = ? and "+ID+"  not in ("+fragezeichen+")";
         //String[]selectionArgs={String.valueOf(r.getTyp()), ids};
         String  order="ANZAHL ASC";
         String limit =(String.valueOf(1));
 
-        Cursor c= db.query(dbName,columnNames,whereClause,selectionArgs,null,null,order,limit);
+        Cursor c= db.query(TABELLE,COLUMNS,whereClause,selectionArgs,null,null,order,limit);
         c.moveToFirst();
         while (!c.isAfterLast()) {
-                   rezept = new Rezept(c.getInt(0),c.getString(1),c.getString(2),c.getString(3),c.getInt(4),c.getInt(5),false);
+                   rezept = new Rezept(c.getInt(0),c.getString(1),c.getString(2),c.getString(3),c.getInt(4),c.getInt(5),c.getString(6),false);
             System.out.println("Habe ein neues Rezept für dich= "+rezept.getTitel());
             c.moveToNext();
 
@@ -491,17 +484,15 @@ public class DBHelper extends SQLiteOpenHelper {
         }
 
         //die Variablen
-        String dbName ="rezepte";
-        String [] columnNames = {"_id","TITEL","ZUTATEN","ANLEITUNG","TYP","ANZAHL"};
         String whereClause = TYP+" = ? and "+ID+"  not in ("+fragezeichen+")";
         //String[]selectionArgs={String.valueOf(r.getTyp()), ids};
         String  order="ANZAHL ASC";
         String limit =(String.valueOf(1));
 
-        Cursor c= db.query(dbName,columnNames,whereClause,selectionArgs,null,null,order,limit);
+        Cursor c= db.query(TABELLE,COLUMNS,whereClause,selectionArgs,null,null,order,limit);
         c.moveToFirst();
         while (!c.isAfterLast()) {
-            rezept = new Rezept(c.getInt(0),c.getString(1),c.getString(2),c.getString(3),c.getInt(4),c.getInt(5),false);
+            rezept = new Rezept(c.getInt(0),c.getString(1),c.getString(2),c.getString(3),c.getInt(4),c.getInt(5),c.getString(6),false);
             System.out.println("Habe ein neues Rezept für dich= "+rezept.getTitel());
             c.moveToNext();
 
@@ -520,19 +511,17 @@ public class DBHelper extends SQLiteOpenHelper {
      */
     public boolean doesAlreadyExist(Rezept r){
         SQLiteDatabase db =this.getReadableDatabase();
-        //die Variablen
-        String dbName ="rezepte";
-        String [] columnNames = {"_id","TITEL","ZUTATEN","ANLEITUNG","TYP","ANZAHL"};
+
         String whereClause = TITEL+" = ? and "+TYP+" = ?";
         String[]selectionArgs={r.getTitel(), String.valueOf(r.getTyp())  };
-        Cursor c= db.query(dbName,columnNames,whereClause,selectionArgs,null,null,null,null);
+        Cursor c= db.query(TABELLE,COLUMNS,whereClause,selectionArgs,null,null,null,null);
 
         if(c.getCount()>0){
             //für update Methode gilt die Regel, dass auch hier false übergeben wird, wenn ID vom übergebenen Rezept mit dem gefunden übereinstimmt
             //so läßt sich verhindern, dass anderweitig ohne Prüfung ein vorhandenes Rezept so umbenannt wird, dass es eine Duplette gibt.
             c.moveToFirst();
             while (!c.isAfterLast()) {
-                Rezept rezept = new Rezept(c.getInt(0),c.getString(1),c.getString(2),c.getString(3),c.getInt(4),c.getInt(5),false);
+                Rezept rezept = new Rezept(c.getInt(0),c.getString(1),c.getString(2),c.getString(3),c.getInt(4),c.getInt(5),c.getString(6),false);
                 if(rezept.getId()==r.getId()){
                     db.close();
                     return false; //existiert schon, aber da gleiche ID läuft eine Prüfung für ein Update
@@ -552,6 +541,33 @@ public class DBHelper extends SQLiteOpenHelper {
 
 
 
+
+    }
+
+    /**
+     * Universelle Abfrage der DB anhand der übergebenen Paramter
+     * @param whereClause  Bedingung wie TYP=?
+     * @param selectionArgs Array mit den Werten für die Bedingung wie 1,2
+     * @param order Reihefolge (order by xy)
+     * @param limit Limitierung der Ergebnisse
+     * @return
+     */
+    public ArrayList <Rezept> getRezepte(String whereClause, String []selectionArgs,String order, String limit ) {
+        SQLiteDatabase db =this.getReadableDatabase();
+        Rezept rezept;
+        ArrayList<Rezept> rezepte=new ArrayList();
+        Cursor c = db.query(TABELLE, COLUMNS, whereClause,selectionArgs,null,null,order,limit);
+        c.moveToFirst();
+        while (!c.isAfterLast()) {
+            //(int id,String titel,String anleitung, String zutaten,int typ, int anzahl){
+
+            rezept = new Rezept(c.getInt(0),c.getString(1),c.getString(2),c.getString(3),c.getInt(4),c.getInt(5),c.getString(6),false);
+            rezepte.add(rezept);
+            c.moveToNext();
+        }
+
+        db.close();
+        return rezepte;
 
     }
 

@@ -3,13 +3,22 @@ package de.caliandroid.kochplaner;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.io.File;
+import java.io.IOException;
+import java.sql.Types;
 
 /**
  * Created by stefan on 19.02.16.
@@ -19,6 +28,7 @@ public class RezeptAnsicht extends AppCompatActivity implements View.OnClickList
     private TextView tvTitel,tvZutaten,tvAnleitung,tvAnzahl;
     private Button bZurueck,bEdit,bDelete;
     public static Activity activity;
+    String imageUri = null;
 
 
     @Override
@@ -37,12 +47,27 @@ public class RezeptAnsicht extends AppCompatActivity implements View.OnClickList
         bEdit.setOnClickListener(this);
         bZurueck.setOnClickListener(this);
         bDelete.setOnClickListener(this);
+        ImageView imageView =(ImageView)findViewById(R.id.imageView);
 
         //Daten holen
         tvTitel.setText(getIntent().getStringExtra("titel"));
         tvZutaten.setText("ZUTATEN:\n"+getIntent().getStringExtra("zutaten")+"\n\n");
-        tvAnleitung.setText("ANLEITUNG:\n"+getIntent().getStringExtra("anleitung"));
-        tvAnzahl.setText("Bisher gekocht: "+String.valueOf(getIntent().getIntExtra("anzahl",0))+" mal");
+        tvAnleitung.setText("ANLEITUNG:\n" + getIntent().getStringExtra("anleitung"));
+        tvAnzahl.setText("Bisher gekocht: " + String.valueOf(getIntent().getIntExtra("anzahl", 0)) + " mal");
+
+        imageUri = getIntent().getStringExtra("imageUri");
+        if(imageUri!=null){
+
+            try {
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), Uri.parse(imageUri));
+                imageView.setImageBitmap(bitmap);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+
+
 
 
 
@@ -69,6 +94,7 @@ public class RezeptAnsicht extends AppCompatActivity implements View.OnClickList
             i.putExtra("anleitung",  this.getIntent().getStringExtra("anleitung"));
             i.putExtra("anzahl", this.getIntent().getIntExtra("anzahl", 0));
             i.putExtra("typ",this.getIntent().getIntExtra("typ",0));
+            i.putExtra("imageUri",this.getIntent().getStringExtra("imageUri"));
             startActivityForResult(i, 1);
 
 

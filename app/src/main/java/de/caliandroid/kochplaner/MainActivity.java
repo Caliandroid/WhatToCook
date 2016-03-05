@@ -60,6 +60,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public static Activity activity; //damit in Subclassen die Referenz zu dieser Klasse vorhanden ist
     String restoredIDs;
     ArrayList blocker=new ArrayList<String>();
+    public static String imageUri; //zur Anwendung in AddEditRezept;
 
 
 
@@ -213,6 +214,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             i.putExtra("anleitung", rezept.getAnleitung());
             i.putExtra("anzahl", rezept.getAnzahl());
             i.putExtra("typ", rezept.getTyp());
+            i.putExtra("imageUri",rezept.getImageUri());
             startActivityForResult(i, 1);
         }
     }
@@ -248,6 +250,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (item.getItemId() == R.id.action_settings) {
             //starte  Settings
             Intent i = new Intent(this,Settings.class);
+            startActivityForResult(i, 1);
+            return true;
+        }
+        if (item.getItemId() == R.id.action_alleRezepte) {
+            //starte  Settings
+            Intent i = new Intent(this,RezeptAlle.class);
             startActivityForResult(i, 1);
             return true;
         }

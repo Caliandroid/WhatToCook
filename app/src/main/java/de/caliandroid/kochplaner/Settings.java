@@ -18,6 +18,9 @@ import java.io.InputStreamReader;
  * Created by stefan on 26.02.16.
  */
 public class Settings extends AppCompatActivity implements View.OnClickListener{
+    public static final String IMPORTPATH = "/storage/sdcard1/kochplaner/csv/";
+    public static final String IMPORTFILE= "import.csv";
+    public static final String SPLITTER =";";
     private Button bImport;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,7 +34,7 @@ public class Settings extends AppCompatActivity implements View.OnClickListener{
     public void onClick(View v) {
         Worker worker = new Worker(this);
         try{
-            worker.importCSVRezepteFromSDCard("/storage/sdcard1/","import.csv","\t");
+            worker.importCSVRezepteFromSDCard(IMPORTPATH,IMPORTFILE,SPLITTER);
         }
         catch(IOException e){
             e.printStackTrace();
