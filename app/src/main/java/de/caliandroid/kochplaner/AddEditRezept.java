@@ -298,4 +298,13 @@ public class AddEditRezept extends AppCompatActivity implements View.OnClickList
         selectedImageUri = Uri.fromFile(photo);
         startActivityForResult(intent, CAMERADATA);
     }
+
+    public void saveSharedPrefs(){
+        //an dieser Stelle die Änderungen speichern
+        editor = getSharedPreferences(MY_PREFS, MODE_PRIVATE).edit();
+        Worker myWorker = new Worker(this);
+        editor.putString("plannedIDs", myWorker.getIDs(rezepte));
+        editor.commit();
+
+
 }
