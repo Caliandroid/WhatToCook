@@ -295,8 +295,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         private class ViewHolder{
             TextView name;
-
+            CheckBox prepared;
             CheckBox selected;
+
         }
         @Override
         public View getView(final int position, View convertView, ViewGroup parent) {
@@ -310,7 +311,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 holder = new ViewHolder();
                 holder.name = (TextView) convertView.findViewById(R.id.textView1);
-                holder.name.setTextSize(23);
+                holder.name.setTextSize(18);
+                holder.prepared=(CheckBox)convertView.findViewById(R.id.checkBox2);
                 holder.selected = (CheckBox) convertView.findViewById(R.id.checkBox1);
                 convertView.setTag(holder);
 
@@ -352,6 +354,67 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     }
 
                 });
+                holder.prepared.setOnClickListener(new View.OnClickListener() {
+                    public void onClick(View v) {
+                        final CheckBox cb = (CheckBox) v;
+                        final Rezept rezept = (Rezept) cb.getTag();
+                        rezept.setSelected(cb.isChecked());
+                        if (rezept.isSelected()) {
+
+                            //AlertDialog - um Tippfehler auszuschließen
+                            AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.activity);
+                            alert.setTitle("Alle Zutaten für " + rezept.getTitel() + " besorgt?");
+                            alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int whichButton) {
+                                    //falls selektiert, dann prepared auf 1 in planned setzen
+                                    helper.setPrepared(rezept.getId(),1);
+
+
+                                }
+                            });
+
+                            alert.setNegativeButton("Cancel",
+                                    new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int whichButton) {
+                                            //deselektieren
+                                            cb.setChecked(false);
+                                        }
+                                    });
+
+                            alert.show();
+
+
+                        }
+                        else{//deaktivieren
+                            //AlertDialog - um Tippfehler auszuschließen
+                            AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.activity);
+                            alert.setTitle("Fehlen noch Zutaten für" + rezept.getTitel() + " ?");
+                            alert.setPositiveButton("Ja", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int whichButton) {
+                                    //falls selektiert, dann prepared auf 1 in planned setzen
+                                    helper.setPrepared(rezept.getId(),0);
+
+
+                                }
+                            });
+
+                            alert.setNegativeButton("Nein",
+                                    new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int whichButton) {
+                                            //deselektieren
+                                            cb.setChecked(false);
+                                        }
+                                    });
+
+                            alert.show();
+
+                        }
+
+                    }
+
+                });
+
+
                 holder.name.setOnClickListener(new View.OnClickListener() {
                     public void onClick(View v) {
                         TextView tv = (TextView) v;
@@ -430,7 +493,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 holder.name.setBackgroundColor(Color.LTGRAY);
             }*/
-            holder.selected.setChecked(rezept.isSelected());
+            holder.prepared.setTag(rezept);
+            holder.prepared.setChecked(helper.isPrepared(rezept));
+            /**
+             * Variante 1, um die Checkbox Prepared korrekt zu markieren
+             * In der Planned DB anhand der RezeptID prüfen, wie der Zustand von prepared ist und dann hier markieren
+             */
+
+
+           // holder.selected.setChecked(rezept.isSelected());
             holder.selected.setTag(rezept);
             holder.name.setTag(rezept);
             i++;

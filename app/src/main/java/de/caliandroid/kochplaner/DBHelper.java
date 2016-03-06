@@ -670,6 +670,44 @@ public class DBHelper extends SQLiteOpenHelper {
 
     }
 
+    public boolean isPrepared(Rezept r){
+        boolean prepared=false;
+        SQLiteDatabase db =this.getReadableDatabase();
+        Rezept rezept;
+        ArrayList<Rezept> rezepte=new ArrayList();
+        String whereClause="rezeptid = ?";
+        String []selectionArgs= {String.valueOf(r.getId())};
+        Cursor c = db.query(TABELLE2, TABELLE2_COLUMNS, whereClause,selectionArgs,null,null,null,null);
+        c.moveToFirst();
+        while (!c.isAfterLast()) {
+            //(int id,String titel,String anleitung, String zutaten,int typ, int anzahl){
+
+            if(c.getInt(2)==1) {
+                prepared = true;
+            }
+            c.moveToNext();
+        }
+        return prepared;
+    }
+
+    public void setPrepared(int rezeptid,int prepared){
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(TABELLE2_3,prepared);
+        String whereClause= "rezeptid = ?";
+        String[]whereArgs= {String.valueOf(rezeptid)};
+
+        try{
+            db.update(TABELLE2, values, whereClause, whereArgs);
+
+        }
+        catch(SQLiteException e){
+            e.printStackTrace();
+        }
+        db.close();
+    }
+
+
 
 
 
