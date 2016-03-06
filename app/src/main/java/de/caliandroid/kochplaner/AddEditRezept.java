@@ -3,6 +3,7 @@ package de.caliandroid.kochplaner;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteException;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -53,9 +54,15 @@ public class AddEditRezept extends AppCompatActivity implements View.OnClickList
 
 
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        //Load Prefs
+        SharedPreferences prefs = getSharedPreferences(MY_PREFS, MODE_PRIVATE);
+        restoredIDs = prefs.getString("plannedIDs", null);
+
         setContentView(R.layout.rezept_insert);
         etTitel=(EditText)findViewById(R.id.etTitel);
         etZutaten=(EditText)findViewById(R.id.etZutaten);
