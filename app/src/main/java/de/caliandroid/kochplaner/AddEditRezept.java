@@ -50,6 +50,8 @@ public class AddEditRezept extends AppCompatActivity implements View.OnClickList
     private static final int CAMERA_REQUEST = 0;
     private Uri selectedImageUri = null;
     private String sUri=null;
+    SharedPreferences sharedpreferences;
+    SharedPreferences.Editor editor ;
 
 
 
@@ -60,7 +62,7 @@ public class AddEditRezept extends AppCompatActivity implements View.OnClickList
         super.onCreate(savedInstanceState);
 
         //Load Prefs
-        SharedPreferences prefs = getSharedPreferences(MY_PREFS, MODE_PRIVATE);
+        sharedpreferences = getSharedPreferences(MY_PREFS, MODE_PRIVATE);
         restoredIDs = prefs.getString("plannedIDs", null);
 
         setContentView(R.layout.rezept_insert);
