@@ -30,7 +30,6 @@ public class DBHelper extends SQLiteOpenHelper {
     private final Context context;
 
     //Statische Werte für Tabelle REZEPTE
-    static final String [] TABELLE1_COLUMNS = {"_id","TITEL","ZUTATEN","ANLEITUNG","TYP","ANZAHL","IMAGEURI"};
     static final String TABELLE1 = "rezepte";
     static final String TABELLE1_1 = "_id";
     static final String TABELLE1_2 = "titel";
@@ -39,15 +38,22 @@ public class DBHelper extends SQLiteOpenHelper {
     static final String TABELLE1_5 = "typ";
     static final String TABELLE1_6= "anzahl";
     static final String TABELLE1_7= "imageUri";
+    static final String [] TABELLE1_COLUMNS = {TABELLE1_1 ,TABELLE1_2 ,TABELLE1_3,TABELLE1_4,TABELLE1_5,TABELLE1_6, TABELLE1_7};
 
     //Statische Werte für Tabelle PLANNED
-    static final String [] TABELLE2_COLUMNS = {"_id","REZEPTID","PREPARED"};
     static final String TABELLE2 = "planned";
     static final String TABELLE2_1= "_id";
     static final String TABELLE2_2 = "rezeptid";
     static final String TABELLE2_3= "prepared";
+    static final String [] TABELLE2_COLUMNS = {TABELLE2_1,TABELLE2_2,TABELLE2_3};
 
-
+    //Statische Werte für Tabelle shoppingliste
+    static final String TABELLE3 = "shoppingliste";
+    static final String TABELLE3_1= "_id";
+    static final String TABELLE3_2 = "zutat";
+    static final String TABELLE3_3= "shopped";
+    static final String TABELLE3_4= "planned_id";
+    static final String [] TABELLE3_COLUMNS = {TABELLE3_1,TABELLE3_2,TABELLE3_3,TABELLE3_4};
 
     public DBHelper(Context context){
         super(context, DB_NAME, null, 1);
@@ -298,6 +304,8 @@ public class DBHelper extends SQLiteOpenHelper {
             rezept=(Rezept)i.next();
             //Füge in Planned ein
             insertPlanned(rezept);
+            //Füge in shoppinglist ein
+            insertIntoShoppinglist(rezept);
         }
         db.close();
         return rezepte;
@@ -690,12 +698,12 @@ public class DBHelper extends SQLiteOpenHelper {
         return prepared;
     }
 
-    public void setPrepared(int rezeptid,int prepared){
+    public void setPrepared(int rezept_id,int prepared){
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(TABELLE2_3,prepared);
         String whereClause= "rezeptid = ?";
-        String[]whereArgs= {String.valueOf(rezeptid)};
+        String[]whereArgs= {String.valueOf(rezept_id)};
 
         try{
             db.update(TABELLE2, values, whereClause, whereArgs);
@@ -707,17 +715,154 @@ public class DBHelper extends SQLiteOpenHelper {
         db.close();
     }
 
+    /**
+     * Holt aus dem Feld Zutaten alle Zutaten als StringArray und speichert sie in die
+     * Shoppingliste
+     * @param r
+     */
+    public void insertIntoShoppinglist(Rezept r){
+        SQLiteDatabase db = this.getWritableDatabase();
+        //Zutaten aufsplitten
+        String[] zutaten = r.getZutaten().split(";");
 
+        if(zutaten!=null && zutaten.length>0){
 
+            ContentValues values = new ContentValues();
+            try{
 
+                for(int i=0;i<zutaten.length;i++){
 
+                    values.put(TABELLE3_3,r.getId());
+                    values.put(TABELLE3_4, 0);
+                    values.put(TABELLE3_2,zutaten[i]);
 
-
-
-
-
-
-
-
+                    db.insert(TABELLE3, null, values);
+                    values.clear();
+                    System.out.println("Zutat "+zutaten[i]+"["+r.getId()+"] in die neue Tabelle gesteckt");
+                }
+            }
+            catch(SQLiteException e){
+                e.printStackTrace();
+            }
+        }
+        db.close();
 
     }
+
+    public void deleteItemFromShoppinglist(Rezept r){
+        SQLiteDatabase db = this.getWritableDatabase();
+        String sID =String.valueOf(r.getId());
+        String whereClause="planned_id=?";
+        String []whereArgs={sID};
+
+        try{
+            db.delete(TABELLE3, whereClause, whereArgs);
+        }
+        catch(SQLiteException e){
+            e.printStackTrace();
+        }
+        db.close();
+    }
+
+    public void deleteAllFromShoppinglist(){
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        try{
+            db.delete(TABELLE3, null,null);
+        }
+        catch(SQLiteException e){
+            e.printStackTrace();
+        }
+        db.close();
+    }
+    public void setShopped(int rezept_id,String zutat, int prepared){
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(TABELLE3_4,prepared);
+        String whereClause= "planned_id = ? and zutat = ?";
+        String[]whereArgs= {String.valueOf(rezept_id),zutat};
+
+        try{
+            db.update(TABELLE3, values, whereClause, whereArgs);
+
+        }
+        catch(SQLiteException e){
+            e.printStackTrace();
+        }
+        db.close();
+    }
+    public boolean isShopped(int rezept_id,String zutat){
+        boolean prepared=false;
+        SQLiteDatabase db =this.getReadableDatabase();
+        String whereClause="planned_id = ? and zutat = ?";
+        String []selectionArgs= {String.valueOf(rezept_id),zutat};
+        Cursor c = db.query(TABELLE2, TABELLE2_COLUMNS, whereClause,selectionArgs,null,null,null,null);
+        c.moveToFirst();
+        while (!c.isAfterLast()) {
+
+            if(c.getInt(2)==1) {
+                prepared = true;
+            }
+            c.moveToNext();
+        }
+        return prepared;
+    }
+
+    /**
+     * Universelle Abfrage. Bekommt Rezepte ArrayListe mit einem oder mehreren Rezepten und gibt dazu die Daten aus der Tabelle ShoppingListe
+     * @param rezepte
+
+     * @return
+     */
+    public ArrayList<ShoppingListItem> getZutatenListe(ArrayList<Rezept> rezepte){
+
+        ArrayList <ShoppingListItem> items = new ArrayList();
+        SQLiteDatabase db =this.getReadableDatabase();
+        ShoppingListItem item;
+        Rezept rezept;
+        String whereClause ="planned_id = ?";
+        String[] selectionArgs;
+        Iterator iterator = rezepte.iterator();
+        while(iterator.hasNext()){
+
+            rezept= (Rezept) iterator.next();
+            selectionArgs=new String[]{String.valueOf(rezept.getId())};
+
+            Cursor c = db.query(TABELLE3, TABELLE3_COLUMNS, whereClause,selectionArgs,null,null,null,null);
+            c.moveToFirst();
+            while (!c.isAfterLast()) {
+                item = new ShoppingListItem(c.getInt(0),c.getString(1),c.getInt(2),c.getInt(3));
+                items.add(item);
+                c.moveToNext();
+            }
+        }
+
+
+        db.close();
+
+
+        return items;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+}
