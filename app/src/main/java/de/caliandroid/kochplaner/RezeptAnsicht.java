@@ -3,6 +3,7 @@ package de.caliandroid.kochplaner;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -25,15 +26,23 @@ import java.sql.Types;
  */
 public class RezeptAnsicht extends AppCompatActivity implements View.OnClickListener{
 
+    private static final String IMAGELOCATIONPREFIX="file://";
+    private static final String IMAGE_FOLDER ="/images";  //geladen werden soll dann noch /storage/sdcard1/kochplaner
+
+
     private TextView tvTitel,tvZutaten,tvAnleitung,tvAnzahl;
     private Button bZurueck,bEdit,bDelete;
     public static Activity activity;
     String imageUri = null;
+    SharedPreferences sharedpreferences;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //pfad laden
+        sharedpreferences = getSharedPreferences(MainActivity.MY_PREFS, MODE_PRIVATE);
+        String restoredPath = sharedpreferences.getString("storagePath", null);
         setContentView(R.layout.rezept_ansicht);
         activity=this;
 
@@ -59,7 +68,7 @@ public class RezeptAnsicht extends AppCompatActivity implements View.OnClickList
         if(imageUri!=null){
 
             try {
-                Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), Uri.parse(imageUri));
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), Uri.parse(IMAGELOCATIONPREFIX+restoredPath+IMAGE_FOLDER+File.separator+imageUri));
                 imageView.setImageBitmap(bitmap);
             } catch (IOException e) {
                 e.printStackTrace();

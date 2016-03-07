@@ -40,4 +40,30 @@
         android:layout_row="2"
         android:layout_column="1" />
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Storage-Pfad"
+        android:id="@+id/textView3"
+        android:layout_row="4"
+        android:layout_column="0" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/editText"
+        android:layout_row="5"
+        android:layout_column="0"
+        android:inputType="textNoSuggestions"
+        android:editable="true" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Speichern"
+        android:id="@+id/button4"
+        android:layout_row="5"
+        android:layout_column="1" />
+
 </GridLayout>

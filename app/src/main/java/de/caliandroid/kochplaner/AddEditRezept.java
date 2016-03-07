@@ -37,8 +37,12 @@ import java.util.Locale;
  */
 public class AddEditRezept extends AppCompatActivity implements View.OnClickListener, View.OnKeyListener {
 
+    private static final String IMAGELOCATIONPREFIX="file://";
+    private static final String IMAGE_FOLDER ="/images";  //geladen werden soll dann noch /storage/sdcard1/kochplaner
+
     private static final String IMAGELOCATION="/storage/sdcard1/kochplaner/images";
     private static final int CAMERADATA = 0;
+    public static final String MY_PREFS = "MyPrefs";
 
 
     private EditText etTitel,etZutaten,etAnleitung,etAnzahl;
@@ -49,9 +53,11 @@ public class AddEditRezept extends AppCompatActivity implements View.OnClickList
     Button button, bKamera;
     private static final int CAMERA_REQUEST = 0;
     private Uri selectedImageUri = null;
-    private String sUri=null;
+    private String filename=null;
     SharedPreferences sharedpreferences;
     SharedPreferences.Editor editor ;
+    String restoredPath;
+
 
 
 
@@ -61,9 +67,10 @@ public class AddEditRezept extends AppCompatActivity implements View.OnClickList
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        //Load Prefs
+        //pfad laden
         sharedpreferences = getSharedPreferences(MY_PREFS, MODE_PRIVATE);
-        restoredIDs = prefs.getString("plannedIDs", null);
+        restoredPath = sharedpreferences.getString("storagePath", null);
+
 
         setContentView(R.layout.rezept_insert);
         etTitel=(EditText)findViewById(R.id.etTitel);
@@ -94,10 +101,10 @@ public class AddEditRezept extends AppCompatActivity implements View.OnClickList
             etAnleitung.setText(getIntent().getStringExtra("anleitung"));
             etAnzahl.setText(String.valueOf(getIntent().getIntExtra("anzahl", 0)));
             rezeptID = getIntent().getIntExtra("id", 0);
-            sUri= getIntent().getStringExtra("imageUri");
-            if(sUri!=null){
+            filename= getIntent().getStringExtra("imageUri");
+            if(filename!=null){
                 bKamera.setText("Foto aktualisieren");
-                tvImageUri.setText(sUri);
+                tvImageUri.setText(filename);
             }
             //Spinner setzen
             spType.setSelection(getIntent().getIntExtra("typ", 0));
@@ -142,18 +149,23 @@ public class AddEditRezept extends AppCompatActivity implements View.OnClickList
     @Override
     public void onDestroy() {
         System.out.println("onDestroy");
+
         super.onDestroy();
+
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        tvImageUri.setText(savedInstanceState.getString("imageUri", null));
+        filename=savedInstanceState.getString("filename", null);
+        tvImageUri.setText(filename);
+        System.out.println("RESTOREDINSTANCE");
 
     }
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        outState.putString("imageUri", tvImageUri.getText().toString());
+        outState.putString("filename", filename);
+        System.out.println("SAVEDINSTANCE");
         super.onSaveInstanceState(outState);
 
     }
@@ -176,10 +188,8 @@ public class AddEditRezept extends AppCompatActivity implements View.OnClickList
             if (v.getId() == R.id.bEditRezept) {
                 if (bInsert) {//NEUES REZEPT
 
-                    /*if(selectedImageUri!=null){
-                        sUri=selectedImageUri.toString();
-                    }*/
-                    Rezept r = new Rezept(-1, etTitel.getText().toString(), etZutaten.getText().toString(), etAnleitung.getText().toString(), spType.getSelectedItemPosition(), Integer.valueOf(etAnzahl.getText().toString()),tvImageUri.getText().toString(), false);
+
+                    Rezept r = new Rezept(-1, etTitel.getText().toString(), etZutaten.getText().toString(), etAnleitung.getText().toString(), spType.getSelectedItemPosition(), Integer.valueOf(etAnzahl.getText().toString()),filename, false);
                     if (!helper.doesAlreadyExist(r)) {
                         helper.insertRezept(r);
                         //TODO einen Toast anzeigen, dann Ansicht schließen
@@ -198,18 +208,16 @@ public class AddEditRezept extends AppCompatActivity implements View.OnClickList
                      */
 
 
-                    System.out.println("in ImageUri steht "+tvImageUri.getText());
-
-                    Rezept r = new Rezept(getIntent().getIntExtra("id", -1), etTitel.getText().toString(), etZutaten.getText().toString(), etAnleitung.getText().toString(), spType.getSelectedItemPosition(), Integer.valueOf(etAnzahl.getText().toString()),tvImageUri.getText().toString(), false);
+                    Rezept r = new Rezept(getIntent().getIntExtra("id", -1), etTitel.getText().toString(), etZutaten.getText().toString(), etAnleitung.getText().toString(), spType.getSelectedItemPosition(), Integer.valueOf(etAnzahl.getText().toString()),filename, false);
                     if (!helper.doesAlreadyExist(r)) { //Duplettengenerierung bei Update vermeiden
                         helper.updateRezept(r);
                         Toast.makeText(getApplicationContext(), "Erfolgreich aktualisiert", Toast.LENGTH_LONG).show();
 
                         //sofern altes Foto vorhanden und ein neues gesetzt wurde  muss dieses gelöscht werden:
-                        if(!tvImageUri.getText().toString().equals(getIntent().getStringExtra("imageUri"))){
+                        if(!filename.equals(getIntent().getStringExtra("imageUri"))){
                             try { // try und catch sollte nicht notwendig sein, aber wenn das Löschen einer alten Bilddatei nicht klappt, soll deswegen nicht die App abstürzen
                                 Worker worker = new Worker(this);
-                                worker.deleteFileFromSDCard(Uri.parse(getIntent().getStringExtra("imageUri")));
+                                worker.deleteFileFromSDCard(restoredPath+IMAGE_FOLDER+File.separator+getIntent().getStringExtra("imageUri"));
                             }
                             catch(Exception e){
                                 e.printStackTrace();
@@ -245,9 +253,9 @@ public class AddEditRezept extends AppCompatActivity implements View.OnClickList
     protected void  onActivityResult(int requestCode, int resultCode, Intent data)  {
         //ImageHelper help= new ImageHelper(this);
         if (requestCode == CAMERA_REQUEST) {
-            //schreibe die URI in das Textfeld
+            //schreibe Filename
             try{
-                tvImageUri.setText(selectedImageUri.toString());
+                tvImageUri.setText(filename);
             }
             catch(Exception e){
                 e.printStackTrace();
@@ -301,19 +309,22 @@ public class AddEditRezept extends AppCompatActivity implements View.OnClickList
         imageDirectory.mkdirs();
 
         //falls Titel bereits existiert wird er mit in den filenamen aufgenommen
-        File photo = new File(IMAGELOCATION, File.separator+etTitel.getText().toString()+"_"+sdf.format(new Date())+".jpg");
+        File photo = new File(restoredPath+IMAGE_FOLDER,File.separator+etTitel.getText().toString()+"_"+sdf.format(new Date())+".jpg");
+
 
         intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(photo));
         selectedImageUri = Uri.fromFile(photo);
+        filename = photo.getName();
         startActivityForResult(intent, CAMERADATA);
     }
 
     public void saveSharedPrefs(){
         //an dieser Stelle die Änderungen speichern
-        editor = getSharedPreferences(MY_PREFS, MODE_PRIVATE).edit();
-        Worker myWorker = new Worker(this);
-        editor.putString("plannedIDs", myWorker.getIDs(rezepte));
-        editor.commit();
+      //  editor = getSharedPreferences(MY_PREFS, MODE_PRIVATE).edit();
+      //  Worker myWorker = new Worker(this);
+  //      editor.putString("plannedIDs", myWorker.getIDs(rezepte));
+     //   editor.commit();
+    }
 
 
 }

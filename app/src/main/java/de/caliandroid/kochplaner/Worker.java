@@ -151,7 +151,7 @@ public class Worker {
         int[]results={0,0};
 
         //File file = new File(Environment.getExternalStorageDirectory(),"import.csv"); <-- gibt mir /storage/emulated/0/ anstelle der realen SD Card
-        File file = new File(path,"import.csv");
+        File file = new File(path,fileName);
         FileReader fr= new FileReader(file);
         BufferedReader br=new BufferedReader(fr);
         String line;
@@ -169,12 +169,12 @@ public class Worker {
                 if(!dbhelper.doesAlreadyExist(r)){
                     dbhelper.insertRezept(r);
                     Log.v("CSV Import" , "Rezept " + r.getTitel() + " erfolgreich importiert");
-                    results[0]=+1;
+                    results[0]++;
 
                 }
                 else{
                     Log.v("INFO","Rezept existiert schon in DB:: "+line);
-                    results[1]=+1;
+                    results[1]++;
                 }
 
 
@@ -191,8 +191,8 @@ public class Worker {
         return results;
     }
 
-    public void deleteFileFromSDCard(Uri uri){
-        File file =new File(uri.getPath());
+    public void deleteFileFromSDCard(String path){
+        File file =new File(path);
         file.delete();
 
     }
