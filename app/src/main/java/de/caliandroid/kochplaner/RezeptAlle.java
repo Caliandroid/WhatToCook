@@ -108,7 +108,11 @@ public class RezeptAlle extends AppCompatActivity implements View.OnClickListene
     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
         System.out.println("Lange geklickt!");
         //TODO Handling fürs REzepte hinzufügen komplettieren
-        // MainActivity.rezepte.add((Rezept) rezepte.get(position));
+        MainActivity.rezepte.add((Rezept) rezepte.get(position));
+        DBHelper helper = new DBHelper(this);
+        helper.insertIntoShoppinglist((Rezept) rezepte.get(position));
+        //zusätzlich in die planned DB eintragen
+        helper.insertPlanned((Rezept) rezepte.get(position));
         return true;
     }
 }
