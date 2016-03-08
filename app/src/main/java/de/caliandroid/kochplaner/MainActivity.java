@@ -49,7 +49,7 @@ import static android.view.View.INVISIBLE;
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, Toolbar.OnMenuItemClickListener, View.OnTouchListener {
     public static final String MY_PREFS = "MyPrefs";
     DBHelper helper;
-    ArrayList<Rezept> rezepte = new ArrayList();
+    public static ArrayList<Rezept> rezepte = new ArrayList();
     Rezept rezept;
     Button button;
     ListView myListView;
@@ -242,6 +242,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             startActivityForResult(i, 1);
             return true;
         }
+        if (item.getItemId() == R.id.action_shoppinglist) {
+            //starte  Settings
+            Intent i = new Intent(this,ShoppingListAnsicht.class);
+            startActivityForResult(i, 1);
+            return true;
+        }
 
         return false;
     }
@@ -369,6 +375,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 public void onClick(DialogInterface dialog, int whichButton) {
                                     //falls selektiert, dann prepared auf 1 in planned setzen
                                     helper.setPrepared(rezept.getId(),1);
+                                    //alle Zutaten in der Shoppingliste ebenfalls markieren
+                                    helper.setRezeptShopped(rezept.getId(),1);
 
 
                                 }
@@ -394,6 +402,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 public void onClick(DialogInterface dialog, int whichButton) {
                                     //falls selektiert, dann prepared auf 1 in planned setzen
                                     helper.setPrepared(rezept.getId(),0);
+                                    helper.setRezeptShopped(rezept.getId(),0);
 
 
                                 }

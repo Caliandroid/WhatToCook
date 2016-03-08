@@ -17,4 +17,11 @@
         android:orderInCategory="90"
         android:title="Rezepte ansehen"
         app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_shoppinglist"
+        android:orderInCategory="90"
+        android:title="Shoppingliste"
+        app:showAsAction="never" />
+
 </menu>

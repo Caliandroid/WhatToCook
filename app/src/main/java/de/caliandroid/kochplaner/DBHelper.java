@@ -732,8 +732,8 @@ public class DBHelper extends SQLiteOpenHelper {
 
                 for(int i=0;i<zutaten.length;i++){
 
-                    values.put(TABELLE3_3,r.getId());
-                    values.put(TABELLE3_4, 0);
+                    values.put(TABELLE3_4,r.getId());
+                    values.put(TABELLE3_3, 0);
                     values.put(TABELLE3_2,zutaten[i]);
 
                     db.insert(TABELLE3, null, values);
@@ -775,15 +775,22 @@ public class DBHelper extends SQLiteOpenHelper {
         }
         db.close();
     }
-    public void setShopped(int rezept_id,String zutat, int prepared){
+    public void setShopped(int item_id, int rezept_id,int shopped){
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put(TABELLE3_4,prepared);
-        String whereClause= "planned_id = ? and zutat = ?";
-        String[]whereArgs= {String.valueOf(rezept_id),zutat};
+        values.put(TABELLE3_3,shopped);
+        String whereClause= "_id = ?";
+        String[]whereArgs= {String.valueOf(item_id)};
 
         try{
             db.update(TABELLE3, values, whereClause, whereArgs);
+            //zusätzlich prüfem, ob jetzt alle Zutaten auf shopped stehen und dann das prepared flag anpassen
+            if(isRezeptShopped(rezept_id)){
+                setPrepared(rezept_id,1);
+            }
+            else{
+                setPrepared(rezept_id,0);
+            }
 
         }
         catch(SQLiteException e){
@@ -791,21 +798,41 @@ public class DBHelper extends SQLiteOpenHelper {
         }
         db.close();
     }
+
     public boolean isShopped(int rezept_id,String zutat){
-        boolean prepared=false;
+        boolean shopped=false;
         SQLiteDatabase db =this.getReadableDatabase();
         String whereClause="planned_id = ? and zutat = ?";
         String []selectionArgs= {String.valueOf(rezept_id),zutat};
-        Cursor c = db.query(TABELLE2, TABELLE2_COLUMNS, whereClause,selectionArgs,null,null,null,null);
+        Cursor c = db.query(TABELLE3, TABELLE3_COLUMNS, whereClause,selectionArgs,null,null,null,null);
         c.moveToFirst();
         while (!c.isAfterLast()) {
 
             if(c.getInt(2)==1) {
-                prepared = true;
+                shopped= true;
             }
             c.moveToNext();
         }
-        return prepared;
+        db.close();
+        return shopped;
+    }
+
+    public boolean isRezeptShopped(int rezept_id){
+        boolean shopped=true;
+        SQLiteDatabase db =this.getReadableDatabase();
+        String whereClause=TABELLE3_4+" = ? ";
+        String []selectionArgs= {String.valueOf(rezept_id)};
+        Cursor c = db.query(TABELLE3, TABELLE3_COLUMNS, whereClause,selectionArgs,null,null,null,null);
+        c.moveToFirst();
+        while (!c.isAfterLast()) {
+
+            if(c.getInt(2)==0) {
+                shopped= false;
+            }
+            c.moveToNext();
+        }
+        db.close();
+        return shopped;
     }
 
     /**
@@ -814,24 +841,26 @@ public class DBHelper extends SQLiteOpenHelper {
 
      * @return
      */
-    public ArrayList<ShoppingListItem> getZutatenListe(ArrayList<Rezept> rezepte){
+    public ArrayList<ShoppingListItem> getShoppinglist(ArrayList<Rezept> rezepte){
 
         ArrayList <ShoppingListItem> items = new ArrayList();
         SQLiteDatabase db =this.getReadableDatabase();
         ShoppingListItem item;
         Rezept rezept;
-        String whereClause ="planned_id = ?";
+        String whereClause =TABELLE3_4+" = ?";
         String[] selectionArgs;
         Iterator iterator = rezepte.iterator();
         while(iterator.hasNext()){
 
             rezept= (Rezept) iterator.next();
+           // System.out.println("Fülle item Array mit "+rezept.getTitel()+" Zutaten");
             selectionArgs=new String[]{String.valueOf(rezept.getId())};
 
             Cursor c = db.query(TABELLE3, TABELLE3_COLUMNS, whereClause,selectionArgs,null,null,null,null);
             c.moveToFirst();
             while (!c.isAfterLast()) {
                 item = new ShoppingListItem(c.getInt(0),c.getString(1),c.getInt(2),c.getInt(3));
+               // System.out.println("Fülle item Array mit "+item.getZutat());
                 items.add(item);
                 c.moveToNext();
             }
@@ -842,6 +871,28 @@ public class DBHelper extends SQLiteOpenHelper {
 
 
         return items;
+    }
+
+    /**
+     * Um auf einmal alle Zutaten eines Rezepts zu aktivieren oder deaktivieren
+     * @param rezept_id
+     * @param shopped
+     */
+    public void setRezeptShopped(int rezept_id, int shopped){
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(TABELLE3_3,shopped);
+        String whereClause= TABELLE3_4+" = ?";
+        String[]whereArgs= {String.valueOf(rezept_id)};
+
+        try{
+            db.update(TABELLE3, values, whereClause, whereArgs);
+
+        }
+        catch(SQLiteException e){
+            e.printStackTrace();
+        }
+        db.close();
     }
 
 

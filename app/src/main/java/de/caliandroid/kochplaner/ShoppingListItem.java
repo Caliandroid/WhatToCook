@@ -7,11 +7,14 @@ public class ShoppingListItem {
     private String zutat;
     private int id, rezept_id, shopped;
 
-    public ShoppingListItem(int id,String zutat, int rezept_id, int shopped){
+
+
+    public ShoppingListItem(int id,String zutat,  int shopped,int rezept_id){
         this.id=id;
         this.zutat=zutat;
-        this.rezept_id=rezept_id;
         this.shopped=shopped;
+        this.rezept_id=rezept_id;
+
 
     }
 
@@ -28,6 +31,15 @@ public class ShoppingListItem {
         return shopped;
     }
 
+    public boolean isShopped(){
+        if(this.shopped==0){
+            return  false;
+        }
+        else{
+            return true;
+        }
+    }
+
     public void setShopped(int shopped) {
         this.shopped = shopped;
     }
@@ -38,5 +50,13 @@ public class ShoppingListItem {
 
     public void setZutat(String zutat) {
         this.zutat = zutat;
+    }
+
+    public int getRezept_id() {
+        return rezept_id;
+    }
+
+    public void setRezept_id(int rezept_id) {
+        this.rezept_id = rezept_id;
     }
 }
