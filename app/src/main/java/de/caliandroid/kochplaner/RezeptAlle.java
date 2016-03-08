@@ -16,7 +16,7 @@ import java.util.ArrayList;
 /**
  * Created by stefan on 05.03.16.
  */
-public class RezeptAlle extends AppCompatActivity implements View.OnClickListener, View.OnTouchListener, ListView.OnItemClickListener {
+public class RezeptAlle extends AppCompatActivity implements View.OnClickListener, View.OnTouchListener, ListView.OnItemClickListener, ListView.OnItemLongClickListener {
     private ArrayList<Rezept> rezepte;
     private ListView listView;
 
@@ -33,6 +33,7 @@ public class RezeptAlle extends AppCompatActivity implements View.OnClickListene
         final ArrayAdapter adapter = new ArrayAdapter(this,android.R.layout.simple_list_item_1, worker.getRezeptTitel(rezepte));
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(this);
+        listView.setOnItemLongClickListener(this);
         adapter.notifyDataSetChanged();
     }
 
@@ -77,12 +78,12 @@ public class RezeptAlle extends AppCompatActivity implements View.OnClickListene
      */
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        //final String item = (String) parent.getItemAtPosition(position);
-        //Position des Items entspricht der des Rezeptes in der ArrayListe
         Rezept r = rezepte.get(position);
         System.out.println("Rezept "+r.getTitel()+" angeklickt");
-        startEditAnsicht(r,RezeptAnsicht.class);
+        startEditAnsicht(r, RezeptAnsicht.class);
+
     }
+
 
     // TODO: Die Methode gibts jetzt zweimal, einmal in MainActivity und einmal hier -> Optimieren!
     public void startEditAnsicht(Rezept rezept, Class e){
@@ -101,5 +102,13 @@ public class RezeptAlle extends AppCompatActivity implements View.OnClickListene
             i.putExtra("imageUri",rezept.getImageUri());
             startActivityForResult(i, 1);
         }
+    }
+
+    @Override
+    public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+        System.out.println("Lange geklickt!");
+        //TODO Handling fürs REzepte hinzufügen komplettieren
+        // MainActivity.rezepte.add((Rezept) rezepte.get(position));
+        return true;
     }
 }

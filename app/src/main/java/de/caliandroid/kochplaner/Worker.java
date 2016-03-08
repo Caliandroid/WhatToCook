@@ -191,6 +191,50 @@ public class Worker {
         return results;
     }
 
+
+    public int[] exportRezepteToCSV(String path,String fileName, String delimiter) throws IOException {
+        Log.v("Start", "Export gestartet (CSV)");
+        int[] results = {0, 0};
+
+        //File file = new File(Environment.getExternalStorageDirectory(),"import.csv"); <-- gibt mir /storage/emulated/0/ anstelle der realen SD Card
+        File file = new File(path, fileName);
+        FileReader fr = new FileReader(file);
+        BufferedReader br = new BufferedReader(fr);
+        String line;
+        String[] temp;
+        Rezept r;
+        DBHelper dbhelper = new DBHelper(MainActivity.activity); //TODO Welches Context Objekt wäre angemessen?
+
+
+        while ((line = br.readLine()) != null) {
+            temp = line.split(delimiter);
+
+            if (temp.length == 5) {
+                //TODO versuche ein Rezeptobjekt zu erstellen
+                r = new Rezept(-1, temp[0], temp[1], temp[2], Integer.valueOf(temp[3]), Integer.valueOf(temp[4]), null, false);
+                if (!dbhelper.doesAlreadyExist(r)) {
+                    dbhelper.insertRezept(r);
+                    Log.v("CSV Import", "Rezept " + r.getTitel() + " erfolgreich importiert");
+                    results[0]++;
+
+                } else {
+                    Log.v("INFO", "Rezept existiert schon in DB:: " + line);
+                    results[1]++;
+                }
+
+
+            } else {
+                Log.v("Error", "Konnte nichts lesen in Zeile:: " + line + "\nDer Split hat die Länge=" + temp.length);
+                results[1] = +1;
+            }
+
+        }
+        br.close();
+        fr.close();
+        return results;
+
+    }
+
     public void deleteFileFromSDCard(String path){
         File file =new File(path);
         file.delete();

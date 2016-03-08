@@ -108,9 +108,11 @@ public class ShoppingListAnsicht extends AppCompatActivity implements View.OnCli
                         final ShoppingListItem item = (ShoppingListItem) cb.getTag();
                         if (cb.isChecked()) {
                             helper.setShopped(item.getId(),item.getRezept_id(), 1);
+                            item.setShopped(1);
                         }
                         else{
                             helper.setShopped(item.getId(),item.getRezept_id(),0);
+                            item.setShopped(0);
                         }
                     }
                 });

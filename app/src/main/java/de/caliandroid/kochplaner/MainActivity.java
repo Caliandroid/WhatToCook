@@ -456,7 +456,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                         rezepte.remove(rezept);
                                         helper.updatePlannedRezeptID(rezept.getId(), newRezept.getId());
                                         helper.deleteItemFromShoppinglist(rezept);
-                                        helper.insertIntoShoppinglist(rezept);
+                                        helper.insertIntoShoppinglist(newRezept);
                                         Toast.makeText(getApplicationContext(), "Rezept ausgetauscht", Toast.LENGTH_SHORT).show();
                                         dataAdapter.notifyDataSetChanged(); //da AL rezepte verkürzt wurde
                                         blocker.add( String.valueOf(rezept.getId()));
