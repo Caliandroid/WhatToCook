@@ -35,6 +35,7 @@ public class RezeptAlle extends AppCompatActivity implements View.OnClickListene
         listView.setOnItemClickListener(this);
         listView.setOnItemLongClickListener(this);
         adapter.notifyDataSetChanged();
+
     }
 
 
@@ -100,6 +101,7 @@ public class RezeptAlle extends AppCompatActivity implements View.OnClickListene
             i.putExtra("anzahl", rezept.getAnzahl());
             i.putExtra("typ", rezept.getTyp());
             i.putExtra("imageUri",rezept.getImageUri());
+            i.putExtra("blocked",rezept.getBlocked());
             startActivityForResult(i, 1);
         }
     }

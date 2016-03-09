@@ -5,11 +5,11 @@ package de.caliandroid.kochplaner;
  */
 public class Rezept {
 
-    private int id,typ,anzahl;
+    private int id,typ,anzahl,blocked;
     private String titel,anleitung,zutaten,imageUri;
-    private boolean selected;
 
-    public Rezept(int id,String titel,String zutaten, String anleitung,int typ, int anzahl,String imageUri, boolean selected){
+
+    public Rezept(int id,String titel,String zutaten, String anleitung,int typ, int anzahl,String imageUri, int blocked){
         this.id = id;
         this.titel=titel;
         this.zutaten=zutaten;
@@ -17,7 +17,7 @@ public class Rezept {
         this.typ=typ;
         this.anzahl=anzahl;
         this.imageUri=imageUri;
-        this.selected=selected;
+        this.blocked = blocked;
     }
 
     public int getId(){
@@ -41,11 +41,14 @@ public class Rezept {
     public String getImageUri(){
         return this.imageUri;
     }
-    public boolean isSelected() {
-        return selected;
+
+    public int getBlocked() {
+        return blocked;
     }
-    public void setSelected(boolean selected) {
-        this.selected = selected;
+
+    public void setBlocked(int blocked) {
+        this.blocked = blocked;
     }
+
 }
 

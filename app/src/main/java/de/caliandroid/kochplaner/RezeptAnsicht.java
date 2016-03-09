@@ -17,6 +17,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.w3c.dom.Text;
+
 import java.io.File;
 import java.io.IOException;
 import java.sql.Types;
@@ -30,7 +32,7 @@ public class RezeptAnsicht extends AppCompatActivity implements View.OnClickList
     private static final String IMAGE_FOLDER ="/images";  //geladen werden soll dann noch /storage/sdcard1/kochplaner
 
 
-    private TextView tvTitel,tvZutaten,tvAnleitung,tvAnzahl;
+    private TextView tvTitel,tvZutaten,tvAnleitung,tvAnzahl,tvBlocked;
     private Button bZurueck,bEdit,bDelete;
     public static Activity activity;
     String imageUri = null;
@@ -57,12 +59,16 @@ public class RezeptAnsicht extends AppCompatActivity implements View.OnClickList
         bZurueck.setOnClickListener(this);
         bDelete.setOnClickListener(this);
         ImageView imageView =(ImageView)findViewById(R.id.imageView);
+        tvBlocked = (TextView)findViewById(R.id.textView4);
 
         //Daten holen
         tvTitel.setText(getIntent().getStringExtra("titel"));
         tvZutaten.setText("ZUTATEN:\n"+getIntent().getStringExtra("zutaten")+"\n\n");
         tvAnleitung.setText("ANLEITUNG:\n" + getIntent().getStringExtra("anleitung"));
         tvAnzahl.setText("Bisher gekocht: " + String.valueOf(getIntent().getIntExtra("anzahl", 0)) + " mal");
+        if( getIntent().getIntExtra("blocked", 0)==1 ){
+            tvBlocked.setText("geblockt!");
+        }
 
         imageUri = getIntent().getStringExtra("imageUri");
         if(imageUri!=null){
@@ -104,6 +110,7 @@ public class RezeptAnsicht extends AppCompatActivity implements View.OnClickList
             i.putExtra("anzahl", this.getIntent().getIntExtra("anzahl", 0));
             i.putExtra("typ",this.getIntent().getIntExtra("typ",0));
             i.putExtra("imageUri",this.getIntent().getStringExtra("imageUri"));
+            i.putExtra("blocked",this.getIntent().getIntExtra("blocked",0));
             startActivityForResult(i, 1);
 
 

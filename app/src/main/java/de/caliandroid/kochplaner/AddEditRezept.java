@@ -16,6 +16,7 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
@@ -46,8 +47,9 @@ public class AddEditRezept extends AppCompatActivity implements View.OnClickList
 
 
     private EditText etTitel,etZutaten,etAnleitung,etAnzahl;
+    private CheckBox blocked;
     private TextView tvImageUri;
-    private int rezeptID;
+    private int rezeptID,iBlocked;
     private Spinner spType;
     boolean bInsert=true; //steuert, ob es ein Update oder ein Neu Insert wird
     Button button, bKamera;
@@ -90,6 +92,7 @@ public class AddEditRezept extends AppCompatActivity implements View.OnClickList
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
                 R.array.typen_array, android.R.layout.simple_spinner_item);
         spType.setAdapter(adapter);
+        blocked=(CheckBox)findViewById(R.id.checkBox);
 
 
 
@@ -108,6 +111,10 @@ public class AddEditRezept extends AppCompatActivity implements View.OnClickList
             }
             //Spinner setzen
             spType.setSelection(getIntent().getIntExtra("typ", 0));
+            iBlocked=getIntent().getIntExtra("blocked",0);
+            if(iBlocked==1){
+                blocked.setChecked(true);
+            }
 
 
 
@@ -182,6 +189,14 @@ public class AddEditRezept extends AppCompatActivity implements View.OnClickList
             if(etAnzahl.getText().toString().isEmpty()){
                 etAnzahl.setText("0");
             }
+           if(blocked.isChecked()){
+               iBlocked=1;
+           }
+            else{
+               iBlocked=0;
+           }
+
+
 
             DBHelper helper = new DBHelper(this);
 
@@ -189,7 +204,7 @@ public class AddEditRezept extends AppCompatActivity implements View.OnClickList
                 if (bInsert) {//NEUES REZEPT
 
 
-                    Rezept r = new Rezept(-1, etTitel.getText().toString(), etZutaten.getText().toString(), etAnleitung.getText().toString(), spType.getSelectedItemPosition(), Integer.valueOf(etAnzahl.getText().toString()),filename, false);
+                    Rezept r = new Rezept(-1, etTitel.getText().toString(), etZutaten.getText().toString(), etAnleitung.getText().toString(), spType.getSelectedItemPosition(), Integer.valueOf(etAnzahl.getText().toString()),filename,iBlocked);
                     if (!helper.doesAlreadyExist(r)) {
                         helper.insertRezept(r);
                         //TODO einen Toast anzeigen, dann Ansicht schließen
@@ -208,7 +223,7 @@ public class AddEditRezept extends AppCompatActivity implements View.OnClickList
                      */
 
 
-                    Rezept r = new Rezept(getIntent().getIntExtra("id", -1), etTitel.getText().toString(), etZutaten.getText().toString(), etAnleitung.getText().toString(), spType.getSelectedItemPosition(), Integer.valueOf(etAnzahl.getText().toString()),filename, false);
+                    Rezept r = new Rezept(getIntent().getIntExtra("id", -1), etTitel.getText().toString(), etZutaten.getText().toString(), etAnleitung.getText().toString(), spType.getSelectedItemPosition(), Integer.valueOf(etAnzahl.getText().toString()),filename,iBlocked);
                     if (!helper.doesAlreadyExist(r)) { //Duplettengenerierung bei Update vermeiden
                         helper.updateRezept(r);
                         Toast.makeText(getApplicationContext(), "Erfolgreich aktualisiert", Toast.LENGTH_LONG).show();

@@ -119,9 +119,9 @@ public class Worker {
         while ((line = br.readLine()) != null){
                 temp= line.split(delimiter);
 
-                if(temp.length==5){
+                if(temp.length==7){
                     //TODO versuche ein Rezeptobjekt zu erstellen
-                    r= new Rezept(-1,temp[0],temp[1],temp[2],Integer.valueOf(temp[3]),Integer.valueOf(temp[4]),null,false);
+                    r= new Rezept(-1,temp[0],temp[1],temp[2],Integer.valueOf(temp[3]),Integer.valueOf(temp[4]),temp[5],Integer.valueOf(temp[6]));
                     if(!dbhelper.doesAlreadyExist(r)){
                         dbhelper.insertRezept(r);
                         Log.v("CSV Import" , "Rezept " + r.getTitel() + " erfolgreich importiert");
@@ -163,9 +163,9 @@ public class Worker {
         while ((line = br.readLine()) != null){
             temp= line.split(delimiter);
 
-            if(temp.length==5){
+            if(temp.length==7){
                 //TODO versuche ein Rezeptobjekt zu erstellen
-                r= new Rezept(-1,temp[0],temp[1],temp[2],Integer.valueOf(temp[3]),Integer.valueOf(temp[4]),null,false);
+                r= new Rezept(-1,temp[0],temp[1],temp[2],Integer.valueOf(temp[3]),Integer.valueOf(temp[4]),temp[5],Integer.valueOf(temp[6]));
                 if(!dbhelper.doesAlreadyExist(r)){
                     dbhelper.insertRezept(r);
                     Log.v("CSV Import" , "Rezept " + r.getTitel() + " erfolgreich importiert");
@@ -209,9 +209,9 @@ public class Worker {
         while ((line = br.readLine()) != null) {
             temp = line.split(delimiter);
 
-            if (temp.length == 5) {
+            if (temp.length == 7) {
                 //TODO versuche ein Rezeptobjekt zu erstellen
-                r = new Rezept(-1, temp[0], temp[1], temp[2], Integer.valueOf(temp[3]), Integer.valueOf(temp[4]), null, false);
+                r= new Rezept(-1,temp[0],temp[1],temp[2],Integer.valueOf(temp[3]),Integer.valueOf(temp[4]),temp[5],Integer.valueOf(temp[6]));
                 if (!dbhelper.doesAlreadyExist(r)) {
                     dbhelper.insertRezept(r);
                     Log.v("CSV Import", "Rezept " + r.getTitel() + " erfolgreich importiert");

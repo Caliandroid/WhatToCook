@@ -152,8 +152,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         // alle Inhalte in PLANNED und Shoppingliste entfernen
                         helper.deleteAllPlanned();
                         helper.deleteAllFromShoppinglist();
+                        rezepte.clear();
                         //neue Wochenplanung durchführen
-                        rezepte = helper.getKochplan();
+                        /**
+                         * Alte Variante statisch rezepte = helper.getKochplan();
+                         * TODO
+                         * in der neuen Variante wird aus den SharedPrefs ausgelesen, wie die Planung aussehen soll und dann jeweils die Kochliste aufgerufen
+                         *
+                         **/
+                        rezepte= helper.getKochplanNeu(0,3,rezepte);
+                        rezepte= helper.getKochplanNeu(1,2,rezepte);
+                        rezepte= helper.getKochplanNeu(2,1,rezepte);
+                        rezepte= helper.getKochplanNeu(3, 1, rezepte);
+
+                        //wenn fertig, dann noch in die Planned Tabelle einfügen
+                        helper.insertPlanned(rezepte);
+
 
                         dataAdapter = new MyCustomAdapter(MainActivity.activity, R.layout.row, rezepte); //MainActivity.activity anstelle von this
                         myListView.setAdapter(dataAdapter);
@@ -199,6 +213,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             i.putExtra("anzahl", rezept.getAnzahl());
             i.putExtra("typ", rezept.getTyp());
             i.putExtra("imageUri",rezept.getImageUri());
+            i.putExtra("blocked",rezept.getBlocked());
             startActivityForResult(i, 1);
         }
     }
@@ -327,8 +342,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     public void onClick(View v) {
                         final CheckBox cb = (CheckBox) v;
                         final Rezept rezept = (Rezept) cb.getTag();
-                        rezept.setSelected(cb.isChecked());
-                        if (rezept.isSelected()) {
+
+                       // if (rezept.getBlocked()==1) { hier gibts nichts zu prüfen. Wenn gekocht, dann fliegt das Item aus der Liste
 
                             //AlertDialog - um Tippfehler auszuschließen
                             AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.activity);
@@ -356,7 +371,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             alert.show();
 
 
-                        }
+                        //}
 
                     }
 
@@ -365,8 +380,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     public void onClick(View v) {
                         final CheckBox cb = (CheckBox) v;
                         final Rezept rezept = (Rezept) cb.getTag();
-                        rezept.setSelected(cb.isChecked());
-                        if (rezept.isSelected()) {
+
+                        //rezept.setSelected(cb.isChecked());
+                        if (cb.isChecked()) { //prepared ist bereits gecheckt
 
                             //AlertDialog - um Tippfehler auszuschließen
                             AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.activity);
