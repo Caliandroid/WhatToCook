@@ -354,6 +354,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                     helper.updateHaeufigkeit(rezept.getId());
                                     helper.deletePlanned(rezept.getId());
                                     rezepte.remove(position);
+                                    cb.setChecked(false); //wichtig, da beim entfernen des Rezeptes aus der Liste ein anderes an die Stelle nachrückt (ausser beim letzten) und dann die Checkbox weiter aktiv bleiben würde
                                     Toast.makeText(getApplicationContext(), rezept.getTitel() + " gekocht :)", Toast.LENGTH_LONG).show();
                                     dataAdapter.notifyDataSetChanged(); //da AL rezepte verkürzt wurde
 
@@ -515,12 +516,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             //Das Programm stürzt ab und beim nächsten Laden paßt es wieder.
             Rezept rezept = rezepte.get(position);
             holder.name.setText(rezept.getTitel());
-            /*
-            * Colorierung klappt nicht so recht TODO
-            if( i % 2 ==0){
 
-                holder.name.setBackgroundColor(Color.LTGRAY);
-            }*/
             holder.prepared.setTag(rezept);
             holder.prepared.setChecked(helper.isPrepared(rezept));
             /**
@@ -530,7 +526,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
            // holder.selected.setChecked(rezept.isSelected());
+            // holder.selected.setChecked(false); //darf nie vorab aktiviert sein
             holder.selected.setTag(rezept);
+
             holder.name.setTag(rezept);
             i++;
 
