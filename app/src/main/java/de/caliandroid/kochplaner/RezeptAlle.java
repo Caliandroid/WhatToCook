@@ -19,6 +19,9 @@ import java.util.ArrayList;
 public class RezeptAlle extends AppCompatActivity implements View.OnClickListener, View.OnTouchListener, ListView.OnItemClickListener, ListView.OnItemLongClickListener {
     private ArrayList<Rezept> rezepte;
     private ListView listView;
+    ArrayAdapter adapter =null;
+    int iPosition=0;
+    String[] rezepteTitel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,7 +33,8 @@ public class RezeptAlle extends AppCompatActivity implements View.OnClickListene
         rezepte=helper.getRezepte(null,null,"TITEL ASC",null);
         Worker worker = new Worker(this);
         listView = (ListView)findViewById(R.id.listView2);
-        final ArrayAdapter adapter = new ArrayAdapter(this,android.R.layout.simple_list_item_1, worker.getRezeptTitel(rezepte));
+        rezepteTitel=worker.getRezeptTitel(rezepte);
+        adapter= new ArrayAdapter(this,android.R.layout.simple_list_item_1,rezepteTitel );
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(this);
         listView.setOnItemLongClickListener(this);
@@ -80,8 +84,9 @@ public class RezeptAlle extends AppCompatActivity implements View.OnClickListene
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         Rezept r = rezepte.get(position);
-        System.out.println("Rezept "+r.getTitel()+" angeklickt");
+        iPosition=position;
         startEditAnsicht(r, RezeptAnsicht.class);
+
 
     }
 
@@ -102,6 +107,7 @@ public class RezeptAlle extends AppCompatActivity implements View.OnClickListene
             i.putExtra("typ", rezept.getTyp());
             i.putExtra("imageUri",rezept.getImageUri());
             i.putExtra("blocked",rezept.getBlocked());
+            i.putExtra("position",iPosition);  //um bei Löschoperation das Rezept aus dem Array zu entfernen
             startActivityForResult(i, 1);
         }
     }
@@ -117,4 +123,32 @@ public class RezeptAlle extends AppCompatActivity implements View.OnClickListene
         helper.insertPlanned((Rezept) rezepte.get(position));
         return true;
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        DBHelper helper = new DBHelper(this);
+        rezepte=helper.getRezepte(null,null,"TITEL ASC",null);
+        adapter.notifyDataSetChanged();
+    }
+
+    @Override
+    protected  void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // Aktuell nur ausgelöst, sollte ein Rezept gelöscht worden sein, man erhält als ResultCode die ID
+        //synchronized hinzugefügt, damit es vor Erstellung der ListView ablaufen kann -> funktioniert!
+        if (resultCode >= 0) {
+            Worker worker = new Worker(this);
+            rezepte.remove(resultCode);
+            rezepteTitel=worker.getRezeptTitel(rezepte);
+            //weil innerhalb des Adapters eine eigene Instanz von rezepteTitel besteht, muss ich entweder wie nun folgend
+            //einen neuen Adapter erstellen oder ich muss einen eigenen Adapter erstellen, innerhalb dessen es eine refresh Funktion gibt.
+            adapter= new ArrayAdapter(this,android.R.layout.simple_list_item_1,rezepteTitel);
+            listView.setAdapter(adapter);
+            adapter.notifyDataSetChanged();
+
+            //Ebenfalls aus dem MainAct.Rezepte dieses Element entfernen (sofern vorhanden)
+
+        }
+    }
+
 }

@@ -37,6 +37,7 @@ public class RezeptAnsicht extends AppCompatActivity implements View.OnClickList
     public static Activity activity;
     String imageUri = null;
     SharedPreferences sharedpreferences;
+    int iPosition=-1;
 
 
     @Override
@@ -69,6 +70,7 @@ public class RezeptAnsicht extends AppCompatActivity implements View.OnClickList
         if( getIntent().getIntExtra("blocked", 0)==1 ){
             tvBlocked.setText("geblockt!");
         }
+        iPosition=getIntent().getIntExtra("position",-1);
 
         imageUri = getIntent().getStringExtra("imageUri");
         if(imageUri!=null){
@@ -117,6 +119,7 @@ public class RezeptAnsicht extends AppCompatActivity implements View.OnClickList
 
         }
         if(v.getId()== R.id.bZurueck){
+
             setResult(0);
             finish();
         }
@@ -130,7 +133,10 @@ public class RezeptAnsicht extends AppCompatActivity implements View.OnClickList
                     DBHelper helper = new DBHelper(activity);
                     helper.deleteRezept(activity.getIntent().getIntExtra("id", -1));
                     Toast.makeText(getApplicationContext(), tvTitel.getText() + " wurde gelöscht)", Toast.LENGTH_LONG).show();
-                    setResult(activity.getIntent().getIntExtra("id", -1));
+
+                    Intent i= new Intent();
+                    i.putExtra("loeschposition",iPosition);
+                    setResult(2,i); //2=delete
                     finish();
                 }
             });

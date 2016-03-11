@@ -45,6 +45,7 @@ import java.util.Set;
 
 import static android.content.SharedPreferences.*;
 import static android.view.View.INVISIBLE;
+import static android.view.View.SYSTEM_UI_FLAG_FULLSCREEN;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, Toolbar.OnMenuItemClickListener, View.OnTouchListener {
     public static final String MY_PREFS = "MyPrefs";
@@ -58,6 +59,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public static Activity activity; //damit in Subclassen die Referenz zu dieser Klasse vorhanden ist
     ArrayList blocker=new ArrayList<String>();
     public static String imageUri; //zur Anwendung in AddEditRezept;
+    int iPosition=-1;
 
 
 
@@ -214,7 +216,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             i.putExtra("typ", rezept.getTyp());
             i.putExtra("imageUri",rezept.getImageUri());
             i.putExtra("blocked",rezept.getBlocked());
+            i.putExtra("position",iPosition);  //um bei Löschoperation das Rezept aus dem Array zu entfernen
+            System.out.println("habe Position mitgegeben ="+iPosition);
             startActivityForResult(i, 1);
+
         }
     }
 
@@ -287,14 +292,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     @Override
-    protected synchronized  void onActivityResult(int requestCode, int resultCode, Intent data) {
+    protected  void onActivityResult(int requestCode, int resultCode, Intent data) {
         // Aktuell nur ausgelöst, sollte ein Rezept gelöscht worden sein, man erhält als ResultCode die ID
-        //synchronized hinzugefügt, damit es vor Erstellung der ListView ablaufen kann -> funktioniert!
-        if(resultCode>=0){
-            //Liste der geplanten Rezepte erneut einlesen, das nicht mehr existierende wird dabei verworfen und entfernt -
-            Worker worker= new Worker(this);
-           rezepte= worker.bereinigeListe(rezepte,resultCode);
-            // rezepte = helper.getGeplanteRezepte(restoredIDs); TODO Testen, ob nötig oder nicht
+
+        if(resultCode==2){ //Rezept wurde gelöscht
+           // System.out.println("Habe ANweisung zum Etnfernen von Pos "+data.getIntExtra("position",-1)+" erhalten");
+            rezepte.remove(data.getIntExtra("loeschposition", -1));
             dataAdapter.notifyDataSetChanged();
         }
     }
@@ -447,6 +450,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         TextView tv = (TextView) v;
                         Rezept rezept = (Rezept) tv.getTag();
                         //Öffne RezeptAnsicht mit Inhalt des Rezepts
+                        iPosition=position;
                         startEditAnsicht(rezept, RezeptAnsicht.class);
 
                     }
@@ -472,7 +476,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                         rezepte.add(rezepte.indexOf(rezept), newRezept);
                                         rezepte.remove(rezept);
                                         helper.updatePlannedRezeptID(rezept.getId(), newRezept.getId());
-                                        helper.deleteItemFromShoppinglist(rezept);
+                                        helper.deleteItemFromShoppinglist(rezept.getId());
                                         helper.insertIntoShoppinglist(newRezept);
                                         Toast.makeText(getApplicationContext(), "Rezept ausgetauscht", Toast.LENGTH_SHORT).show();
                                         dataAdapter.notifyDataSetChanged(); //da AL rezepte verkürzt wurde

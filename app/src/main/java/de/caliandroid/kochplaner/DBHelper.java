@@ -401,6 +401,7 @@ public class DBHelper extends SQLiteOpenHelper {
         values.put(TABELLE1_5,r.getTyp());
         values.put(TABELLE1_6,r.getAnzahl());
         values.put(TABELLE1_7,r.getImageUri());
+        values.put(TABELLE1_8,r.getBlocked());
 
         // 3. insert
         try{
@@ -414,12 +415,15 @@ public class DBHelper extends SQLiteOpenHelper {
 
     public void deleteRezept(int id){
         SQLiteDatabase db = this.getWritableDatabase();
-        String sID =String.valueOf(id);
+       // String sID =String.valueOf(r.getId());
         String whereClause="_id=?";
-        String []whereArgs={sID};
+        String []whereArgs={String.valueOf(id)};
 
         try{
             db.delete(TABELLE1, whereClause, whereArgs);
+            //es muss ebenfalls aus der planned und shoppinglist tabelle entfernt werden
+            deletePlanned(id);
+            deleteItemFromShoppinglist(id);
 
         }
         catch(SQLiteException e){
@@ -814,9 +818,9 @@ public class DBHelper extends SQLiteOpenHelper {
 
     }
 
-    public void deleteItemFromShoppinglist(Rezept r){
+    public void deleteItemFromShoppinglist(int rezeptid){
         SQLiteDatabase db = this.getWritableDatabase();
-        String sID =String.valueOf(r.getId());
+        String sID =String.valueOf(rezeptid);
         String whereClause="planned_id=?";
         String []whereArgs={sID};
 
