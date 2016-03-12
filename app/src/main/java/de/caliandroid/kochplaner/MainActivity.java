@@ -60,6 +60,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     ArrayList blocker=new ArrayList<String>();
     public static String imageUri; //zur Anwendung in AddEditRezept;
     int iPosition=-1;
+    SharedPreferences sharedpreferences ;
 
 
 
@@ -162,10 +163,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                          * in der neuen Variante wird aus den SharedPrefs ausgelesen, wie die Planung aussehen soll und dann jeweils die Kochliste aufgerufen
                          *
                          **/
-                        rezepte= helper.getKochplanNeu(0,3,rezepte);
-                        rezepte= helper.getKochplanNeu(1,2,rezepte);
-                        rezepte= helper.getKochplanNeu(2,1,rezepte);
-                        rezepte= helper.getKochplanNeu(3, 1, rezepte);
+                        sharedpreferences = getSharedPreferences(MY_PREFS, MODE_PRIVATE);
+
+                        //vegetarisch
+                        rezepte= helper.getKochplanNeu(0,Integer.valueOf(sharedpreferences.getString("vegetarisch","3")),rezepte);
+                        //rezepte= helper.getKochplanNeu(0,3,rezepte);
+                        rezepte= helper.getKochplanNeu(1,Integer.valueOf(sharedpreferences.getString("fleisch","1")),rezepte);
+                        rezepte= helper.getKochplanNeu(2,Integer.valueOf(sharedpreferences.getString("fisch","1")),rezepte);
+                        rezepte= helper.getKochplanNeu(3,Integer.valueOf(sharedpreferences.getString("suess","1")),rezepte);
+                        rezepte= helper.getKochplanNeu(4,Integer.valueOf(sharedpreferences.getString("nachtisch","0")),rezepte);
 
                         //wenn fertig, dann noch in die Planned Tabelle einfügen
                         helper.insertPlanned(rezepte);

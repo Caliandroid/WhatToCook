@@ -320,8 +320,10 @@ public class AddEditRezept extends AppCompatActivity implements View.OnClickList
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss",Locale.getDefault());
 
         //Ordner auf sdcard erstellen, falls nicht existent:
+
         File imageDirectory = new File(restoredPath+IMAGE_FOLDER);
         imageDirectory.mkdirs();
+
 
         //falls Titel bereits existiert wird er mit in den filenamen aufgenommen
         File photo = new File(restoredPath+IMAGE_FOLDER,File.separator+etTitel.getText().toString()+"_"+sdf.format(new Date())+".jpg");

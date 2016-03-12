@@ -27,9 +27,10 @@ public class Settings extends AppCompatActivity implements View.OnClickListener{
     public static final String IMPORTFILE= "import.csv";
     public static final String SPLITTER =";";
     public static final String MY_PREFS = "MyPrefs";
+
     String restoredPath;
     private Button bImport,bSave;
-    private EditText etPath;
+    private EditText etPath,etVeg,etFlei,etFisc, etSuess,etNach;
     SharedPreferences sharedpreferences;
     SharedPreferences.Editor editor ;
 
@@ -50,6 +51,16 @@ public class Settings extends AppCompatActivity implements View.OnClickListener{
         if(restoredPath!=null){
             etPath.setText(restoredPath);
         }
+        etVeg = (EditText)findViewById(R.id.textView11);
+        etVeg.setText(sharedpreferences.getString("vegetarisch", "3"));
+        etFlei= (EditText)findViewById(R.id.textView12);
+        etFlei.setText(sharedpreferences.getString("fleisch", "1"));
+        etFisc= (EditText)findViewById(R.id.textView13);
+        etFisc.setText(sharedpreferences.getString("fisch", "1"));
+        etSuess= (EditText)findViewById(R.id.textView14);
+        etSuess.setText(sharedpreferences.getString("suess", "1"));
+        etNach= (EditText)findViewById(R.id.editText2);
+        etNach.setText(sharedpreferences.getString("vnachtisch", "0"));
 
 
     }
@@ -69,7 +80,7 @@ public class Settings extends AppCompatActivity implements View.OnClickListener{
         if(v.getId()== bSave.getId()) {
             saveSharedPrefs();
             restoredPath= etPath.getText().toString(); //da die Änderung auch direkt ohne erneutes OnCreate Aufrufen aktiv ist
-            Toast.makeText(getApplicationContext(), "Speicherpfad wurde geändert.", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), "Settings gespeichert!", Toast.LENGTH_LONG).show();
         }
 
     }
@@ -85,8 +96,14 @@ public class Settings extends AppCompatActivity implements View.OnClickListener{
         //an dieser Stelle die Änderungen speichern
         editor = getSharedPreferences(MY_PREFS, MODE_PRIVATE).edit();
         editor.putString("storagePath", etPath.getText().toString());
+        editor.putString("vegetarisch", etVeg.getText().toString());
+        editor.putString("fleisch", etFlei.getText().toString());
+        editor.putString("fisch", etFisc.getText().toString());
+        editor.putString("suess", etSuess.getText().toString());
+        editor.putString("nachtisch", etNach.getText().toString());
+
         editor.commit();
-        System.out.println("Pfag gespeichert="+etPath.getText().toString());
+        //System.out.println("Pfag gespeichert="+etPath.getText().toString());
     }
 
 
