@@ -16,6 +16,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 
 /**
  * Created by stefan on 26.02.16.
@@ -25,11 +26,12 @@ public class Settings extends AppCompatActivity implements View.OnClickListener{
     public static final String IMPORTPATH = "/storage/sdcard1/kochplaner/csv/";
     public static final String IMPORT_FOLDER="/csv";
     public static final String IMPORTFILE= "import.csv";
+    public static final String EXPORTFILE="export.csv";
     public static final String SPLITTER =";";
     public static final String MY_PREFS = "MyPrefs";
 
     String restoredPath;
-    private Button bImport,bSave;
+    private Button bImport,bSave,bExport;
     private EditText etPath,etVeg,etFlei,etFisc, etSuess,etNach;
     SharedPreferences sharedpreferences;
     SharedPreferences.Editor editor ;
@@ -46,6 +48,8 @@ public class Settings extends AppCompatActivity implements View.OnClickListener{
         bImport.setOnClickListener(this);
         bSave=(Button)findViewById(R.id.button4);
         bSave.setOnClickListener(this);
+        bExport = (Button) findViewById(R.id.bExport);
+        bExport.setOnClickListener(this);
 
         etPath = (EditText) findViewById(R.id.editText);
         if(restoredPath!=null){
@@ -81,6 +85,18 @@ public class Settings extends AppCompatActivity implements View.OnClickListener{
             saveSharedPrefs();
             restoredPath= etPath.getText().toString(); //da die Änderung auch direkt ohne erneutes OnCreate Aufrufen aktiv ist
             Toast.makeText(getApplicationContext(), "Settings gespeichert!", Toast.LENGTH_LONG).show();
+        }
+
+        if(v.getId()==bExport.getId()){
+            DBHelper dbHelper = new DBHelper(this);
+            ArrayList<Rezept> rezepte = dbHelper.getRezepte(null,null,null,null);
+            Worker worker = new Worker(this);
+            try{
+                worker.exportRezepteToCSV(restoredPath+IMPORT_FOLDER, File.separator+EXPORTFILE, SPLITTER,rezepte);
+            }
+            catch(IOException e){
+                e.printStackTrace();
+            }
         }
 
     }

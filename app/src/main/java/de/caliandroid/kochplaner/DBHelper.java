@@ -29,6 +29,8 @@ public class DBHelper extends SQLiteOpenHelper {
     private SQLiteDatabase myDB;
     private final Context context;
 
+    static final String ZUTATENSPLITTER ="#";
+
     //Statische Werte für Tabelle REZEPTE
     static final String TABELLE1 = "rezepte";
     static final String TABELLE1_1 = "_id";
@@ -792,7 +794,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public void insertIntoShoppinglist(Rezept r){
         SQLiteDatabase db = this.getWritableDatabase();
         //Zutaten aufsplitten
-        String[] zutaten = r.getZutaten().split(";");
+        String[] zutaten = r.getZutaten().split(ZUTATENSPLITTER);
 
         if(zutaten!=null && zutaten.length>0){
 

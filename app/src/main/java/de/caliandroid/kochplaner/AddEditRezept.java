@@ -229,15 +229,18 @@ public class AddEditRezept extends AppCompatActivity implements View.OnClickList
                         Toast.makeText(getApplicationContext(), "Erfolgreich aktualisiert", Toast.LENGTH_LONG).show();
 
                         //sofern altes Foto vorhanden und ein neues gesetzt wurde  muss dieses gelöscht werden:
-                        if(!filename.equals(getIntent().getStringExtra("imageUri"))){
+
                             try { // try und catch sollte nicht notwendig sein, aber wenn das Löschen einer alten Bilddatei nicht klappt, soll deswegen nicht die App abstürzen
-                                Worker worker = new Worker(this);
-                                worker.deleteFileFromSDCard(restoredPath+IMAGE_FOLDER+File.separator+getIntent().getStringExtra("imageUri"));
+                                if(!filename.equals(getIntent().getStringExtra("imageUri"))) {
+                                    Worker worker = new Worker(this);
+                                    worker.deleteFileFromSDCard(restoredPath + IMAGE_FOLDER + File.separator + getIntent().getStringExtra("imageUri"));
+                                }
                             }
                             catch(Exception e){
-                                e.printStackTrace();
+                                //harmlos - wird ausgelöst, wenn kein Bild vorhanden ist
+                                // e.printStackTrace();
                             }
-                        }
+
                         setResult(-1);
                         Intent i = new Intent(this, MainActivity.class);
                         finish();

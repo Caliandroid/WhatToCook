@@ -11,8 +11,10 @@ import android.os.Environment;
 import android.util.Log;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -79,6 +81,19 @@ public class Worker {
             sb.append("########################");
             sb.append("\n");
             iTag++;
+
+        }
+
+        sb.append("\n**********************\nJetzt folgen die Anleitungen\n");
+        Iterator i2 = rezepte.iterator();
+
+        while(i2.hasNext()){
+            rezept =(Rezept)i2.next();
+            sb.append("\n");
+            sb.append(rezept.getTitel());
+            sb.append("\n---------------\n");
+            sb.append(rezept.getAnleitung());
+            sb.append("\n*********************");
 
         }
         mailText=sb.toString();
@@ -192,46 +207,31 @@ public class Worker {
     }
 
 
-    public int[] exportRezepteToCSV(String path,String fileName, String delimiter) throws IOException {
+    public boolean exportRezepteToCSV(String path,String fileName, String delimiter,ArrayList<Rezept> rezepte) throws IOException {
         Log.v("Start", "Export gestartet (CSV)");
         int[] results = {0, 0};
 
         //File file = new File(Environment.getExternalStorageDirectory(),"import.csv"); <-- gibt mir /storage/emulated/0/ anstelle der realen SD Card
         File file = new File(path, fileName);
-        FileReader fr = new FileReader(file);
-        BufferedReader br = new BufferedReader(fr);
+        FileWriter fileWriter = new FileWriter(file);
+        BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+        StringBuffer content;
         String line;
         String[] temp;
-        Rezept r;
+        Rezept rezept;
         DBHelper dbhelper = new DBHelper(MainActivity.activity); //TODO Welches Context Objekt wäre angemessen?
+        Iterator iterator = rezepte.iterator();
 
-
-        while ((line = br.readLine()) != null) {
-            temp = line.split(delimiter);
-
-            if (temp.length == 7) {
-                //TODO versuche ein Rezeptobjekt zu erstellen
-                r= new Rezept(-1,temp[0],temp[1],temp[2],Integer.valueOf(temp[3]),Integer.valueOf(temp[4]),temp[5],Integer.valueOf(temp[6]));
-                if (!dbhelper.doesAlreadyExist(r)) {
-                    dbhelper.insertRezept(r);
-                    Log.v("CSV Import", "Rezept " + r.getTitel() + " erfolgreich importiert");
-                    results[0]++;
-
-                } else {
-                    Log.v("INFO", "Rezept existiert schon in DB:: " + line);
-                    results[1]++;
-                }
-
-
-            } else {
-                Log.v("Error", "Konnte nichts lesen in Zeile:: " + line + "\nDer Split hat die Länge=" + temp.length);
-                results[1] = +1;
-            }
-
+        while(iterator.hasNext()){
+            rezept = (Rezept) iterator.next();
+            bufferedWriter.write(rezept.getTitel()+delimiter+rezept.getZutaten()+delimiter+rezept.getAnleitung()+delimiter+rezept.getTyp()+delimiter+rezept.getAnzahl()+delimiter+rezept.getImageUri()+delimiter+rezept.getBlocked());
+            bufferedWriter.write("\n");
         }
-        br.close();
-        fr.close();
-        return results;
+        bufferedWriter.close();
+
+
+        return true;
+
 
     }
 
