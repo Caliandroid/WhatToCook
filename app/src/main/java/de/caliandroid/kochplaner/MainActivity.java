@@ -52,7 +52,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     DBHelper helper;
     public static ArrayList<Rezept> rezepte = new ArrayList();
     Rezept rezept;
-    Button button;
+    Button button, bClear;
     ListView myListView;
     MyCustomAdapter dataAdapter;
     SharedPreferences.Editor editor ;
@@ -94,6 +94,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //myListView.setOnItemClickListener(this); Nicht mehr benötigt, da in CustomAdapter integriert
         button = (Button) findViewById(R.id.button);
         button.setOnClickListener(this);
+        bClear = (Button) findViewById(R.id.bClear);
+        bClear.setOnClickListener(this);
         dataAdapter = new MyCustomAdapter(this,R.layout.row, rezepte);
         myListView.setAdapter(dataAdapter);
 
@@ -180,8 +182,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         helper.insertPlanned(rezepte);
 
 
-                        dataAdapter = new MyCustomAdapter(MainActivity.activity, R.layout.row, rezepte); //MainActivity.activity anstelle von this
-                        myListView.setAdapter(dataAdapter);
+                        //dataAdapter = new MyCustomAdapter(MainActivity.activity, R.layout.row, rezepte); //MainActivity.activity anstelle von this
+                       // myListView.setAdapter(dataAdapter);
                         dataAdapter.notifyDataSetChanged();
 
                     } catch (SQLiteException e) {
@@ -200,6 +202,37 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             alert.show();
 
             //Toast.makeText(getApplicationContext(),"Button geklickt", Toast.LENGTH_LONG).show();
+
+        }
+        if(v.getId()==R.id.bClear){
+            //AlertDialog
+            AlertDialog.Builder alert = new AlertDialog.Builder(this);
+            alert.setTitle("Komplette Planung leeren?");
+            alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    helper = new DBHelper(MainActivity.activity);
+                    try {
+                        // alle Inhalte in PLANNED und Shoppingliste entfernen
+                        helper.deleteAllPlanned();
+                        helper.deleteAllFromShoppinglist();
+                        rezepte.clear();
+                        dataAdapter.notifyDataSetChanged();
+
+                    } catch (SQLiteException e) {
+                        throw e;
+                    }
+                }
+            });
+
+            alert.setNegativeButton("Cancel",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            //nix
+                        }
+                    });
+
+            alert.show();
+
 
         }
 
@@ -240,6 +273,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onStart() {
         super.onStart();
+        //An dieser Stelle aktualisieren, weil die Methode immer aufgerufen wird, wenn die Activity wieder gerufen wird.
+        dataAdapter.notifyDataSetChanged();
     }
 
     @Override
