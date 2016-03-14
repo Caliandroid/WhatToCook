@@ -1,7 +1,10 @@
 package de.caliandroid.kochplaner;
 
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.sqlite.SQLiteException;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MotionEvent;
@@ -113,15 +116,42 @@ public class RezeptAlle extends AppCompatActivity implements View.OnClickListene
     }
 
     @Override
-    public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-        System.out.println("füge rezept manuell hinzu");
-        //TODO Handling fürs REzepte hinzufügen komplettieren
-        MainActivity.rezepte.add((Rezept) rezepte.get(position));
+    public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
+        //Manuell ein Rezept hinzufügen
 
-        DBHelper helper = new DBHelper(this);
-        helper.insertIntoShoppinglist((Rezept) rezepte.get(position));
-        //zusätzlich in die planned DB eintragen
-        helper.insertPlanned((Rezept) rezepte.get(position));
+
+        final DBHelper helper = new DBHelper(this);
+
+
+
+
+        //AlertDialog
+        AlertDialog.Builder alert = new AlertDialog.Builder(this);
+        alert.setTitle("Manuell Rezept hinzufügen?");
+        alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+
+                try {
+                    MainActivity.rezepte.add((Rezept) rezepte.get(position));
+                    helper.insertPlanned((Rezept) rezepte.get(position));
+                    helper.insertIntoShoppinglist((Rezept) rezepte.get(position));
+                    //zusätzlich in die planned DB eintragen
+
+                } catch (SQLiteException e) {
+                    throw e;
+                }
+            }
+        });
+
+        alert.setNegativeButton("Cancel",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        //nix
+                    }
+                });
+
+        alert.show();
+
         return true;
     }
 

@@ -168,7 +168,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         sharedpreferences = getSharedPreferences(MY_PREFS, MODE_PRIVATE);
 
                         //vegetarisch
-                        rezepte= helper.getKochplanNeu(0,Integer.valueOf(sharedpreferences.getString("vegetarisch","3")),rezepte);
+                        rezepte= helper.getKochplanNeu(0, Integer.valueOf(sharedpreferences.getString("vegetarisch", "2")), rezepte);
                         //Fleisch
                         rezepte= helper.getKochplanNeu(1,Integer.valueOf(sharedpreferences.getString("fleisch","1")),rezepte);
                         //Fisch
@@ -176,7 +176,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         //Süß
                         rezepte= helper.getKochplanNeu(3,Integer.valueOf(sharedpreferences.getString("suess","1")),rezepte);
                         //Dessert
-                        rezepte= helper.getKochplanNeu(4,Integer.valueOf(sharedpreferences.getString("nachtisch","0")),rezepte);
+                        rezepte= helper.getKochplanNeu(4,Integer.valueOf(sharedpreferences.getString("nachtisch","1")),rezepte);
+                        //Snack
+                        rezepte =helper.getKochplanNeu(4,Integer.valueOf(sharedpreferences.getString("snack","1")),rezepte);
 
                         //wenn fertig, dann noch in die Planned Tabelle einfügen
                         helper.insertPlanned(rezepte);
@@ -270,6 +272,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
 
+    //TODO Sollte es nicht protected heißen? was bringt es?
     @Override
     public void onStart() {
         super.onStart();
@@ -458,6 +461,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
                         }
+                        //TODO Lieber hier nur einen Hinweis auf die Shoppingliste und dann diese öffnen, sonst werden ja alle Zutaten auf shopped=false gesetzt
                         else{//deaktivieren
                             //AlertDialog - um Tippfehler auszuschließen
                             AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.activity);

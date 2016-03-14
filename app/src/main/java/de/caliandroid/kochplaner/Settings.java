@@ -32,7 +32,7 @@ public class Settings extends AppCompatActivity implements View.OnClickListener{
 
     String restoredPath;
     private Button bImport,bSave,bExport;
-    private EditText etPath,etVeg,etFlei,etFisc, etSuess,etNach;
+    private EditText etPath,etVeg,etFlei,etFisc, etSuess,etNach,etSnack;
     SharedPreferences sharedpreferences;
     SharedPreferences.Editor editor ;
 
@@ -56,7 +56,7 @@ public class Settings extends AppCompatActivity implements View.OnClickListener{
             etPath.setText(restoredPath);
         }
         etVeg = (EditText)findViewById(R.id.textView11);
-        etVeg.setText(sharedpreferences.getString("vegetarisch", "3"));
+        etVeg.setText(sharedpreferences.getString("vegetarisch", "2"));
         etFlei= (EditText)findViewById(R.id.textView12);
         etFlei.setText(sharedpreferences.getString("fleisch", "1"));
         etFisc= (EditText)findViewById(R.id.textView13);
@@ -64,8 +64,9 @@ public class Settings extends AppCompatActivity implements View.OnClickListener{
         etSuess= (EditText)findViewById(R.id.textView14);
         etSuess.setText(sharedpreferences.getString("suess", "1"));
         etNach= (EditText)findViewById(R.id.editText2);
-        etNach.setText(sharedpreferences.getString("vnachtisch", "0"));
-
+        etNach.setText(sharedpreferences.getString("nachtisch", "1"));
+        etSnack  = (EditText)findViewById(R.id.editText3);
+        etSnack.setText(sharedpreferences.getString("snack", "1"));
 
     }
 
@@ -117,9 +118,9 @@ public class Settings extends AppCompatActivity implements View.OnClickListener{
         editor.putString("fisch", etFisc.getText().toString());
         editor.putString("suess", etSuess.getText().toString());
         editor.putString("nachtisch", etNach.getText().toString());
+        editor.putString("snack",etSnack.getText().toString());
 
         editor.commit();
-        //System.out.println("Pfag gespeichert="+etPath.getText().toString());
     }
 
 
