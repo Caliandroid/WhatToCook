@@ -170,18 +170,18 @@ public class RezeptAlle extends AppCompatActivity implements View.OnClickListene
 
     @Override
     protected  void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Worker worker = new Worker(this);
         // Aktuell nur ausgelöst, sollte ein Rezept gelöscht worden sein, man erhält als ResultCode die ID
         //synchronized hinzugefügt, damit es vor Erstellung der ListView ablaufen kann -> funktioniert!
         if (resultCode ==2) { //ein Rezept wurde gelöscht
-           // Rezept rezept =rezepte.get(data.getIntExtra("id", -1));
-            Worker worker= new Worker(this);
-           rezepte = worker.bereinigeListe(rezepte,data.getIntExtra("id", -1));
-            //Gesamtansicht neu laden
-            //rezepteTitel=worker.getRezeptTitel(rezepte);
+            rezepte.remove(data.getIntExtra("position",-1));
+            //Da ansonsten die MainActivity keine Rückmeldung bekommt. dass eventuell ein Item entfernt wurde, das in der Liste ist, muss ich hier die Bereinigung aufrufen
+            MainActivity.rezepte = worker.bereinigeListe(MainActivity.rezepte,data.getIntExtra("id",-1));
+            rezepteTitel=worker.getRezeptTitel(rezepte);
              //weil innerhalb des Adapters eine eigene Instanz von rezepteTitel besteht, muss ich entweder wie nun folgend
              //einen neuen Adapter erstellen oder ich muss einen eigenen Adapter erstellen, innerhalb dessen es eine refresh Funktion gibt.
-             //   adapter= new ArrayAdapter(this,android.R.layout.simple_list_item_1,rezepteTitel);
-            //  listView.setAdapter(adapter);
+            adapter= new ArrayAdapter(this,android.R.layout.simple_list_item_1,rezepteTitel);
+            listView.setAdapter(adapter);
             adapter.notifyDataSetChanged();
 
                 //Ebenfalls aus dem MainAct.Rezepte dieses Element entfernen (sofern vorhanden)

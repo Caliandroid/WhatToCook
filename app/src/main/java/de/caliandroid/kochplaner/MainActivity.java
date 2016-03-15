@@ -251,7 +251,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             i.putExtra("anleitung", rezept.getAnleitung());
             i.putExtra("anzahl", rezept.getAnzahl());
             i.putExtra("typ", rezept.getTyp());
-            i.putExtra("imageUri",rezept.getImageUri());
+            i.putExtra("imageUri", rezept.getImageUri());
             i.putExtra("blocked", rezept.getBlocked());
             i.putExtra("position", iPosition);  //um bei Löschoperation das Rezept aus dem Array zu entfernen
             startActivityForResult(i, 1);
@@ -380,9 +380,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         }
 
-        public void updateAdapter(){
-            this.notifyDataSetChanged();
-        }
+
 
          @Override
         public View getView(final int position, View convertView, ViewGroup parent) {

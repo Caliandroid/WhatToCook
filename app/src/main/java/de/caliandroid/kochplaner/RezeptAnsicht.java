@@ -139,9 +139,9 @@ public class RezeptAnsicht extends AppCompatActivity implements View.OnClickList
                     //TODO Problem: Die RezeptAnsicht Activity kann aus MainActivity oder aus RezepteAlle aufgerufen werden
                     //wird hier ein Rezept gelöscht, wird es aus der DB entfernt und dann die Position in der ListView der Aufrufer-Klasse übergeben, damit sie dort auch entfernt werden kann
                     //Problem: Diese Position ist in RezepteAlle eine andere als in MainActivity (und zudem muss das Rezept auch gar nicht in der MainActivity.rezepte gelistet sein
-
                     Intent i= new Intent();
                     i.putExtra("id",id);
+                    i.putExtra("position",iPosition); //only for RezepteAlle
                     setResult(2, i); //2=delete
                     finish();
 
