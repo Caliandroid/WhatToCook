@@ -33,6 +33,7 @@ public class RezeptAnsicht extends AppCompatActivity implements View.OnClickList
 
 
     private TextView tvTitel,tvZutaten,tvAnleitung,tvAnzahl,tvBlocked;
+    private int id;
     private Button bZurueck,bEdit,bDelete;
     public static Activity activity;
     String imageUri = null;
@@ -63,6 +64,7 @@ public class RezeptAnsicht extends AppCompatActivity implements View.OnClickList
         tvBlocked = (TextView)findViewById(R.id.textView4);
 
         //Daten holen
+        id = getIntent().getIntExtra("id",-1);
         tvTitel.setText(getIntent().getStringExtra("titel"));
         tvZutaten.setText("ZUTATEN:\n"+getIntent().getStringExtra("zutaten")+"\n\n");
         tvAnleitung.setText("ANLEITUNG:\n" + getIntent().getStringExtra("anleitung"));
@@ -79,7 +81,7 @@ public class RezeptAnsicht extends AppCompatActivity implements View.OnClickList
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), Uri.parse(IMAGELOCATIONPREFIX+restoredPath+IMAGE_FOLDER+File.separator+imageUri));
                 imageView.setImageBitmap(bitmap);
             } catch (IOException e) {
-                e.printStackTrace();
+               //simply no image
             }
         }
 
@@ -105,7 +107,7 @@ public class RezeptAnsicht extends AppCompatActivity implements View.OnClickList
     public void onClick(View v) {
         if(v.getId() ==R.id.bEditieren){
             Intent i = new Intent(this,AddEditRezept.class);
-            i.putExtra("id", this.getIntent().getIntExtra("id",0));
+            i.putExtra("id", id);
             i.putExtra("titel", this.getIntent().getStringExtra("titel"));
             i.putExtra("zutaten",  this.getIntent().getStringExtra("zutaten"));
             i.putExtra("anleitung",  this.getIntent().getStringExtra("anleitung"));
@@ -120,7 +122,7 @@ public class RezeptAnsicht extends AppCompatActivity implements View.OnClickList
         }
         if(v.getId()== R.id.bZurueck){
 
-            setResult(0);
+            setResult(-1);
             finish();
         }
         if(v.getId()== R.id.bDelete){
@@ -132,12 +134,17 @@ public class RezeptAnsicht extends AppCompatActivity implements View.OnClickList
                 public void onClick(DialogInterface dialog, int whichButton) {
                     DBHelper helper = new DBHelper(activity);
                     helper.deleteRezept(activity.getIntent().getIntExtra("id", -1));
+                    //MainActivity.rezepte.remove(iPosition);
                     Toast.makeText(getApplicationContext(), tvTitel.getText() + " wurde gelöscht)", Toast.LENGTH_LONG).show();
+                    //TODO Problem: Die RezeptAnsicht Activity kann aus MainActivity oder aus RezepteAlle aufgerufen werden
+                    //wird hier ein Rezept gelöscht, wird es aus der DB entfernt und dann die Position in der ListView der Aufrufer-Klasse übergeben, damit sie dort auch entfernt werden kann
+                    //Problem: Diese Position ist in RezepteAlle eine andere als in MainActivity (und zudem muss das Rezept auch gar nicht in der MainActivity.rezepte gelistet sein
 
                     Intent i= new Intent();
-                    i.putExtra("loeschposition",iPosition);
-                    setResult(2,i); //2=delete
+                    i.putExtra("id",id);
+                    setResult(2, i); //2=delete
                     finish();
+
                 }
             });
 

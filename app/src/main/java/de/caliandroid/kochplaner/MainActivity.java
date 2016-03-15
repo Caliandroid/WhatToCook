@@ -69,6 +69,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        System.out.println("OnCreate läuft");
         setContentView(R.layout.activity_main);
         activity=this;
 
@@ -79,12 +80,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } catch (IOException e) {
             throw new Error("Cannot initialize prepopulated db");
         }
-        //TEST Planned Rezepte laden
+        //planned Rezepte laden
         rezepte =helper.getPlannedReceipts(null,null,null,null);
-
-
-
-
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -182,10 +179,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                         //wenn fertig, dann noch in die Planned Tabelle einfügen
                         helper.insertPlanned(rezepte);
-
-
-                        //dataAdapter = new MyCustomAdapter(MainActivity.activity, R.layout.row, rezepte); //MainActivity.activity anstelle von this
-                       // myListView.setAdapter(dataAdapter);
                         dataAdapter.notifyDataSetChanged();
 
                     } catch (SQLiteException e) {
@@ -259,9 +252,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             i.putExtra("anzahl", rezept.getAnzahl());
             i.putExtra("typ", rezept.getTyp());
             i.putExtra("imageUri",rezept.getImageUri());
-            i.putExtra("blocked",rezept.getBlocked());
-            i.putExtra("position",iPosition);  //um bei Löschoperation das Rezept aus dem Array zu entfernen
-            System.out.println("habe Position mitgegeben ="+iPosition);
+            i.putExtra("blocked", rezept.getBlocked());
+            i.putExtra("position", iPosition);  //um bei Löschoperation das Rezept aus dem Array zu entfernen
             startActivityForResult(i, 1);
 
         }
@@ -277,6 +269,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onStart() {
         super.onStart();
         //An dieser Stelle aktualisieren, weil die Methode immer aufgerufen wird, wenn die Activity wieder gerufen wird.
+        System.out.println("OnStart läuft");
+        dataAdapter.notifyDataSetChanged();
+
+    }
+
+    protected void onResume(){
+        super.onResume();
+        System.out.println("OnResume läuft");
+        //planned Rezepte laden
+       // rezepte = helper.getPlannedReceipts(null,null,null,null);
         dataAdapter.notifyDataSetChanged();
     }
 
@@ -288,6 +290,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         helper.close();
 
     }
+
+
 
     @Override
     public boolean onMenuItemClick(MenuItem item) {
@@ -341,11 +345,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected  void onActivityResult(int requestCode, int resultCode, Intent data) {
         // Aktuell nur ausgelöst, sollte ein Rezept gelöscht worden sein, man erhält als ResultCode die ID
-
         if(resultCode==2){ //Rezept wurde gelöscht
-           // System.out.println("Habe ANweisung zum Etnfernen von Pos "+data.getIntExtra("position",-1)+" erhalten");
-            rezepte.remove(data.getIntExtra("loeschposition", -1));
+            System.out.println("Habe Anweisung zum Etnfernen von ID "+data.getIntExtra("id",-1)+" erhalten");
+            Worker worker = new Worker(this);
+            rezepte = worker.bereinigeListe(rezepte,data.getIntExtra("id",-1));
+          //  rezepte.remove(data.getIntExtra("loeschposition", -1));
             dataAdapter.notifyDataSetChanged();
+        }
+        else{
+            System.out.println("Habe ResultCode ="+resultCode+" erhalten");
         }
     }
 
@@ -371,7 +379,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             CheckBox selected;
 
         }
-        @Override
+
+        public void updateAdapter(){
+            this.notifyDataSetChanged();
+        }
+
+         @Override
         public View getView(final int position, View convertView, ViewGroup parent) {
 
             ViewHolder holder = null;

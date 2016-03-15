@@ -87,6 +87,7 @@ public class RezeptAlle extends AppCompatActivity implements View.OnClickListene
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         Rezept r = rezepte.get(position);
+        System.out.println("Habe "+r.getTitel()+ " an POS "+position+ " angeklickt");
         iPosition=position;
         startEditAnsicht(r, RezeptAnsicht.class);
 
@@ -116,14 +117,10 @@ public class RezeptAlle extends AppCompatActivity implements View.OnClickListene
     }
 
     @Override
-    public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
+    public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
         //Manuell ein Rezept hinzufügen
-
-
         final DBHelper helper = new DBHelper(this);
-
-
-
+        final int iPos = position;
 
         //AlertDialog
         AlertDialog.Builder alert = new AlertDialog.Builder(this);
@@ -132,9 +129,9 @@ public class RezeptAlle extends AppCompatActivity implements View.OnClickListene
             public void onClick(DialogInterface dialog, int whichButton) {
 
                 try {
-                    MainActivity.rezepte.add((Rezept) rezepte.get(position));
-                    helper.insertPlanned((Rezept) rezepte.get(position));
-                    helper.insertIntoShoppinglist((Rezept) rezepte.get(position));
+                    MainActivity.rezepte.add((Rezept) rezepte.get(iPos));
+                    helper.insertPlanned((Rezept) rezepte.get(iPos));
+                    helper.insertIntoShoppinglist((Rezept) rezepte.get(iPos));
                     //zusätzlich in die planned DB eintragen
 
                 } catch (SQLiteException e) {
@@ -164,20 +161,32 @@ public class RezeptAlle extends AppCompatActivity implements View.OnClickListene
     }
 
     @Override
+    protected void onRestart() {
+        super.onRestart();
+        DBHelper helper = new DBHelper(this);
+        rezepte=helper.getRezepte(null,null,"TITEL ASC",null);
+        adapter.notifyDataSetChanged();
+    }
+
+    @Override
     protected  void onActivityResult(int requestCode, int resultCode, Intent data) {
         // Aktuell nur ausgelöst, sollte ein Rezept gelöscht worden sein, man erhält als ResultCode die ID
         //synchronized hinzugefügt, damit es vor Erstellung der ListView ablaufen kann -> funktioniert!
-        if (resultCode >= 0) {
-            Worker worker = new Worker(this);
-            rezepte.remove(resultCode);
-            rezepteTitel=worker.getRezeptTitel(rezepte);
-            //weil innerhalb des Adapters eine eigene Instanz von rezepteTitel besteht, muss ich entweder wie nun folgend
-            //einen neuen Adapter erstellen oder ich muss einen eigenen Adapter erstellen, innerhalb dessen es eine refresh Funktion gibt.
-            adapter= new ArrayAdapter(this,android.R.layout.simple_list_item_1,rezepteTitel);
-            listView.setAdapter(adapter);
+        if (resultCode ==2) { //ein Rezept wurde gelöscht
+           // Rezept rezept =rezepte.get(data.getIntExtra("id", -1));
+            Worker worker= new Worker(this);
+           rezepte = worker.bereinigeListe(rezepte,data.getIntExtra("id", -1));
+            //Gesamtansicht neu laden
+            //rezepteTitel=worker.getRezeptTitel(rezepte);
+             //weil innerhalb des Adapters eine eigene Instanz von rezepteTitel besteht, muss ich entweder wie nun folgend
+             //einen neuen Adapter erstellen oder ich muss einen eigenen Adapter erstellen, innerhalb dessen es eine refresh Funktion gibt.
+             //   adapter= new ArrayAdapter(this,android.R.layout.simple_list_item_1,rezepteTitel);
+            //  listView.setAdapter(adapter);
             adapter.notifyDataSetChanged();
 
-            //Ebenfalls aus dem MainAct.Rezepte dieses Element entfernen (sofern vorhanden)
+                //Ebenfalls aus dem MainAct.Rezepte dieses Element entfernen (sofern vorhanden)
+
+
 
         }
     }
