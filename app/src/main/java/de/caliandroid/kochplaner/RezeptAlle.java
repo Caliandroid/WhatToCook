@@ -15,6 +15,7 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by stefan on 05.03.16.
@@ -22,9 +23,9 @@ import java.util.ArrayList;
 public class RezeptAlle extends AppCompatActivity implements View.OnClickListener, View.OnTouchListener, ListView.OnItemClickListener, ListView.OnItemLongClickListener {
     private ArrayList<Rezept> rezepte;
     private ListView listView;
-    ArrayAdapter adapter =null;
+    ArrayAdapter <String> adapter =null;
     int iPosition=0;
-    String[] rezepteTitel;
+    public String[] rezepteTitel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -175,16 +176,18 @@ public class RezeptAlle extends AppCompatActivity implements View.OnClickListene
         //synchronized hinzugefügt, damit es vor Erstellung der ListView ablaufen kann -> funktioniert!
         if (resultCode ==2) { //ein Rezept wurde gelöscht
             rezepte.remove(data.getIntExtra("position",-1));
+            rezepteTitel=worker.getRezeptTitel(rezepte);
             //Da ansonsten die MainActivity keine Rückmeldung bekommt. dass eventuell ein Item entfernt wurde, das in der Liste ist, muss ich hier die Bereinigung aufrufen
             MainActivity.rezepte = worker.bereinigeListe(MainActivity.rezepte,data.getIntExtra("id",-1));
-            rezepteTitel=worker.getRezeptTitel(rezepte);
-             //weil innerhalb des Adapters eine eigene Instanz von rezepteTitel besteht, muss ich entweder wie nun folgend
-             //einen neuen Adapter erstellen oder ich muss einen eigenen Adapter erstellen, innerhalb dessen es eine refresh Funktion gibt.
-            adapter= new ArrayAdapter(this,android.R.layout.simple_list_item_1,rezepteTitel);
-            listView.setAdapter(adapter);
-            adapter.notifyDataSetChanged();
 
-                //Ebenfalls aus dem MainAct.Rezepte dieses Element entfernen (sofern vorhanden)
+             //weil innerhalb des Adapters eine eigene Instanz von rezepteTitel besteht, muss ich entweder wie nun folgend
+             //einen neuen Adapter erstellen oder ich muss einen eigenen Adapter erstellen, innerhalb dessen es eine refresh Funktion gibt
+
+            //und den dann gleich als ordentlichen Adapter
+            adapter= new ArrayAdapter(this,android.R.layout.simple_list_item_1,rezepteTitel);
+             listView.setAdapter(adapter);
+             adapter.notifyDataSetChanged();
+
 
 
 
