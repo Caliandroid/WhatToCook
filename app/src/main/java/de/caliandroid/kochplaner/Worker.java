@@ -213,6 +213,8 @@ public class Worker {
 
         //File file = new File(Environment.getExternalStorageDirectory(),"import.csv"); <-- gibt mir /storage/emulated/0/ anstelle der realen SD Card
         File file = new File(path, fileName);
+        file.delete(); //eventuell vorhandenes exportfile löschen
+        file = new File(path, fileName);
         FileWriter fileWriter = new FileWriter(file);
         BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
         StringBuffer content;
