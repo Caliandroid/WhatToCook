@@ -110,6 +110,8 @@ public class Worker {
             if(r.getId()==id){
                // rezepte.remove(r); führt immer mal wieder zu java.util.ConcurrentModificationException, daher besser über die remove Methode des iterators gehen
                 i.remove();
+                //because of unique key constraint an id can only appear once
+                break; //saves time
             }
 
         }
