@@ -1,18 +1,24 @@
 package de.caliandroid.kochplaner;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.sqlite.SQLiteException;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,25 +30,29 @@ public class RezeptAlle extends AppCompatActivity implements View.OnClickListene
     private ArrayList<Rezept> rezepte;
     private ListView listView;
     ArrayAdapter <String> adapter =null;
+    MyCustomAdapter myCustomAdapter;
     int iPosition=0;
     public String[] rezepteTitel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        super.setTitle("Alle Rezepte");
         setContentView(R.layout.rezept_alle);
+
 
         //alle Rezepte laden
         DBHelper helper = new DBHelper(this);
         rezepte=helper.getRezepte(null,null,"TITEL ASC",null);
-        Worker worker = new Worker(this);
+        //Worker worker = new Worker(this);
         listView = (ListView)findViewById(R.id.listView2);
-        rezepteTitel=worker.getRezeptTitel(rezepte);
-        adapter= new ArrayAdapter(this,android.R.layout.simple_list_item_1,rezepteTitel );
-        listView.setAdapter(adapter);
+       // rezepteTitel=worker.getRezeptTitel(rezepte);
+        //adapter= new ArrayAdapter(this,android.R.layout.simple_list_item_1,rezepteTitel );
+        myCustomAdapter = new MyCustomAdapter(this,R.layout.rezeptalle_element,rezepte);
+        listView.setAdapter(myCustomAdapter);
         listView.setOnItemClickListener(this);
         listView.setOnItemLongClickListener(this);
-        adapter.notifyDataSetChanged();
+        myCustomAdapter.notifyDataSetChanged();
 
     }
 
@@ -156,42 +166,86 @@ public class RezeptAlle extends AppCompatActivity implements View.OnClickListene
     @Override
     protected void onResume() {
         super.onResume();
-        DBHelper helper = new DBHelper(this);
-        rezepte=helper.getRezepte(null,null,"TITEL ASC",null);
-        adapter.notifyDataSetChanged();
+       // DBHelper helper = new DBHelper(this);
+        //rezepte=helper.getRezepte(null,null,"TITEL ASC",null);
+       // adapter.notifyDataSetChanged();
     }
 
     @Override
     protected void onRestart() {
         super.onRestart();
-        DBHelper helper = new DBHelper(this);
-        rezepte=helper.getRezepte(null,null,"TITEL ASC",null);
-        adapter.notifyDataSetChanged();
+        //DBHelper helper = new DBHelper(this);
+        //rezepte=helper.getRezepte(null,null,"TITEL ASC",null);
+       // adapter.notifyDataSetChanged();
     }
 
     @Override
     protected  void onActivityResult(int requestCode, int resultCode, Intent data) {
         Worker worker = new Worker(this);
+        DBHelper helper = new DBHelper(this);
         // Aktuell nur ausgelöst, sollte ein Rezept gelöscht worden sein, man erhält als ResultCode die ID
         //synchronized hinzugefügt, damit es vor Erstellung der ListView ablaufen kann -> funktioniert!
         if (resultCode ==2) { //ein Rezept wurde gelöscht
-            rezepte.remove(data.getIntExtra("position",-1));
-            rezepteTitel=worker.getRezeptTitel(rezepte);
+        // ;
+            rezepte = worker.bereinigeListe(rezepte,data.getIntExtra("id",-1));
             //Da ansonsten die MainActivity keine Rückmeldung bekommt. dass eventuell ein Item entfernt wurde, das in der Liste ist, muss ich hier die Bereinigung aufrufen
             MainActivity.rezepte = worker.bereinigeListe(MainActivity.rezepte,data.getIntExtra("id",-1));
-
-             //weil innerhalb des Adapters eine eigene Instanz von rezepteTitel besteht, muss ich entweder wie nun folgend
-             //einen neuen Adapter erstellen oder ich muss einen eigenen Adapter erstellen, innerhalb dessen es eine refresh Funktion gibt
-
-            //und den dann gleich als ordentlichen Adapter
-            adapter= new ArrayAdapter(this,android.R.layout.simple_list_item_1,rezepteTitel);
-             listView.setAdapter(adapter);
-             adapter.notifyDataSetChanged();
+             myCustomAdapter.notifyDataSetChanged();
+            //jetzt erst das Rezept endgültig aus der DB entfernen
+            helper.deleteRezept(data.getIntExtra("id", -1));
 
 
 
 
         }
+    }
+
+    /**
+     * Eigener Adapter zur Darstellung der Zutatenliste
+     */
+    private class MyCustomAdapter extends ArrayAdapter<Rezept> {
+
+
+        public MyCustomAdapter(Context context, int textViewResourceId,
+                               ArrayList<Rezept> rezepte) {
+            super(context, textViewResourceId, rezepte);
+
+        }
+
+        private class ViewHolder{
+            TextView rezeptTitel;
+
+        }
+        @Override
+        public View getView(final int position, View convertView, ViewGroup parent) {
+            DBHelper dbHelper=new DBHelper(getContext());
+
+            ViewHolder holder = null;
+            //Log.v("ConvertView", String.valueOf(position));
+
+            if (convertView == null) {
+                LayoutInflater vi = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                convertView = vi.inflate(R.layout.rezeptalle_element, null);
+
+                holder = new ViewHolder();
+                holder.rezeptTitel = (TextView) convertView.findViewById(R.id.textView2);
+                convertView.setTag(holder);
+
+            }
+            else {
+                holder = (ViewHolder) convertView.getTag();
+            }
+
+            Rezept rezept=rezepte.get(position);
+
+            holder.rezeptTitel.setText(rezept.getTitel());
+
+
+            return convertView;
+
+
+        }
+
     }
 
 }

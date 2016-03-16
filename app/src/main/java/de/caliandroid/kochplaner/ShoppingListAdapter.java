@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ *
+ * UNUSED!
  * Created by stefan on 16.03.16.
  */
 public class ShoppingListAdapter extends ArrayAdapter<ShoppingListItem> {

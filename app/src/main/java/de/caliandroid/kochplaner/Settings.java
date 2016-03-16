@@ -40,6 +40,7 @@ public class Settings extends AppCompatActivity implements View.OnClickListener{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        super.setTitle("Einstellungen");
         //Load Prefs
         sharedpreferences = getSharedPreferences(MY_PREFS, MODE_PRIVATE);
         restoredPath = sharedpreferences.getString("storagePath", null);

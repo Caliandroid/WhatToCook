@@ -108,7 +108,8 @@ public class Worker {
         while(i.hasNext()){
             r = (Rezept)i.next();
             if(r.getId()==id){
-                rezepte.remove(r);
+               // rezepte.remove(r); führt immer mal wieder zu java.util.ConcurrentModificationException, daher besser über die remove Methode des iterators gehen
+                i.remove();
             }
 
         }

@@ -641,7 +641,12 @@ public class DBHelper extends SQLiteOpenHelper {
         ArrayList<Rezept> rezepte=new ArrayList();
         Cursor c = db.query(TABELLE1, TABELLE1_COLUMNS, whereClause,selectionArgs,null,null,order,limit);
         c.moveToFirst();
-        rezept = new Rezept(c.getInt(0),c.getString(1),c.getString(2),c.getString(3),c.getInt(4),c.getInt(5),c.getString(6),c.getInt(7));
+        try{
+            rezept = new Rezept(c.getInt(0),c.getString(1),c.getString(2),c.getString(3),c.getInt(4),c.getInt(5),c.getString(6),c.getInt(7));
+        }
+        catch(CursorIndexOutOfBoundsException e){
+            e.printStackTrace();
+        }
         db.close();
         return rezept;
     }

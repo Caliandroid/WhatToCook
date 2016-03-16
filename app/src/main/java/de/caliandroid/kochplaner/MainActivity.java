@@ -346,14 +346,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected  void onActivityResult(int requestCode, int resultCode, Intent data) {
         // Aktuell nur ausgelöst, sollte ein Rezept gelöscht worden sein, man erhält als ResultCode die ID
         if(resultCode==2){ //Rezept wurde gelöscht
-            System.out.println("Habe Anweisung zum Etnfernen von ID "+data.getIntExtra("id",-1)+" erhalten");
             Worker worker = new Worker(this);
             rezepte = worker.bereinigeListe(rezepte,data.getIntExtra("id",-1));
-          //  rezepte.remove(data.getIntExtra("loeschposition", -1));
+           //rezepte.remove(data.getIntExtra("loeschposition", -1));
             dataAdapter.notifyDataSetChanged();
+            //jetzt erst das Rezept endgültig aus der DB entfernen
+            helper.deleteRezept(data.getIntExtra("id", -1));
         }
         else{
-            System.out.println("Habe ResultCode ="+resultCode+" erhalten");
+            System.out.println("Habe ResultCode =" + resultCode + " erhalten");
         }
     }
 

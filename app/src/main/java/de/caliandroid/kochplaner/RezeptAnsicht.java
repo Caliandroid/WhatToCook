@@ -44,6 +44,7 @@ public class RezeptAnsicht extends AppCompatActivity implements View.OnClickList
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        super.setTitle("Rezeptdetails");
         //pfad laden
         sharedpreferences = getSharedPreferences(MainActivity.MY_PREFS, MODE_PRIVATE);
         String restoredPath = sharedpreferences.getString("storagePath", null);
@@ -133,7 +134,7 @@ public class RezeptAnsicht extends AppCompatActivity implements View.OnClickList
             alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whichButton) {
                     DBHelper helper = new DBHelper(activity);
-                    helper.deleteRezept(activity.getIntent().getIntExtra("id", -1));
+                    //helper.deleteRezept(activity.getIntent().getIntExtra("id", -1)); >> besser in den Result empfangenden Activities ausführen, sonst gibt es das Rezept nicht mehr und man kann es nicht aus den ListViews entfernen
                     //MainActivity.rezepte.remove(iPosition);
                     Toast.makeText(getApplicationContext(), tvTitel.getText() + " wurde gelöscht)", Toast.LENGTH_LONG).show();
                     //TODO Problem: Die RezeptAnsicht Activity kann aus MainActivity oder aus RezepteAlle aufgerufen werden

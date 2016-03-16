@@ -68,6 +68,7 @@ public class AddEditRezept extends AppCompatActivity implements View.OnClickList
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        super.setTitle("Rezept erfassen/ändern");
 
         //pfad laden
         sharedpreferences = getSharedPreferences(MY_PREFS, MODE_PRIVATE);

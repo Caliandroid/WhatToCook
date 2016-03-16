@@ -37,6 +37,7 @@ public class ShoppingListAnsicht extends AppCompatActivity implements View.OnCli
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        super.setTitle("Shoppingliste");
         setContentView(R.layout.shopping_list_single);
         //ShoplistItems holen
         helper = new DBHelper(this);
@@ -66,7 +67,7 @@ public class ShoppingListAnsicht extends AppCompatActivity implements View.OnCli
 
 
     /**
-     * Angepaßter Adapter, der die Rezepte samt einer Auswahlcheckbox anzeigen soll
+     * Eigener Adapter zur Darstellung der Zutatenliste
      */
     private class MyCustomAdapter extends ArrayAdapter<ShoppingListItem> {
 
