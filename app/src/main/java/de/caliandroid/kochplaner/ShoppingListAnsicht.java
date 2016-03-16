@@ -33,6 +33,7 @@ public class ShoppingListAnsicht extends AppCompatActivity implements View.OnCli
     private ListView listView;
     private MyCustomAdapter dataAdapter;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -86,6 +87,7 @@ public class ShoppingListAnsicht extends AppCompatActivity implements View.OnCli
         }
         @Override
         public View getView(final int position, View convertView, ViewGroup parent) {
+            DBHelper dbHelper=new DBHelper(getContext());
 
             ViewHolder holder = null;
             //Log.v("ConvertView", String.valueOf(position));
@@ -96,9 +98,8 @@ public class ShoppingListAnsicht extends AppCompatActivity implements View.OnCli
 
                 holder = new ViewHolder();
                 holder.name = (TextView) convertView.findViewById(R.id.textView2);
-                holder.name.setTextSize(18);
+                //holder.name.setTextSize(18);
                 holder.shopped=(CheckBox)convertView.findViewById(R.id.checkBox3);
-
                 convertView.setTag(holder);
 
 
@@ -124,7 +125,18 @@ public class ShoppingListAnsicht extends AppCompatActivity implements View.OnCli
             }
 
             ShoppingListItem item= items.get(position);
-            holder.name.setText(item.getZutat()+"["+item.getShopped()+"]");
+            String[]whereArgs=new String[]{ String.valueOf(item.getRezept_id())};
+            Rezept rezept = dbHelper.getRezept("_id = ?",whereArgs,null,null);
+            String rezeptTitel ="";
+            try{
+                rezeptTitel=rezept.getTitel().substring(0,12);
+            }
+            //if title is <13
+            catch(StringIndexOutOfBoundsException e){
+                rezeptTitel=rezept.getTitel();
+            }
+
+            holder.name.setText(item.getZutat()+"["+rezeptTitel+"]");
             /*
             * Colorierung
             *

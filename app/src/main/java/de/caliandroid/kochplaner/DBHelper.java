@@ -628,6 +628,25 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     /**
+     * Universelle Abfrage der DB anhand der übergebenen Paramter
+     * @param whereClause  Bedingung wie TYP=?
+     * @param selectionArgs Array mit den Werten für die Bedingung wie 1,2
+     * @param order Reihefolge (order by xy)
+     * @param limit Limitierung der Ergebnisse
+     * @return
+     */
+    public Rezept getRezept(String whereClause, String []selectionArgs,String order, String limit ) {
+        SQLiteDatabase db =this.getReadableDatabase();
+        Rezept rezept=null;
+        ArrayList<Rezept> rezepte=new ArrayList();
+        Cursor c = db.query(TABELLE1, TABELLE1_COLUMNS, whereClause,selectionArgs,null,null,order,limit);
+        c.moveToFirst();
+        rezept = new Rezept(c.getInt(0),c.getString(1),c.getString(2),c.getString(3),c.getInt(4),c.getInt(5),c.getString(6),c.getInt(7));
+        db.close();
+        return rezept;
+    }
+
+    /**
      * Fügt in die Planned Tabelle einen einzelnen Eintrag an.
      * @param r
      */

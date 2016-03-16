@@ -59,4 +59,5 @@ public class ShoppingListItem {
     public void setRezept_id(int rezept_id) {
         this.rezept_id = rezept_id;
     }
+
 }
