@@ -36,9 +36,10 @@
         android:id="@+id/tvAnleitung" />
 
     <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/imageView" />
+        android:layout_width="fill_parent"
+        android:layout_height="300dp"
+        android:id="@+id/imageView"
+        android:scaleType="fitXY" />
 
     <TextView
         android:layout_width="wrap_content"

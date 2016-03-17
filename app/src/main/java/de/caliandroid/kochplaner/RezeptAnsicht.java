@@ -12,8 +12,10 @@ import android.provider.MediaStore;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -82,8 +84,21 @@ public class RezeptAnsicht extends AppCompatActivity implements View.OnClickList
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), Uri.parse(IMAGELOCATIONPREFIX+restoredPath+IMAGE_FOLDER+File.separator+imageUri));
                 imageView.setImageBitmap(bitmap);
             } catch (IOException e) {
-               //simply no image
+               //no image even if the filename is in the db -> shrink the imageview to 0,0
+                LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) imageView.getLayoutParams();
+                params.width = 0;
+                params.height=0;
+                imageView.setLayoutParams(params);
+
             }
+        }
+        else{
+            //shrink imageview to 0,0
+           LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) imageView.getLayoutParams();
+            params.width = 0;
+            params.height=0;
+            imageView.setLayoutParams(params);
+
         }
 
 

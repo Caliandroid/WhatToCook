@@ -13,11 +13,14 @@ import android.util.Log;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -257,6 +260,27 @@ public class Worker {
             i++;
         }
         return rezeptTitel;
+    }
+
+    public void copyFile(File sourceFile, File destFile) throws IOException {
+        if (!sourceFile.exists()) {
+            return;
+        }
+
+        FileChannel source = null;
+        FileChannel destination = null;
+        source = new FileInputStream(sourceFile).getChannel();
+        destination = new FileOutputStream(destFile).getChannel();
+        if (destination != null && source != null) {
+            destination.transferFrom(source, 0, source.size());
+        }
+        if (source != null) {
+            source.close();
+        }
+        if (destination != null) {
+            destination.close();
+        }
+
     }
 
 

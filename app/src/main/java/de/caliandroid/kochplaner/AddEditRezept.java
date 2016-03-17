@@ -1,14 +1,17 @@
 package de.caliandroid.kochplaner;
 
 import android.app.Activity;
+import android.content.CursorLoader;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -23,9 +26,11 @@ import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URI;
 import java.sql.Timestamp;
@@ -45,6 +50,9 @@ public class AddEditRezept extends AppCompatActivity implements View.OnClickList
     private static final int CAMERADATA = 0;
     public static final String MY_PREFS = "MyPrefs";
 
+    private static final int SELECT_FILE = 100;
+    private static final int REQUEST_CAMERA = 110;
+
 
     private EditText etTitel,etZutaten,etAnleitung,etAnzahl;
     private CheckBox blocked;
@@ -59,6 +67,7 @@ public class AddEditRezept extends AppCompatActivity implements View.OnClickList
     SharedPreferences sharedpreferences;
     SharedPreferences.Editor editor ;
     String restoredPath;
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss",Locale.getDefault());
 
 
 
@@ -260,7 +269,38 @@ public class AddEditRezept extends AppCompatActivity implements View.OnClickList
         }
         //Kameraintegration
         if(v.getId()==R.id.bKamera){
-            getCameraPic();
+            //getCameraPic();
+            final CharSequence[] choose = { "Neues Foto", "Aus der Galerie", "Cancel" };
+            AlertDialog.Builder builder = new AlertDialog.Builder(AddEditRezept.this);
+            builder.setTitle("Foto hinzufügen");
+            builder.setItems(choose, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int item) {
+                    if (choose[item].equals("Neues Foto")) {
+                        Intent intent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+                        //Ordner auf sdcard erstellen, falls nicht existent:
+                        File imageDirectory = new File(restoredPath+IMAGE_FOLDER);
+                        imageDirectory.mkdirs();
+                        //falls Titel bereits existiert wird er mit in den filenamen aufgenommen
+                        File photo = new File(restoredPath+IMAGE_FOLDER,File.separator+etTitel.getText().toString()+"_"+sdf.format(new Date())+".jpg");
+                        intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(photo));
+                        selectedImageUri = Uri.fromFile(photo);
+                        filename = photo.getName();
+                        startActivityForResult(intent, REQUEST_CAMERA);
+
+                    } else if (choose[item].equals("Aus der Galerie")) {
+                        Intent intent = new Intent(
+                                Intent.ACTION_PICK,
+                                android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                        intent.setType("image/*");
+                        startActivityForResult(Intent.createChooser(intent, "Select File"), SELECT_FILE);
+
+                    } else if (choose[item].equals("Cancel")) {
+                        dialog.dismiss();
+                    }
+                }
+            });
+            builder.show();
 
 
 
@@ -269,7 +309,7 @@ public class AddEditRezept extends AppCompatActivity implements View.OnClickList
     }
 
 
-    protected void  onActivityResult(int requestCode, int resultCode, Intent data)  {
+  /**  protected void  onActivityResult(int requestCode, int resultCode, Intent data)  {
         //ImageHelper help= new ImageHelper(this);
         if (requestCode == CAMERA_REQUEST) {
             //schreibe Filename
@@ -286,10 +326,10 @@ public class AddEditRezept extends AppCompatActivity implements View.OnClickList
 
         }
 
-    }
+    }*/
     //Dialog
     public void onBackPressed() {
-        AlertDialog.Builder alert = new AlertDialog.Builder(this);
+       AlertDialog.Builder alert = new AlertDialog.Builder(this);
         alert.setTitle("Ohne Speichern zurück?");
         // alert.setMessage("Message");
 
@@ -321,7 +361,7 @@ public class AddEditRezept extends AppCompatActivity implements View.OnClickList
 
     public void getCameraPic(){
         Intent intent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss",Locale.getDefault());
+
 
         //Ordner auf sdcard erstellen, falls nicht existent:
 
@@ -331,8 +371,6 @@ public class AddEditRezept extends AppCompatActivity implements View.OnClickList
 
         //falls Titel bereits existiert wird er mit in den filenamen aufgenommen
         File photo = new File(restoredPath+IMAGE_FOLDER,File.separator+etTitel.getText().toString()+"_"+sdf.format(new Date())+".jpg");
-
-
         intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(photo));
         selectedImageUri = Uri.fromFile(photo);
         filename = photo.getName();
@@ -346,6 +384,72 @@ public class AddEditRezept extends AppCompatActivity implements View.OnClickList
   //      editor.putString("plannedIDs", myWorker.getIDs(rezepte));
      //   editor.commit();
     }
+
+
+    /***
+     * Dev Branch CameraAndGallery
+     * Select picture over gallery or camera and compress and resize it as jpg
+     *
+     */
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss",Locale.getDefault());
+        if (resultCode == RESULT_OK) {
+            if (requestCode == REQUEST_CAMERA) {
+
+                tvImageUri.setText(filename);
+
+
+            } else if (requestCode == SELECT_FILE) {
+                Uri selectedImageUri = data.getData();
+                String[] projection = {MediaStore.MediaColumns.DATA};
+                CursorLoader cursorLoader = new CursorLoader(this, selectedImageUri, projection, null, null,
+                        null);
+                Cursor cursor = cursorLoader.loadInBackground();
+                int column_index = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
+                cursor.moveToFirst();
+
+                String selectedImagePath = cursor.getString(column_index);
+
+                Bitmap bm;
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inJustDecodeBounds = true;
+                BitmapFactory.decodeFile(selectedImagePath, options);
+                final int REQUIRED_SIZE = 1024;
+                int scale = 1;
+                while (options.outWidth / scale / 2 >= REQUIRED_SIZE
+                        && options.outHeight / scale / 2 >= REQUIRED_SIZE)
+                    scale *= 2;
+                options.inSampleSize = scale;
+                options.inJustDecodeBounds = false;
+                bm = BitmapFactory.decodeFile(selectedImagePath, options);
+                //In Datei schreiben:
+                System.out.println("Image ="+selectedImagePath);
+                filename =etTitel.getText().toString()+"_"+sdf.format(new Date())+".jpg";
+                File photo = new File(restoredPath+IMAGE_FOLDER,File.separator+filename);
+                Worker worker = new Worker(this);
+                File photoAusGalerie = new File(selectedImagePath);
+
+                try {
+                    worker.copyFile( photoAusGalerie,photo);
+                    tvImageUri.setText(filename);
+
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                //ivImage.setImageBitmap(bm);
+            }
+        }
+    }
+
+
+
+
+
 
 
 }
