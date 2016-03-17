@@ -164,18 +164,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                          **/
                         sharedpreferences = getSharedPreferences(MY_PREFS, MODE_PRIVATE);
 
-                        //vegetarisch
+                        //vegetarisch=0
                         rezepte= helper.getKochplanNeu(0, Integer.valueOf(sharedpreferences.getString("vegetarisch", "2")), rezepte);
-                        //Fleisch
+                        //Fleisch=1
                         rezepte= helper.getKochplanNeu(1,Integer.valueOf(sharedpreferences.getString("fleisch","1")),rezepte);
-                        //Fisch
+                        //Fisch=2
                         rezepte= helper.getKochplanNeu(2,Integer.valueOf(sharedpreferences.getString("fisch","1")),rezepte);
-                        //Süß
+                        //Süß=3
                         rezepte= helper.getKochplanNeu(3,Integer.valueOf(sharedpreferences.getString("suess","1")),rezepte);
-                        //Dessert
+                        //Dessert=4
                         rezepte= helper.getKochplanNeu(4,Integer.valueOf(sharedpreferences.getString("nachtisch","1")),rezepte);
-                        //Snack
-                        rezepte =helper.getKochplanNeu(4,Integer.valueOf(sharedpreferences.getString("snack","1")),rezepte);
+                        //Snack=5
+                        rezepte =helper.getKochplanNeu(5,Integer.valueOf(sharedpreferences.getString("snack","1")),rezepte);
 
                         //wenn fertig, dann noch in die Planned Tabelle einfügen
                         helper.insertPlanned(rezepte);
