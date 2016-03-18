@@ -192,141 +192,129 @@ public class AddEditRezept extends AppCompatActivity implements View.OnClickList
     @Override
     public void onClick(View v) {
 
+        //Kameraintegration
+        if(v.getId()==R.id.bKamera){
+            if(etTitel.getText().toString().isEmpty()){
 
-        //TODO INHALT PRÜFEN!
-        if( !(etTitel.getText().toString().isEmpty() || etZutaten.getText().toString().isEmpty() || etAnleitung.getText().toString().isEmpty())) {
-            //sollte Anzahl nicht gesetzt sein wird 0 gesetzt
-            if(etAnzahl.getText().toString().isEmpty()){
-                etAnzahl.setText("0");
+                Toast.makeText(getApplicationContext(), "Zuerst muss einen Titel vergeben werden", Toast.LENGTH_LONG).show();
+
             }
-           if(blocked.isChecked()){
-               iBlocked=1;
-           }
             else{
-               iBlocked=0;
-           }
 
+                final CharSequence[] choose = { "Neues Foto", "Aus der Galerie", "Cancel" };
+                AlertDialog.Builder builder = new AlertDialog.Builder(AddEditRezept.this);
+                builder.setTitle("Foto hinzufügen");
+                builder.setItems(choose, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int item) {
+                        if (choose[item].equals("Neues Foto")) {
+                            Intent intent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+                            //Ordner auf sdcard erstellen, falls nicht existent:
+                            File imageDirectory = new File(restoredPath+IMAGE_FOLDER);
+                            imageDirectory.mkdirs();
+                            //falls Titel bereits existiert wird er mit in den filenamen aufgenommen
+                            File photo = new File(restoredPath+IMAGE_FOLDER,File.separator+etTitel.getText().toString()+"_"+sdf.format(new Date())+".jpg");
+                            intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(photo));
+                            selectedImageUri = Uri.fromFile(photo);
+                            filename = photo.getName();
+                            startActivityForResult(intent, REQUEST_CAMERA);
 
+                        } else if (choose[item].equals("Aus der Galerie")) {
+                            Intent intent = new Intent(
+                                    Intent.ACTION_PICK,
+                                    android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                            intent.setType("image/*");
+                            startActivityForResult(Intent.createChooser(intent, "Select File"), SELECT_FILE);
 
-            DBHelper helper = new DBHelper(this);
-
-            if (v.getId() == R.id.bEditRezept) {
-                if (bInsert) {//NEUES REZEPT
-
-
-                    Rezept r = new Rezept(-1, etTitel.getText().toString(), etZutaten.getText().toString(), etAnleitung.getText().toString(), spType.getSelectedItemPosition(), Integer.valueOf(etAnzahl.getText().toString()),filename,iBlocked);
-                    if (!helper.doesAlreadyExist(r)) {
-                        helper.insertRezept(r);
-                        //TODO einen Toast anzeigen, dann Ansicht schließen
-                        Toast.makeText(getApplicationContext(), "Erfolgreich gespeichert", Toast.LENGTH_LONG).show();
-                       // MainActivity.imageUri=null;//wieder leeren
-                        setResult(-1);
-                        finish();
-                    } else {
-                        Toast.makeText(getApplicationContext(), "Es gibt schon ein Rezept mit diesem Titel (Typ " + spType.getSelectedItem() + ")", Toast.LENGTH_LONG).show();
+                        } else if (choose[item].equals("Cancel")) {
+                            dialog.dismiss();
+                        }
                     }
+                });
+                builder.show();
+            }
 
+
+
+
+
+        }
+        else {
+
+            //prüfen, ob alle Felder ausgefüllt wurden
+            if (!(etTitel.getText().toString().isEmpty() || etZutaten.getText().toString().isEmpty() || etAnleitung.getText().toString().isEmpty())) {
+                //sollte Anzahl nicht gesetzt sein wird 0 gesetzt
+                if (etAnzahl.getText().toString().isEmpty()) {
+                    etAnzahl.setText("0");
+                }
+                if (blocked.isChecked()) {
+                    iBlocked = 1;
                 } else {
-                    // UPDATE eines Rezepts
-                    /**TODO ImageURi hinzufügen
-                     * Wenn schon eine Uri existiert, diese wieder übernehmen. Ansonsten Null bzw. die neugesetze nutzen
-                     */
+                    iBlocked = 0;
+                }
 
 
-                    Rezept r = new Rezept(getIntent().getIntExtra("id", -1), etTitel.getText().toString(), etZutaten.getText().toString(), etAnleitung.getText().toString(), spType.getSelectedItemPosition(), Integer.valueOf(etAnzahl.getText().toString()),filename,iBlocked);
-                    if (!helper.doesAlreadyExist(r)) { //Duplettengenerierung bei Update vermeiden
-                        helper.updateRezept(r);
-                        Toast.makeText(getApplicationContext(), "Erfolgreich aktualisiert", Toast.LENGTH_LONG).show();
+                DBHelper helper = new DBHelper(this);
 
-                        //sofern altes Foto vorhanden und ein neues gesetzt wurde  muss dieses gelöscht werden:
+                if (v.getId() == R.id.bEditRezept) {
+                    if (bInsert) {//NEUES REZEPT
+
+
+                        Rezept r = new Rezept(-1, etTitel.getText().toString(), etZutaten.getText().toString(), etAnleitung.getText().toString(), spType.getSelectedItemPosition(), Integer.valueOf(etAnzahl.getText().toString()), filename, iBlocked);
+                        if (!helper.doesAlreadyExist(r)) {
+                            helper.insertRezept(r);
+                            //TODO einen Toast anzeigen, dann Ansicht schließen
+                            Toast.makeText(getApplicationContext(), "Erfolgreich gespeichert", Toast.LENGTH_LONG).show();
+                            // MainActivity.imageUri=null;//wieder leeren
+                            setResult(-1);
+                            finish();
+                        } else {
+                            Toast.makeText(getApplicationContext(), "Es gibt schon ein Rezept mit diesem Titel (Typ " + spType.getSelectedItem() + ")", Toast.LENGTH_LONG).show();
+                        }
+
+                    } else {
+                        // UPDATE eines Rezepts
+                        /**TODO ImageURi hinzufügen
+                         * Wenn schon eine Uri existiert, diese wieder übernehmen. Ansonsten Null bzw. die neugesetze nutzen
+                         */
+
+
+                        Rezept r = new Rezept(getIntent().getIntExtra("id", -1), etTitel.getText().toString(), etZutaten.getText().toString(), etAnleitung.getText().toString(), spType.getSelectedItemPosition(), Integer.valueOf(etAnzahl.getText().toString()), filename, iBlocked);
+                        if (!helper.doesAlreadyExist(r)) { //Duplettengenerierung bei Update vermeiden
+                            helper.updateRezept(r);
+                            Toast.makeText(getApplicationContext(), "Erfolgreich aktualisiert", Toast.LENGTH_LONG).show();
+
+                            //sofern altes Foto vorhanden und ein neues gesetzt wurde  muss dieses gelöscht werden:
 
                             try { // try und catch sollte nicht notwendig sein, aber wenn das Löschen einer alten Bilddatei nicht klappt, soll deswegen nicht die App abstürzen
-                                if(!filename.equals(getIntent().getStringExtra("imageUri"))) {
+                                if (!filename.equals(getIntent().getStringExtra("imageUri"))) {
                                     Worker worker = new Worker(this);
                                     worker.deleteFileFromSDCard(restoredPath + IMAGE_FOLDER + File.separator + getIntent().getStringExtra("imageUri"));
                                 }
-                            }
-                            catch(Exception e){
+                            } catch (Exception e) {
                                 //harmlos - wird ausgelöst, wenn kein Bild vorhanden ist
                                 // e.printStackTrace();
                             }
 
-                        setResult(-1);
-                        Intent i = new Intent(this, MainActivity.class);
-                        finish();
-                        startActivity(i);
+                            setResult(-1);
+                            Intent i = new Intent(this, MainActivity.class);
+                            finish();
+                            startActivity(i);
 
-                    } else {
-                        Toast.makeText(getApplicationContext(), "Es gibt schon ein anderes Gericht mit diesem Titel (Typ " + spType.getSelectedItem() + ")", Toast.LENGTH_LONG).show();
+                        } else {
+                            Toast.makeText(getApplicationContext(), "Es gibt schon ein anderes Gericht mit diesem Titel (Typ " + spType.getSelectedItem() + ")", Toast.LENGTH_LONG).show();
+                        }
+
                     }
 
                 }
-
+            } else {
+                Toast.makeText(getApplicationContext(), "Titel,Zutaten und Anleitungen müssen eingegeben werden!", Toast.LENGTH_LONG).show();
             }
         }
-        else{
-            Toast.makeText(getApplicationContext(), "Titel, Zutaten und Anleitungen müssen eingegeben werden!", Toast.LENGTH_LONG).show();
-        }
-        //Kameraintegration
-        if(v.getId()==R.id.bKamera){
-            //getCameraPic();
-            final CharSequence[] choose = { "Neues Foto", "Aus der Galerie", "Cancel" };
-            AlertDialog.Builder builder = new AlertDialog.Builder(AddEditRezept.this);
-            builder.setTitle("Foto hinzufügen");
-            builder.setItems(choose, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int item) {
-                    if (choose[item].equals("Neues Foto")) {
-                        Intent intent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-                        //Ordner auf sdcard erstellen, falls nicht existent:
-                        File imageDirectory = new File(restoredPath+IMAGE_FOLDER);
-                        imageDirectory.mkdirs();
-                        //falls Titel bereits existiert wird er mit in den filenamen aufgenommen
-                        File photo = new File(restoredPath+IMAGE_FOLDER,File.separator+etTitel.getText().toString()+"_"+sdf.format(new Date())+".jpg");
-                        intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(photo));
-                        selectedImageUri = Uri.fromFile(photo);
-                        filename = photo.getName();
-                        startActivityForResult(intent, REQUEST_CAMERA);
 
-                    } else if (choose[item].equals("Aus der Galerie")) {
-                        Intent intent = new Intent(
-                                Intent.ACTION_PICK,
-                                android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                        intent.setType("image/*");
-                        startActivityForResult(Intent.createChooser(intent, "Select File"), SELECT_FILE);
-
-                    } else if (choose[item].equals("Cancel")) {
-                        dialog.dismiss();
-                    }
-                }
-            });
-            builder.show();
-
-
-
-
-        }
     }
 
-
-  /**  protected void  onActivityResult(int requestCode, int resultCode, Intent data)  {
-        //ImageHelper help= new ImageHelper(this);
-        if (requestCode == CAMERA_REQUEST) {
-            //schreibe Filename
-            try{
-                tvImageUri.setText(filename);
-            }
-            catch(Exception e){
-                e.printStackTrace();
-
-            }
-
-
-
-
-        }
-
-    }*/
     //Dialog
     public void onBackPressed() {
        AlertDialog.Builder alert = new AlertDialog.Builder(this);
@@ -397,8 +385,13 @@ public class AddEditRezept extends AppCompatActivity implements View.OnClickList
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss",Locale.getDefault());
         if (resultCode == RESULT_OK) {
             if (requestCode == REQUEST_CAMERA) {
-
                 tvImageUri.setText(filename);
+                //constraint Anleitung darf nicht leer sein notfalls mit folgendem Text bedienen
+                if(etAnleitung.getText().toString().isEmpty()){
+                    etAnleitung.setText("siehe Bild");
+                    System.out.println("Keine Anleitung gefunden");
+                }
+
 
 
             } else if (requestCode == SELECT_FILE) {
@@ -434,6 +427,10 @@ public class AddEditRezept extends AppCompatActivity implements View.OnClickList
                 try {
                     worker.copyFile( photoAusGalerie,photo);
                     tvImageUri.setText(filename);
+                    if(etAnleitung.getText().toString().isEmpty()){
+                        etAnleitung.setText("siehe Bild");
+                        System.out.println("Keine Anleitung gefunden");
+                    }
 
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
@@ -441,9 +438,9 @@ public class AddEditRezept extends AppCompatActivity implements View.OnClickList
                     e.printStackTrace();
                 }
 
-                //ivImage.setImageBitmap(bm);
             }
         }
+
     }
 
 
