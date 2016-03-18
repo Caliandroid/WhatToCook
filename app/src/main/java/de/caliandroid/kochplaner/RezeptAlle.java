@@ -18,6 +18,7 @@ import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -26,13 +27,16 @@ import java.util.List;
 /**
  * Created by stefan on 05.03.16.
  */
-public class RezeptAlle extends AppCompatActivity implements View.OnClickListener, View.OnTouchListener, ListView.OnItemClickListener, ListView.OnItemLongClickListener {
+public class RezeptAlle extends AppCompatActivity implements View.OnClickListener, View.OnTouchListener, ListView.OnItemClickListener, ListView.OnItemLongClickListener, Spinner.OnItemSelectedListener {
     private ArrayList<Rezept> rezepte;
     private ListView listView;
     ArrayAdapter <String> adapter =null;
     MyCustomAdapter myCustomAdapter;
+    Spinner spinner;
     int iPosition=0;
     public String[] rezepteTitel;
+    DBHelper helper;
+    boolean alreadyCreated=false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,7 +46,7 @@ public class RezeptAlle extends AppCompatActivity implements View.OnClickListene
 
 
         //alle Rezepte laden
-        DBHelper helper = new DBHelper(this);
+        helper = new DBHelper(this);
         rezepte=helper.getRezepte(null,null,"TITEL ASC",null);
         //Worker worker = new Worker(this);
         listView = (ListView)findViewById(R.id.listView2);
@@ -53,6 +57,12 @@ public class RezeptAlle extends AppCompatActivity implements View.OnClickListene
         listView.setOnItemClickListener(this);
         listView.setOnItemLongClickListener(this);
         myCustomAdapter.notifyDataSetChanged();
+        spinner = (Spinner)findViewById(R.id.spinner);
+        //Array ist in den String Values
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                R.array.filter_array, android.R.layout.simple_spinner_item);
+        spinner.setAdapter(adapter);
+        spinner.setOnItemSelectedListener(this);
 
     }
 
@@ -97,11 +107,10 @@ public class RezeptAlle extends AppCompatActivity implements View.OnClickListene
      */
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        Rezept r = rezepte.get(position);
-        System.out.println("Habe "+r.getTitel()+ " an POS "+position+ " angeklickt");
-        iPosition=position;
-        startEditAnsicht(r, RezeptAnsicht.class);
-
+           Rezept r = rezepte.get(position);
+           System.out.println("Habe " + r.getTitel() + " an POS " + position + " angeklickt");
+           iPosition = position;
+           startEditAnsicht(r, RezeptAnsicht.class);
 
     }
 
@@ -182,7 +191,7 @@ public class RezeptAlle extends AppCompatActivity implements View.OnClickListene
     @Override
     protected  void onActivityResult(int requestCode, int resultCode, Intent data) {
         Worker worker = new Worker(this);
-        DBHelper helper = new DBHelper(this);
+
         // Aktuell nur ausgelöst, sollte ein Rezept gelöscht worden sein, man erhält als ResultCode die ID
         //synchronized hinzugefügt, damit es vor Erstellung der ListView ablaufen kann -> funktioniert!
         if (resultCode ==2) { //ein Rezept wurde gelöscht
@@ -200,6 +209,45 @@ public class RezeptAlle extends AppCompatActivity implements View.OnClickListene
         }
     }
 
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        //use boolean alreadyCreated to avoid recalling rezepte from database on activtiy creation. This happens already in onCreate
+        if (spinner.getSelectedItemPosition() == 0 && alreadyCreated) {
+            System.out.println("onItemSelected triggerd");
+            //no filtering
+            rezepte = helper.getRezepte(null, null, "TITEL ASC", null);
+            myCustomAdapter.clear();
+            myCustomAdapter.addAll(rezepte);
+
+
+        }
+        else{
+            if (spinner.getSelectedItemPosition()==0 && !alreadyCreated) {
+                alreadyCreated = true;
+
+            }
+            else {
+                if (spinner.getSelectedItemPosition() > 0) {
+                    System.out.println("onItemSelected triggerd");
+                    //filtering. Filter typ = position-1
+                    String[] selectionArgs = {String.valueOf(spinner.getSelectedItemPosition() - 1)};
+                    rezepte = helper.getRezepte("typ = ? ", selectionArgs, "TITEL ASC", null);
+                    //Da das neue Rezepte jetzt deutlich kürzer als bisher sein kann, muss ich clear aufrufen, um die bisherigen Objekte im Adapter zu bereinigen und dann neu hinzuzufügen
+                    myCustomAdapter.clear();
+                    myCustomAdapter.addAll(rezepte);
+                }
+            }
+        }
+
+
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+        System.out.println("onNothingSelected gewählt");
+
+    }
+
     /**
      * Eigener Adapter zur Darstellung der Zutatenliste
      */
@@ -208,7 +256,10 @@ public class RezeptAlle extends AppCompatActivity implements View.OnClickListene
 
         public MyCustomAdapter(Context context, int textViewResourceId,
                                ArrayList<Rezept> rezepte) {
+
             super(context, textViewResourceId, rezepte);
+
+
 
         }
 
@@ -237,14 +288,13 @@ public class RezeptAlle extends AppCompatActivity implements View.OnClickListene
             }
 
             Rezept rezept=rezepte.get(position);
-
             holder.rezeptTitel.setText(rezept.getTitel());
-
 
             return convertView;
 
 
         }
+
 
     }
 

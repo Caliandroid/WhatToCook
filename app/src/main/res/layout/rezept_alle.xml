@@ -4,6 +4,27 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="15dp"
+        android:background="#edaa24">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Filter:"
+            android:id="@+id/textView16"
+            android:textSize="25dp" />
+
+        <Spinner
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/spinner"
+            android:layoutMode="opticalBounds" />
+    </LinearLayout>
+
     <ListView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -12,10 +33,4 @@
         android:divider="#205d24"
         android:dividerHeight="10dp"/>
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="New Button"
-        android:id="@+id/button2"
-        android:layout_gravity="bottom" />
 </LinearLayout>
