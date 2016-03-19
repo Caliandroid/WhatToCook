@@ -20,5 +20,13 @@
         <item>Nachtisch</item>
         <item>Snack</item>
     </string-array>
+    <string-array name="operations_1">
+        <item>Ansehen</item>
+        <item>Wurde gekocht!</item>
+        <item>Rezept austauschen</item>
+        <item>Aus Planung entfernen</item>
+        <item>Cancel</item>
+
+    </string-array>
 
 </resources>

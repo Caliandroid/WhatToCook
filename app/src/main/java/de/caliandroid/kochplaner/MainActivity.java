@@ -11,6 +11,7 @@ import android.database.sqlite.SQLiteException;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
@@ -37,8 +38,10 @@ import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -525,14 +528,82 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         if (rezept!=null) {
 
                             //AlertDialog - um Tippfehler auszuschließen
+                            //final CharSequence[] choose = {"Ansehen", "Austauschen", "Entfernen","Cancel" };
+                            final String [] choose=getResources().getStringArray(R.array.operations_1);
+
+                           // final CharSequence[] choose = R.array.operations_1;
                             AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.activity);
-                            alert.setTitle("Keine Lust auf "+ rezept.getTitel() + " ?");
-                            alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                            alert.setTitle("Was tun mit "+rezept.getTitel() + " ?");
+                            alert.setItems(choose, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int item) {
+                                    if (choose[item].equals(choose[2])) { //Replace
+                                        Worker myWorker = new Worker(activity);
+                                        Rezept newRezept = helper.replaceRezept(rezept, myWorker.getIDs(rezepte), blocker);
+                                        if (newRezept != null) {
+                                            rezepte.add(rezepte.indexOf(rezept), newRezept);
+                                            rezepte.remove(rezept);
+                                            helper.updatePlannedRezeptID(rezept.getId(), newRezept.getId());
+                                            helper.deleteItemFromShoppinglist(rezept.getId());
+                                            helper.insertIntoShoppinglist(newRezept);
+                                            Toast.makeText(getApplicationContext(), "Rezept ausgetauscht", Toast.LENGTH_SHORT).show();
+                                            dataAdapter.notifyDataSetChanged(); //da AL rezepte verkürzt wurde
+                                            blocker.add(String.valueOf(rezept.getId()));
+                                        } else {
+                                            Toast.makeText(getApplicationContext(), "Keine weiteren Rezepte zum Austauschen mehr vorhanden, bei erneutem Austausch wird wieder von vorne begonnen", Toast.LENGTH_SHORT).show();
+                                            blocker.clear(); //slle Items entfernen und wieder bei null beginnen
+                                        }
+
+
+                                    } else if (choose[item].equals(choose[3])) { //remove
+
+                                        helper.deletePlanned(rezept.getId());
+                                        helper.deleteItemFromShoppinglist(rezept.getId());
+                                        rezepte.remove(rezept);
+                                        dataAdapter.notifyDataSetChanged();
+
+                                    } else if (choose[item].equals(choose[0])) {
+                                        iPosition=position;
+                                        startEditAnsicht(rezept, RezeptAnsicht.class);
+
+                                    } else if (choose[item].equals(choose[1])) { //als gekocht markieren und entfernen
+
+                                        AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.activity);
+                                        alert.setTitle("Wurde " + rezept.getTitel() + " gekocht?");
+                                        alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int whichButton) {
+                                                //falls selektiert, dann entfernen und Häufigkeit hochsetzen
+                                                helper.updateHaeufigkeit(rezept.getId());
+                                                helper.deletePlanned(rezept.getId());
+                                                rezepte.remove(position);
+                                                Toast.makeText(getApplicationContext(), rezept.getTitel() + " gekocht :)", Toast.LENGTH_LONG).show();
+                                                dataAdapter.notifyDataSetChanged(); //da AL rezepte verkürzt wurde
+
+                                            }
+                                        });
+
+                                        alert.setNegativeButton("Cancel",
+                                                new DialogInterface.OnClickListener() {
+                                                    public void onClick(DialogInterface dialog, int whichButton) {
+
+                                                    }
+                                                });
+
+                                        alert.show();
+
+                                    } else if (choose[item].equals(choose[4])) { //cancel
+                                        dialog.dismiss();
+                                    }
+
+
+                                }
+                            });
+                           /* alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int whichButton) {
                                     //neues Rezept gleichen Typs laden (unter der Berücksichtung der bereits geplannten Rezepte in der Liste
-                                    Worker myWorker=new Worker(activity);
-                                    Rezept newRezept=helper.replaceRezept(rezept, myWorker.getIDs(rezepte), blocker);
-                                    if(newRezept!=null){
+                                    Worker myWorker = new Worker(activity);
+                                    Rezept newRezept = helper.replaceRezept(rezept, myWorker.getIDs(rezepte), blocker);
+                                    if (newRezept != null) {
                                         rezepte.add(rezepte.indexOf(rezept), newRezept);
                                         rezepte.remove(rezept);
                                         helper.updatePlannedRezeptID(rezept.getId(), newRezept.getId());
@@ -540,13 +611,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                         helper.insertIntoShoppinglist(newRezept);
                                         Toast.makeText(getApplicationContext(), "Rezept ausgetauscht", Toast.LENGTH_SHORT).show();
                                         dataAdapter.notifyDataSetChanged(); //da AL rezepte verkürzt wurde
-                                        blocker.add( String.valueOf(rezept.getId()));
-                                    }
-                                    else{
+                                        blocker.add(String.valueOf(rezept.getId()));
+                                    } else {
                                         Toast.makeText(getApplicationContext(), "Keine weiteren Rezepte zum Austauschen mehr vorhanden, bei erneutem Austausch wird wieder von vorne begonnen", Toast.LENGTH_SHORT).show();
                                         blocker.clear(); //slle Items entfernen und wieder bei null beginnen
                                     }
-
 
 
                                 }
@@ -558,7 +627,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                             //nichts zu tun
 
                                         }
-                                    });
+                                    });*/
 
                             alert.show();
 
