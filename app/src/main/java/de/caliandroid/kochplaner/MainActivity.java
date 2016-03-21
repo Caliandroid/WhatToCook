@@ -1,88 +1,97 @@
 package de.caliandroid.kochplaner;
 
 import android.app.Activity;
-import android.content.ActivityNotFoundException;
+import android.app.FragmentManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.graphics.Color;
-import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.provider.MediaStore;
+import android.provider.ContactsContract;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.appindexing.Action;
-import com.google.android.gms.appindexing.AppIndex;
-import com.google.android.gms.common.api.GoogleApiClient;
-
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
 
-import static android.content.SharedPreferences.*;
-import static android.view.View.INVISIBLE;
-import static android.view.View.SYSTEM_UI_FLAG_FULLSCREEN;
-
-public class MainActivity extends AppCompatActivity implements View.OnClickListener, Toolbar.OnMenuItemClickListener, View.OnTouchListener {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener, Toolbar.OnMenuItemClickListener, View.OnTouchListener, RetainedFragment.TaskCallbacks {
     public static final String MY_PREFS = "MyPrefs";
     DBHelper helper;
-    public static ArrayList<Rezept> rezepte = new ArrayList();
+    public ArrayList<Rezept> rezepte = new ArrayList(); //static wieder entfernt
     Rezept rezept;
     Button button, bClear;
     ListView myListView;
+    private TextView progressText;
     MyCustomAdapter dataAdapter;
     SharedPreferences.Editor editor ;
     public static Activity activity; //damit in Subclassen die Referenz zu dieser Klasse vorhanden ist
     ArrayList blocker=new ArrayList<String>();
     public static String imageUri; //zur Anwendung in AddEditRezept;
     int iPosition=-1;
-    SharedPreferences sharedpreferences ;
+    public static SharedPreferences sharedpreferences ;
+    RetainedFragment retainedFragment;
+    public static final String  TAG_RETAINED_FRAGMENT = "taskfragment";
+    FragmentManager fragmentManager;
 
-
-
-
-
-    @Override
+        @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        System.out.println("OnCreate läuft");
-        setContentView(R.layout.activity_main);
-        activity=this;
+
+            super.onCreate(savedInstanceState);
+            System.out.println("OnCreate läuft");
+            setContentView(R.layout.activity_main);
+            activity = this;
+            progressText=(TextView)findViewById(R.id.textView17);
+            fragmentManager = getFragmentManager();
+
+
+            retainedFragment = (RetainedFragment) fragmentManager.findFragmentByTag(TAG_RETAINED_FRAGMENT);
+
+            if (retainedFragment == null) {
+            retainedFragment = new RetainedFragment();
+            //LÖST DEN THREAD AUS
+            fragmentManager.beginTransaction().add(retainedFragment, TAG_RETAINED_FRAGMENT).commit();
+
+
+
+        }
+        /*else{
+            gpw= retainedFragment.getData();
+            if(!retainedFragment.isRunning()){
+                gpw = new GetPlanningWeek();
+            }
+        }*/
+
+
+
+
 
         //Check if DB already exists (first run)
-        helper = new DBHelper(this);
+        helper = DBHelper.getInstance(this);
         try {
             helper.createDB();
         } catch (IOException e) {
             throw new Error("Cannot initialize prepopulated db");
         }
+        helper.openDB();
         //planned Rezepte laden
         rezepte =helper.getPlannedReceipts(null,null,null,null);
 
@@ -143,28 +152,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return super.onOptionsItemSelected(item);
     }
 
+
     //Für den Button
     @Override
-    public void onClick(View v) {
+    public  void onClick(View v) {
         if (v.getId() == R.id.button) {
             //AlertDialog
             AlertDialog.Builder alert = new AlertDialog.Builder(this);
             alert.setTitle("Neue Woche planen?");
             alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whichButton) {
-                    helper = new DBHelper(MainActivity.activity);
                     try {
+                        dataAdapter.clear();
+                        sharedpreferences = getSharedPreferences(MY_PREFS, MODE_PRIVATE);
+                        //TODO in einen Async Task auslagern
                         // alle Inhalte in PLANNED und Shoppingliste entfernen
-                        helper.deleteAllPlanned();
-                        helper.deleteAllFromShoppinglist();
-                        rezepte.clear();
+
+                       /* helper.deleteAllPlanned();
+                      //  helper.deleteAllFromShoppinglist();
+                       // rezepte.clear();
                         //neue Wochenplanung durchführen
-                        /**
-                         * Alte Variante statisch rezepte = helper.getKochplan();
-                         * TODO
-                         * in der neuen Variante wird aus den SharedPrefs ausgelesen, wie die Planung aussehen soll und dann jeweils die Kochliste aufgerufen
-                         *
-                         **/
+
                         sharedpreferences = getSharedPreferences(MY_PREFS, MODE_PRIVATE);
 
                         //vegetarisch=0
@@ -181,8 +189,29 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         rezepte =helper.getKochplanNeu(5,Integer.valueOf(sharedpreferences.getString("snack","1")),rezepte);
 
                         //wenn fertig, dann noch in die Planned Tabelle einfügen
-                        helper.insertPlanned(rezepte);
+                        //dieser Teil dauert lange, vielleicht lieber in Thread auslagern
+                        dataAdapter.clear();
+                        dataAdapter.addAll(rezepte);
                         dataAdapter.notifyDataSetChanged();
+
+
+                       /* ///GetPlanningWeek gpw = new GetPlanningWeek();
+                        retainedFragment.setData(gpw);
+                        if(!retainedFragment.isRunning() || retainedFragment==null){
+                            gpw=new GetPlanningWeek();
+                            retainedFragment.setRunning(true);
+                            retainedFragment.setData(gpw);
+                            gpw.execute();
+                        }*/
+
+                       //fragmentManager.beginTransaction().add(retainedFragment, TAG_RETAINED_FRAGMENT).commit();
+
+                       retainedFragment.startTask();
+
+
+
+
+
 
                     } catch (SQLiteException e) {
                         throw e;
@@ -208,13 +237,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             alert.setTitle("Komplette Planung leeren?");
             alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whichButton) {
-                    helper = new DBHelper(MainActivity.activity);
                     try {
                         // alle Inhalte in PLANNED und Shoppingliste entfernen
                         helper.deleteAllPlanned();
                         helper.deleteAllFromShoppinglist();
-                        rezepte.clear();
-                        dataAdapter.notifyDataSetChanged();
+                        dataAdapter.clear();
+                        // dataAdapter.notifyDataSetChanged();
 
                     } catch (SQLiteException e) {
                         throw e;
@@ -235,6 +263,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
 
     }
+
+
 
 
     /**
@@ -267,13 +297,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
 
+
+
     //TODO Sollte es nicht protected heißen? was bringt es?
     @Override
     public void onStart() {
         super.onStart();
-        //An dieser Stelle aktualisieren, weil die Methode immer aufgerufen wird, wenn die Activity wieder gerufen wird.
-        System.out.println("OnStart läuft");
-        dataAdapter.notifyDataSetChanged();
+        //An dieser Stelle Rezepte aktualisieren
+        this.rezepte =helper.getPlannedReceipts(null,null,null, null);
+        dataAdapter.clear();
+        dataAdapter.addAll(rezepte);
+
 
     }
 
@@ -288,9 +322,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onStop() {
         super.onStop();
+        System.out.println("OnStopCalled");
         //saveSharedPrefs();
         //DB Verbindung schließen
-        helper.close();
+       // helper.close();
 
     }
 
@@ -318,6 +353,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         if (item.getItemId() == R.id.action_shoppinglist) {
             //starte  Settings
+            ShoppingListAnsicht.rezepte=rezepte; //übergebe die Rezepte anstatt sie wieder aus der DB zu lesen
             Intent i = new Intent(this,ShoppingListAnsicht.class);
             startActivityForResult(i, 1);
             return true;
@@ -360,6 +396,45 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             System.out.println("Habe ResultCode =" + resultCode + " erhalten");
         }
     }
+
+
+    //Mehtoden des Interfaces TaskCallbacks
+
+    @Override
+    public void onPreExecute() {
+
+    }
+
+    @Override
+    public void onProgressUpdate(int percent) {
+        progressText.setText("Loading .."+percent+" ..elements");
+
+    }
+
+    @Override
+    public void onCancelled() {
+
+    }
+
+    @Override
+    public void onPostExecute(ArrayList<Rezept> rezepte) {
+        progressText.setText("");
+        this.rezepte=rezepte;
+        dataAdapter.clear();
+        dataAdapter.addAll(this.rezepte);
+
+
+       // dataAdapter.notifyDataSetChanged();
+        Toast.makeText(getApplicationContext(), "fertig!", Toast.LENGTH_SHORT).show();
+
+    }
+
+    @Override
+    public SharedPreferences deliverPrefs() {
+        return sharedpreferences;
+    }
+
+
 
 
     /**
@@ -560,7 +635,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                         helper.deletePlanned(rezept.getId());
                                         helper.deleteItemFromShoppinglist(rezept.getId());
                                         rezepte.remove(rezept);
-                                        dataAdapter.notifyDataSetChanged();
+                                        dataAdapter.clear();
+                                        dataAdapter.addAll(rezepte);
+                                        //dataAdapter.notifyDataSetChanged();
 
                                     } else if (choose[item].equals(choose[0])) {
                                         iPosition=position;
@@ -671,6 +748,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
 
     }
+
+
+    @Override
+    public void onSaveInstanceState(Bundle bundle){
+        super.onSaveInstanceState(bundle);
+
+
+    }
+
+
+
 
 
 }

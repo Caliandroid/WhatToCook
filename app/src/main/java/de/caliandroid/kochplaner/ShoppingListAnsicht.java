@@ -24,14 +24,16 @@ import java.util.ArrayList;
  */
 public class ShoppingListAnsicht extends AppCompatActivity implements View.OnClickListener, View.OnTouchListener, ListView.OnItemClickListener {
     private Rezept rezept;
-    //private ArrayList<Rezept> rezepte;
+    public static ArrayList<Rezept> rezepte;
     private ArrayList<ShoppingListItem> items;
     private ShoppingListItem item;
+
     public ShoppingListAnsicht(){
     }
-    DBHelper helper;
     private ListView listView;
     private MyCustomAdapter dataAdapter;
+    DBHelper helper = DBHelper.getInstance(this);
+
 
 
     @Override
@@ -40,8 +42,7 @@ public class ShoppingListAnsicht extends AppCompatActivity implements View.OnCli
         super.setTitle("Shoppingliste");
         setContentView(R.layout.shopping_list_single);
         //ShoplistItems holen
-        helper = new DBHelper(this);
-        items=helper.getShoppinglist(MainActivity.rezepte);
+        items=helper.getShoppinglist(rezepte);
         System.out.println("Länge ITems Arry: "+items.size());
         listView = (ListView)findViewById(R.id.listView3);
         dataAdapter = new MyCustomAdapter(this,R.layout.row_shoppinglist,items);
@@ -88,7 +89,6 @@ public class ShoppingListAnsicht extends AppCompatActivity implements View.OnCli
         }
         @Override
         public View getView(final int position, View convertView, ViewGroup parent) {
-            DBHelper dbHelper=new DBHelper(getContext());
 
             ViewHolder holder = null;
             //Log.v("ConvertView", String.valueOf(position));
@@ -127,7 +127,7 @@ public class ShoppingListAnsicht extends AppCompatActivity implements View.OnCli
 
             ShoppingListItem item= items.get(position);
             String[]whereArgs=new String[]{ String.valueOf(item.getRezept_id())};
-            Rezept rezept = dbHelper.getRezept("_id = ?",whereArgs,null,null);
+            Rezept rezept = helper.getRezept("_id = ?",whereArgs,null,null);
             String rezeptTitel ="";
             try{
                 rezeptTitel=rezept.getTitel().substring(0,12);

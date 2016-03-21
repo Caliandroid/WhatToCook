@@ -53,7 +53,6 @@ public class AddEditRezept extends AppCompatActivity implements View.OnClickList
     private static final int SELECT_FILE = 100;
     private static final int REQUEST_CAMERA = 110;
 
-
     private EditText etTitel,etZutaten,etAnleitung,etAnzahl;
     private CheckBox blocked;
     private TextView tvImageUri;
@@ -254,7 +253,7 @@ public class AddEditRezept extends AppCompatActivity implements View.OnClickList
                 }
 
 
-                DBHelper helper = new DBHelper(this);
+                DBHelper helper = DBHelper.getInstance(this);
 
                 if (v.getId() == R.id.bEditRezept) {
                     if (bInsert) {//NEUES REZEPT

@@ -24,6 +24,25 @@ import java.util.Random;
  */
 public class DBHelper extends SQLiteOpenHelper {
 
+    public static synchronized DBHelper getInstance(Context context)
+    {
+        if (instance == null)
+            instance = new DBHelper(context);
+
+        return instance;
+    }
+
+    private DBHelper (Context context){
+        super(context, DB_NAME, null, 1);
+        this.context = context;
+    }
+
+
+
+
+    //Singleton
+    private static DBHelper instance;
+
     private static String DB_PATH = "/data/data/de.caliandroid.kochplaner/databases/";
     private static String DB_NAME = "kochplaner.db";
     private SQLiteDatabase myDB;
@@ -58,15 +77,9 @@ public class DBHelper extends SQLiteOpenHelper {
     static final String TABELLE3_4= "planned_id";
     static final String [] TABELLE3_COLUMNS = {TABELLE3_1,TABELLE3_2,TABELLE3_3,TABELLE3_4};
 
-    public DBHelper(Context context){
-        super(context, DB_NAME, null, 1);
-        this.context = context;
 
 
-    }
-
-
-    @Override
+        @Override
     public void onCreate(SQLiteDatabase db) {
 
     }
@@ -321,7 +334,7 @@ public class DBHelper extends SQLiteOpenHelper {
      * @return rezepte
      */
     public ArrayList <Rezept> getKochplanNeu(int typ,int anzahl, ArrayList<Rezept> rezepte) {
-        SQLiteDatabase db =this.getReadableDatabase();
+        //SQLiteDatabase db =this.getReadableDatabase();
         Rezept rezept;
         //die Variablen
         String dbName ="rezepte";
@@ -329,7 +342,7 @@ public class DBHelper extends SQLiteOpenHelper {
         String[]selectionArgs={String.valueOf(typ),"0"};
         String  order="ANZAHL ASC";
         String limit = String.valueOf(anzahl);
-        Cursor c = db.query(dbName, TABELLE1_COLUMNS, whereClause,selectionArgs,null,null,order,limit);
+        Cursor c = myDB.query(dbName, TABELLE1_COLUMNS, whereClause,selectionArgs,null,null,order,limit);
         c.moveToFirst();
         while (!c.isAfterLast()) {
             //(int id,String titel,String anleitung, String zutaten,int typ, int anzahl){
@@ -345,7 +358,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
         //Rezepte zufällig anordnen und in der Planned Tabelle eintragen ( in der gleichen Reihenfolge)
         Collections.shuffle(rezepte, new Random(System.nanoTime()));
-        db.close();
+       // db.close();
         return rezepte;
 
     }
@@ -676,7 +689,7 @@ public class DBHelper extends SQLiteOpenHelper {
      * @param rezepte
      */
     public void insertPlanned(ArrayList <Rezept> rezepte){
-        SQLiteDatabase db = this.getWritableDatabase();
+       // SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
         Iterator iterator = rezepte.iterator();
@@ -686,7 +699,7 @@ public class DBHelper extends SQLiteOpenHelper {
             values.put(TABELLE2_2,rezept.getId());
             values.put(TABELLE2_3, 0);
             try{
-                db.insert(TABELLE2, null, values); //
+                myDB.insert(TABELLE2, null, values); //
             }
             catch(SQLiteException e){
                 e.printStackTrace();
@@ -696,20 +709,20 @@ public class DBHelper extends SQLiteOpenHelper {
 
 
 
-        db.close();
+       // db.close();
     }
 
     public ArrayList<Rezept> getPlannedReceipts(String whereClause, String []selectionArgs,String order, String limit){
         ArrayList<Rezept> rezepte = new ArrayList();
-        SQLiteDatabase db =this.getReadableDatabase();
+        //SQLiteDatabase db =this.getReadableDatabase();
         Rezept rezept;
-        Cursor c = db.query(TABELLE2, TABELLE2_COLUMNS, whereClause,selectionArgs,null,null,order,limit);
+        Cursor c = myDB.query(TABELLE2, TABELLE2_COLUMNS, whereClause,selectionArgs,null,null,order,limit);
         c.moveToFirst();
         while (!c.isAfterLast()) {
             //(In c stehen die Spalten int id,int rezeptid, int prepared
 
             //Rezept aus Tabelle Rezept anhand der Spalte2 aus der Planned Tabelle laden
-            Cursor c2 = db.query(TABELLE1,TABELLE1_COLUMNS,TABELLE1_1 +" =?",new String[]{String.valueOf(c.getInt(1))},null,null,null,null);
+            Cursor c2 = myDB.query(TABELLE1,TABELLE1_COLUMNS,TABELLE1_1 +" =?",new String[]{String.valueOf(c.getInt(1))},null,null,null,null);
             c2.moveToFirst();
             while (!c2.isAfterLast()) {
                 rezept = new Rezept(c2.getInt(0), c2.getString(1), c2.getString(2), c2.getString(3), c2.getInt(4), c2.getInt(5), c2.getString(6), c2.getInt(7));
@@ -719,7 +732,7 @@ public class DBHelper extends SQLiteOpenHelper {
             c.moveToNext();
         }
 
-        db.close();
+       // db.close();
 
 
         return rezepte;
@@ -775,12 +788,12 @@ public class DBHelper extends SQLiteOpenHelper {
 
     public boolean isPrepared(Rezept r){
         boolean prepared=false;
-        SQLiteDatabase db =this.getReadableDatabase();
+        //SQLiteDatabase db =this.getReadableDatabase();
         Rezept rezept;
         ArrayList<Rezept> rezepte=new ArrayList();
         String whereClause="rezeptid = ?";
         String []selectionArgs= {String.valueOf(r.getId())};
-        Cursor c = db.query(TABELLE2, TABELLE2_COLUMNS, whereClause,selectionArgs,null,null,null,null);
+        Cursor c = myDB.query(TABELLE2, TABELLE2_COLUMNS, whereClause,selectionArgs,null,null,null,null);
         c.moveToFirst();
         while (!c.isAfterLast()) {
             //(int id,String titel,String anleitung, String zutaten,int typ, int anzahl){
@@ -816,7 +829,7 @@ public class DBHelper extends SQLiteOpenHelper {
      * @param r
      */
     public void insertIntoShoppinglist(Rezept r){
-        SQLiteDatabase db = this.getWritableDatabase();
+       // SQLiteDatabase db = this.getWritableDatabase();
         //Zutaten aufsplitten
         String[] zutaten = r.getZutaten().split(ZUTATENSPLITTER);
 
@@ -831,16 +844,16 @@ public class DBHelper extends SQLiteOpenHelper {
                     values.put(TABELLE3_3, 0);
                     values.put(TABELLE3_2,zutaten[i]);
 
-                    db.insert(TABELLE3, null, values);
+                    myDB.insert(TABELLE3, null, values);
                     values.clear();
-                    System.out.println("Zutat "+zutaten[i]+"["+r.getId()+"] in die neue Tabelle gesteckt");
+                   // System.out.println("Zutat "+zutaten[i]+"["+r.getId()+"] in die neue Tabelle gesteckt");
                 }
             }
             catch(SQLiteException e){
                 e.printStackTrace();
             }
         }
-        db.close();
+       // db.close();
 
     }
 

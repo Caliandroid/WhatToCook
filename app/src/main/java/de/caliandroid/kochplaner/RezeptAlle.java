@@ -38,6 +38,8 @@ public class RezeptAlle extends AppCompatActivity implements View.OnClickListene
     DBHelper helper;
     boolean alreadyCreated=false;
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,12 +48,10 @@ public class RezeptAlle extends AppCompatActivity implements View.OnClickListene
 
 
         //alle Rezepte laden
-        helper = new DBHelper(this);
+        helper = DBHelper.getInstance(this);
         rezepte=helper.getRezepte(null,null,"TITEL ASC",null);
-        //Worker worker = new Worker(this);
         listView = (ListView)findViewById(R.id.listView2);
-       // rezepteTitel=worker.getRezeptTitel(rezepte);
-        //adapter= new ArrayAdapter(this,android.R.layout.simple_list_item_1,rezepteTitel );
+
         myCustomAdapter = new MyCustomAdapter(this,R.layout.rezeptalle_element,rezepte);
         listView.setAdapter(myCustomAdapter);
         listView.setOnItemClickListener(this);
@@ -108,7 +108,6 @@ public class RezeptAlle extends AppCompatActivity implements View.OnClickListene
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
            Rezept r = rezepte.get(position);
-           System.out.println("Habe " + r.getTitel() + " an POS " + position + " angeklickt");
            iPosition = position;
            startEditAnsicht(r, RezeptAnsicht.class);
 
@@ -139,7 +138,6 @@ public class RezeptAlle extends AppCompatActivity implements View.OnClickListene
     @Override
     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
         //Manuell ein Rezept hinzufügen
-        final DBHelper helper = new DBHelper(this);
         final int iPos = position;
 
         //AlertDialog
@@ -149,7 +147,9 @@ public class RezeptAlle extends AppCompatActivity implements View.OnClickListene
             public void onClick(DialogInterface dialog, int whichButton) {
 
                 try {
-                    MainActivity.rezepte.add((Rezept) rezepte.get(iPos));
+
+
+                    //MainActivity.rezepte.add((Rezept) rezepte.get(iPos)); lieber in onResume neuladen
                     helper.insertPlanned((Rezept) rezepte.get(iPos));
                     helper.insertIntoShoppinglist((Rezept) rezepte.get(iPos));
                     //zusätzlich in die planned DB eintragen
@@ -175,7 +175,7 @@ public class RezeptAlle extends AppCompatActivity implements View.OnClickListene
     @Override
     protected void onResume() {
         super.onResume();
-       // DBHelper helper = new DBHelper(this);
+
         //rezepte=helper.getRezepte(null,null,"TITEL ASC",null);
        // adapter.notifyDataSetChanged();
     }
@@ -183,7 +183,7 @@ public class RezeptAlle extends AppCompatActivity implements View.OnClickListene
     @Override
     protected void onRestart() {
         super.onRestart();
-        //DBHelper helper = new DBHelper(this);
+
         //rezepte=helper.getRezepte(null,null,"TITEL ASC",null);
        // adapter.notifyDataSetChanged();
     }
@@ -191,14 +191,11 @@ public class RezeptAlle extends AppCompatActivity implements View.OnClickListene
     @Override
     protected  void onActivityResult(int requestCode, int resultCode, Intent data) {
         Worker worker = new Worker(this);
-
-        // Aktuell nur ausgelöst, sollte ein Rezept gelöscht worden sein, man erhält als ResultCode die ID
-        //synchronized hinzugefügt, damit es vor Erstellung der ListView ablaufen kann -> funktioniert!
         if (resultCode ==2) { //ein Rezept wurde gelöscht
         // ;
             rezepte = worker.bereinigeListe(rezepte,data.getIntExtra("id",-1));
             //Da ansonsten die MainActivity keine Rückmeldung bekommt. dass eventuell ein Item entfernt wurde, das in der Liste ist, muss ich hier die Bereinigung aufrufen
-            MainActivity.rezepte = worker.bereinigeListe(MainActivity.rezepte,data.getIntExtra("id",-1));
+           // MainActivity.rezepte = worker.bereinigeListe(MainActivity.rezepte,data.getIntExtra("id",-1)); in OnResume dort neuladen
              myCustomAdapter.notifyDataSetChanged();
             //jetzt erst das Rezept endgültig aus der DB entfernen
             helper.deleteRezept(data.getIntExtra("id", -1));
@@ -269,7 +266,6 @@ public class RezeptAlle extends AppCompatActivity implements View.OnClickListene
         }
         @Override
         public View getView(final int position, View convertView, ViewGroup parent) {
-            DBHelper dbHelper=new DBHelper(getContext());
 
             ViewHolder holder = null;
             //Log.v("ConvertView", String.valueOf(position));

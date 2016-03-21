@@ -22,8 +22,6 @@ public class ShoppingListAdapter extends ArrayAdapter<ShoppingListItem> {
     private Context context;
     private ShoppingListItem item;
     private ArrayList<ShoppingListItem> items;
-    private DBHelper dbHelper=new DBHelper(getContext());
-
 
     public ShoppingListAdapter(Context context, int textViewResourceId, ArrayList<ShoppingListItem> items) {
         super(context, textViewResourceId,  items);

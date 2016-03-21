@@ -148,13 +148,9 @@ public class RezeptAnsicht extends AppCompatActivity implements View.OnClickList
 
             alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whichButton) {
-                    DBHelper helper = new DBHelper(activity);
-                    //helper.deleteRezept(activity.getIntent().getIntExtra("id", -1)); >> besser in den Result empfangenden Activities ausführen, sonst gibt es das Rezept nicht mehr und man kann es nicht aus den ListViews entfernen
-                    //MainActivity.rezepte.remove(iPosition);
+
                     Toast.makeText(getApplicationContext(), tvTitel.getText() + " wurde gelöscht)", Toast.LENGTH_LONG).show();
                     //TODO Problem: Die RezeptAnsicht Activity kann aus MainActivity oder aus RezepteAlle aufgerufen werden
-                    //wird hier ein Rezept gelöscht, wird es aus der DB entfernt und dann die Position in der ListView der Aufrufer-Klasse übergeben, damit sie dort auch entfernt werden kann
-                    //Problem: Diese Position ist in RezepteAlle eine andere als in MainActivity (und zudem muss das Rezept auch gar nicht in der MainActivity.rezepte gelistet sein
                     Intent i= new Intent();
                     i.putExtra("id",id);
                     i.putExtra("position",iPosition); //only for RezepteAlle

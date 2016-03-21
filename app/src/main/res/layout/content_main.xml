@@ -34,9 +34,9 @@
         android:id="@+id/listView"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
-        android:layout_below="@+id/button"
         android:divider="#205d24"
-        android:dividerHeight="10dp" />
+        android:dividerHeight="10dp"
+        android:layout_below="@+id/textView17" />
 
     <Button
         android:layout_width="wrap_content"
@@ -47,5 +47,15 @@
         android:layout_alignRight="@+id/scrollView"
         android:layout_alignEnd="@+id/scrollView"
         android:layout_toEndOf="@+id/button" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/textView17"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/button"
+        android:layout_alignRight="@+id/listView"
+        android:layout_alignEnd="@+id/listView" />
 
 </RelativeLayout>

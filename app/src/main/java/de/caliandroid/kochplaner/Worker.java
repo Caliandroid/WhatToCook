@@ -29,9 +29,10 @@ import java.util.Iterator;
  */
 public class Worker {
     private Context myContext;
-
+    DBHelper helper;
     public Worker(Context myContext){
         this.myContext=myContext;
+        helper = DBHelper.getInstance(this.myContext);
     }; //brauche für manche Funktionen das Contextobjekt der aufrufenden Klasse
 
     /**
@@ -134,7 +135,6 @@ public class Worker {
         String line;
         String[]temp;
         Rezept r;
-        DBHelper dbhelper=new DBHelper(MainActivity.activity); //TODO Welches Context Objekt wäre angemessen?
 
 
         while ((line = br.readLine()) != null){
@@ -143,8 +143,8 @@ public class Worker {
                 if(temp.length==7){
                     //TODO versuche ein Rezeptobjekt zu erstellen
                     r= new Rezept(-1,temp[0],temp[1],temp[2],Integer.valueOf(temp[3]),Integer.valueOf(temp[4]),temp[5],Integer.valueOf(temp[6]));
-                    if(!dbhelper.doesAlreadyExist(r)){
-                        dbhelper.insertRezept(r);
+                    if(!helper.doesAlreadyExist(r)){
+                        helper.insertRezept(r);
                         Log.v("CSV Import" , "Rezept " + r.getTitel() + " erfolgreich importiert");
                         results[0]=+1;
 
@@ -178,8 +178,6 @@ public class Worker {
         String line;
         String[]temp;
         Rezept r;
-        DBHelper dbhelper=new DBHelper(MainActivity.activity); //TODO Welches Context Objekt wäre angemessen?
-
 
         while ((line = br.readLine()) != null){
             temp= line.split(delimiter);
@@ -187,8 +185,8 @@ public class Worker {
             if(temp.length==7){
                 //TODO versuche ein Rezeptobjekt zu erstellen
                 r= new Rezept(-1,temp[0],temp[1],temp[2],Integer.valueOf(temp[3]),Integer.valueOf(temp[4]),temp[5],Integer.valueOf(temp[6]));
-                if(!dbhelper.doesAlreadyExist(r)){
-                    dbhelper.insertRezept(r);
+                if(!helper.doesAlreadyExist(r)){
+                    helper.insertRezept(r);
                     Log.v("CSV Import" , "Rezept " + r.getTitel() + " erfolgreich importiert");
                     results[0]++;
 
@@ -227,7 +225,6 @@ public class Worker {
         String line;
         String[] temp;
         Rezept rezept;
-        DBHelper dbhelper = new DBHelper(MainActivity.activity); //TODO Welches Context Objekt wäre angemessen?
         Iterator iterator = rezepte.iterator();
 
         while(iterator.hasNext()){

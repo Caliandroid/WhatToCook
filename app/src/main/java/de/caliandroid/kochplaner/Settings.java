@@ -90,8 +90,8 @@ public class Settings extends AppCompatActivity implements View.OnClickListener{
         }
 
         if(v.getId()==bExport.getId()){
-            DBHelper dbHelper = new DBHelper(this);
-            ArrayList<Rezept> rezepte = dbHelper.getRezepte(null,null,null,null);
+            DBHelper helper = DBHelper.getInstance(this);
+            ArrayList<Rezept> rezepte = helper.getRezepte(null,null,null,null);
             Worker worker = new Worker(this);
             try{
                 worker.exportRezepteToCSV(restoredPath+IMPORT_FOLDER, File.separator+EXPORTFILE, SPLITTER,rezepte);
