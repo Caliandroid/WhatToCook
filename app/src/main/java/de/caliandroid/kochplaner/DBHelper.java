@@ -613,6 +613,30 @@ public class DBHelper extends SQLiteOpenHelper {
 
     }
 
+    public boolean alreadyInList(Rezept r){
+
+        String whereClause = TABELLE2_2+" = ? ";
+        String[]selectionArgs={String.valueOf(r.getId())};
+        Cursor c= myDB.query(TABELLE2,TABELLE2_COLUMNS,whereClause,selectionArgs,null,null,null,null);
+
+
+        if(c.getCount()>0){
+
+            return true;
+
+
+        }
+        else{
+            //db.close();
+            return false;
+        }
+
+
+
+
+
+    }
+
     /**
      * Universelle Abfrage der DB anhand der übergebenen Paramter
      * @param whereClause  Bedingung wie TYP=?
@@ -758,6 +782,7 @@ public class DBHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(TABELLE2_2,neu);
+        values.put(TABELLE2_3,0); //prepared muss 0 sein
         String whereClause= "rezeptid = ?";
         String[]whereArgs= {String.valueOf(alt)};
 
@@ -790,7 +815,6 @@ public class DBHelper extends SQLiteOpenHelper {
         boolean prepared=false;
         //SQLiteDatabase db =this.getReadableDatabase();
         Rezept rezept;
-        ArrayList<Rezept> rezepte=new ArrayList();
         String whereClause="rezeptid = ?";
         String []selectionArgs= {String.valueOf(r.getId())};
         Cursor c = myDB.query(TABELLE2, TABELLE2_COLUMNS, whereClause,selectionArgs,null,null,null,null);

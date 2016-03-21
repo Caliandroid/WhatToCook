@@ -20,6 +20,7 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -147,12 +148,18 @@ public class RezeptAlle extends AppCompatActivity implements View.OnClickListene
             public void onClick(DialogInterface dialog, int whichButton) {
 
                 try {
+                    Rezept rezept = (Rezept)rezepte.get(iPos);
 
+                    //check
+                    if( helper.alreadyInList(rezept)){
+                        Toast.makeText(getApplicationContext(), "Bereits in der Liste", Toast.LENGTH_SHORT).show();
+                    }
+                    else {
+                        helper.insertPlanned(rezept);
+                        helper.insertIntoShoppinglist(rezept);
+                        Toast.makeText(getApplicationContext(), rezept.getTitel()+" aufgenommen", Toast.LENGTH_SHORT).show();
 
-                    //MainActivity.rezepte.add((Rezept) rezepte.get(iPos)); lieber in onResume neuladen
-                    helper.insertPlanned((Rezept) rezepte.get(iPos));
-                    helper.insertIntoShoppinglist((Rezept) rezepte.get(iPos));
-                    //zusätzlich in die planned DB eintragen
+                    }
 
                 } catch (SQLiteException e) {
                     throw e;

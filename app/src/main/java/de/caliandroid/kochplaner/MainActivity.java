@@ -407,7 +407,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onProgressUpdate(int percent) {
-        progressText.setText("Loading .."+percent+" ..elements");
+        progressText.setText("Loading "+percent);
 
     }
 
@@ -597,13 +597,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 holder.name.setOnLongClickListener(new View.OnLongClickListener() {
                     @Override
                     public boolean onLongClick(View v) {
-                        //TODO Rezept an dieser Stelle austauschen
-                        final  TextView tv = (TextView)v;
+                                                final  TextView tv = (TextView)v;
                         final Rezept rezept = (Rezept) tv.getTag();
                         if (rezept!=null) {
 
                             //AlertDialog - um Tippfehler auszuschließen
                             //final CharSequence[] choose = {"Ansehen", "Austauschen", "Entfernen","Cancel" };
+
+                            //Austausch
                             final String [] choose=getResources().getStringArray(R.array.operations_1);
 
                            // final CharSequence[] choose = R.array.operations_1;
@@ -617,12 +618,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                         Rezept newRezept = helper.replaceRezept(rezept, myWorker.getIDs(rezepte), blocker);
                                         if (newRezept != null) {
                                             rezepte.add(rezepte.indexOf(rezept), newRezept);
-                                            rezepte.remove(rezept);
-                                            helper.updatePlannedRezeptID(rezept.getId(), newRezept.getId());
                                             helper.deleteItemFromShoppinglist(rezept.getId());
+                                            helper.updatePlannedRezeptID(rezept.getId(), newRezept.getId());
                                             helper.insertIntoShoppinglist(newRezept);
+                                            rezepte.remove(rezept);
                                             Toast.makeText(getApplicationContext(), "Rezept ausgetauscht", Toast.LENGTH_SHORT).show();
-                                            dataAdapter.notifyDataSetChanged(); //da AL rezepte verkürzt wurde
+                                            dataAdapter.clear();
+                                            dataAdapter.addAll(rezepte);//dataAdapter.notifyDataSetChanged(); //da AL rezepte verkürzt wurde
                                             blocker.add(String.valueOf(rezept.getId()));
                                         } else {
                                             Toast.makeText(getApplicationContext(), "Keine weiteren Rezepte zum Austauschen mehr vorhanden, bei erneutem Austausch wird wieder von vorne begonnen", Toast.LENGTH_SHORT).show();
@@ -675,37 +677,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                                 }
                             });
-                           /* alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int whichButton) {
-                                    //neues Rezept gleichen Typs laden (unter der Berücksichtung der bereits geplannten Rezepte in der Liste
-                                    Worker myWorker = new Worker(activity);
-                                    Rezept newRezept = helper.replaceRezept(rezept, myWorker.getIDs(rezepte), blocker);
-                                    if (newRezept != null) {
-                                        rezepte.add(rezepte.indexOf(rezept), newRezept);
-                                        rezepte.remove(rezept);
-                                        helper.updatePlannedRezeptID(rezept.getId(), newRezept.getId());
-                                        helper.deleteItemFromShoppinglist(rezept.getId());
-                                        helper.insertIntoShoppinglist(newRezept);
-                                        Toast.makeText(getApplicationContext(), "Rezept ausgetauscht", Toast.LENGTH_SHORT).show();
-                                        dataAdapter.notifyDataSetChanged(); //da AL rezepte verkürzt wurde
-                                        blocker.add(String.valueOf(rezept.getId()));
-                                    } else {
-                                        Toast.makeText(getApplicationContext(), "Keine weiteren Rezepte zum Austauschen mehr vorhanden, bei erneutem Austausch wird wieder von vorne begonnen", Toast.LENGTH_SHORT).show();
-                                        blocker.clear(); //slle Items entfernen und wieder bei null beginnen
-                                    }
-
-
-                                }
-                            });
-
-                            alert.setNegativeButton("Cancel",
-                                    new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface dialog, int whichButton) {
-                                            //nichts zu tun
-
-                                        }
-                                    });*/
-
                             alert.show();
 
 
@@ -722,8 +693,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
             //TODO Wenn ein Rezept komplett aus der DB gelöscht wurde aber in den geplanten Rezepten existiert,
-            //gibt es eine java.lang.NullPointerException: Attempt to invoke virtual method 'int android.view.View.getImportantForAccessibility()' on a null object reference
-            //Das Programm stürzt ab und beim nächsten Laden paßt es wieder.
             Rezept rezept = rezepte.get(position);
             holder.name.setText(rezept.getTitel());
 
