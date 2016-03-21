@@ -492,11 +492,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 public void onClick(DialogInterface dialog, int whichButton) {
                                     //falls selektiert, dann entfernen und Häufigkeit hochsetzen
                                     helper.updateHaeufigkeit(rezept.getId());
-                                    helper.deletePlanned(rezept.getId());
                                     rezepte.remove(position);
+                                    helper.deletePlanned(rezept.getId());
+
                                     cb.setChecked(false); //wichtig, da beim entfernen des Rezeptes aus der Liste ein anderes an die Stelle nachrückt (ausser beim letzten) und dann die Checkbox weiter aktiv bleiben würde
                                     Toast.makeText(getApplicationContext(), rezept.getTitel() + " gekocht :)", Toast.LENGTH_LONG).show();
-                                    dataAdapter.notifyDataSetChanged(); //da AL rezepte verkürzt wurde
+                                    dataAdapter.clear();
+                                    dataAdapter.addAll(rezepte);
+                                    //dataAdapter.notifyDataSetChanged(); //durch die Veränderung von rezepte durch remove() kommt es so nicht im dataAdapter an und führt zu index fehlern
 
                                 }
                             });
@@ -693,10 +696,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
             //TODO Wenn ein Rezept komplett aus der DB gelöscht wurde aber in den geplanten Rezepten existiert,
-            Rezept rezept = rezepte.get(position);
-            holder.name.setText(rezept.getTitel());
+             Rezept rezept = rezepte.get(position);
+             holder.name.setText(rezept.getTitel());
 
-            holder.prepared.setTag(rezept);
+             holder.prepared.setTag(rezept);
             holder.prepared.setChecked(helper.isPrepared(rezept));
             /**
              * Variante 1, um die Checkbox Prepared korrekt zu markieren

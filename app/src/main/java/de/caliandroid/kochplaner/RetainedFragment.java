@@ -156,7 +156,8 @@ public class RetainedFragment extends Fragment {
 
 
             helper.insertPlanned(rezepte);
-
+            i++;
+            publishProgress(i);
             runs=false;
             //helper.close();
 
