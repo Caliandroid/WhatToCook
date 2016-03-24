@@ -1,6 +1,7 @@
 package de.caliandroid.kochplaner;
 
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -41,6 +42,7 @@ public class RezeptAnsicht extends AppCompatActivity implements View.OnClickList
     String imageUri = null;
     SharedPreferences sharedpreferences;
     int iPosition=-1;
+    String restoredPath;
 
 
     @Override
@@ -49,7 +51,7 @@ public class RezeptAnsicht extends AppCompatActivity implements View.OnClickList
         super.setTitle("Rezeptdetails");
         //pfad laden
         sharedpreferences = getSharedPreferences(MainActivity.MY_PREFS, MODE_PRIVATE);
-        String restoredPath = sharedpreferences.getString("storagePath", null);
+        restoredPath = sharedpreferences.getString("storagePath", null);
         setContentView(R.layout.rezept_ansicht);
         activity=this;
 
@@ -64,6 +66,7 @@ public class RezeptAnsicht extends AppCompatActivity implements View.OnClickList
         bZurueck.setOnClickListener(this);
         bDelete.setOnClickListener(this);
         ImageView imageView =(ImageView)findViewById(R.id.imageView);
+        imageView.setOnClickListener(this);
         tvBlocked = (TextView)findViewById(R.id.textView4);
 
         //Daten holen
@@ -121,6 +124,19 @@ public class RezeptAnsicht extends AppCompatActivity implements View.OnClickList
 
     @Override
     public void onClick(View v) {
+
+        if(v.getId() ==R.id.imageView) {
+            try{
+                //Uri uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI.buildUpon().appendPath(getIntent().getStringExtra("imageUri")).build();
+                Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
+                Uri uri = Uri.parse(IMAGELOCATIONPREFIX+restoredPath+IMAGE_FOLDER+File.separator+imageUri);
+                intent.setDataAndType(uri, "image/*");
+                //Intent intent = new Intent(android.content.Intent.ACTION_VIEW,uri);
+                startActivity(intent);
+            }catch(ActivityNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
         if(v.getId() ==R.id.bEditieren){
             Intent i = new Intent(this,AddEditRezept.class);
             i.putExtra("id", id);
