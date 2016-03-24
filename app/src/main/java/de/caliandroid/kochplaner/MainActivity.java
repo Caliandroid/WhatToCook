@@ -31,7 +31,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, Toolbar.OnMenuItemClickListener, View.OnTouchListener, RetainedFragment.TaskCallbacks {
     public static final String MY_PREFS = "MyPrefs";
@@ -63,22 +66,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             fragmentManager = getFragmentManager();
 
 
-            retainedFragment = (RetainedFragment) fragmentManager.findFragmentByTag(TAG_RETAINED_FRAGMENT);
+            retainedFragment = (RetainedFragment) fragmentManager.findFragmentByTag(TAG_RETAINED_FRAGMENT); //Das Fragment mit dem AsyncTask
 
             if (retainedFragment == null) {
             retainedFragment = new RetainedFragment();
             //LÖST DEN THREAD AUS
             fragmentManager.beginTransaction().add(retainedFragment, TAG_RETAINED_FRAGMENT).commit();
 
-
-
         }
-        /*else{
-            gpw= retainedFragment.getData();
-            if(!retainedFragment.isRunning()){
-                gpw = new GetPlanningWeek();
-            }
-        }*/
+
 
 
 
@@ -113,26 +109,67 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
 
-
         //Hier eine Textmail mit den Rezepten samt Details erstellen
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Infomail versenden", Snackbar.LENGTH_SHORT)
-                        .setAction("Action", null).show();
+            public  void onClick(View view) {
+                final View view1 = view;
 
-                //Mail senden
-                Worker worker =new Worker(getApplicationContext());
-                Intent intent = new Intent(Intent.ACTION_SEND);
-                intent.setType("text/html");
-                intent.putExtra(Intent.EXTRA_EMAIL, "sarah@caliandro.de,stefan@caliandro.de");
-                intent.putExtra(Intent.EXTRA_SUBJECT, "Kochplan dieser Woche");
-                intent.putExtra(Intent.EXTRA_TEXT,worker.getMailText(rezepte));
-                startActivity(Intent.createChooser(intent, "Send Email"));
+                if(rezepte.size()>0){
+
+                   //Alertdialog
+                    final String [] choose=getResources().getStringArray(R.array.mail_operation);
+
+                    AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.activity);
+                    alert.setTitle("Mailversand");
+                    alert.setItems(choose, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int item) {
+                            if (choose[item].equals(choose[0])) { //Komplette Mail
+                                Snackbar.make(view1, "Infomail versenden", Snackbar.LENGTH_SHORT)
+                                        .setAction("Action", null).show();
+                                SimpleDateFormat sdf = new SimpleDateFormat("dd.mm HH:mm", Locale.getDefault());
+                                Worker worker = new Worker(getApplicationContext());
+                                Intent intent = new Intent(Intent.ACTION_SEND);
+                                intent.setType("text/html");
+                                //intent.putExtra(Intent.EXTRA_EMAIL, "sarah@caliandro.de,stefan@caliandro.de");
+                                intent.putExtra(Intent.EXTRA_SUBJECT, "Kochplan " + sdf.format(new Date()));
+                                intent.putExtra(Intent.EXTRA_TEXT, worker.getMailText(rezepte));
+                                startActivity(Intent.createChooser(intent, "Send Email"));
+                                }
+
+
+                            else if (choose[item].equals(choose[1])) { //fehlende Zutaten
+                                Snackbar.make(view1,"Fehlende Zutaten versenden", Snackbar.LENGTH_SHORT)
+                                        .setAction("Action", null).show();
+
+                                SimpleDateFormat sdf = new SimpleDateFormat("dd.mm HH:mm", Locale.getDefault());
+                                Worker worker = new Worker(getApplicationContext());
+                                Intent intent = new Intent(Intent.ACTION_SEND);
+                                intent.setType("text/html");
+                                intent.putExtra(Intent.EXTRA_SUBJECT, "Fehlende Zutaten Stand: " + sdf.format(new Date()));
+                                intent.putExtra(Intent.EXTRA_TEXT, worker.getMailTextMissingItems(helper.getMissingItems()));
+                                startActivity(Intent.createChooser(intent, "Send Email"));
+                            }
+                            else if (choose[item].equals(choose[2])) { //cancel
+                                dialog.dismiss();
+                            }
+
+
+                        }
+                    });
+                    alert.show();
+
+                    // Ende Alertdialog
+                }
+                else{
+                    //Toast.makeText(getApplicationContext(),"Zuerst eine Planung erstellen", Toast.LENGTH_SHORT).show();
+                    Snackbar.make(view, "Zuerst muss eine Planung erstellt werden", Snackbar.LENGTH_SHORT)
+                            .setAction("Action", null).show();
+                }
             }
         });
-
     }
 
     @Override
@@ -166,7 +203,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         dataAdapter.clear();
                         sharedpreferences = getSharedPreferences(MY_PREFS, MODE_PRIVATE);
                         //TODO in einen Async Task auslagern
-                        // alle Inhalte in PLANNED und Shoppingliste entfernen
+
+                        //alles wurde in RetainedFragment ausgelagert
 
                        /* helper.deleteAllPlanned();
                       //  helper.deleteAllFromShoppinglist();
@@ -394,7 +432,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             helper.deleteRezept(data.getIntExtra("id", -1));
         }
         else{
-            System.out.println("Habe ResultCode =" + resultCode + " erhalten");
+            //System.out.println("Habe ResultCode =" + resultCode + " erhalten");
         }
     }
 
@@ -599,13 +637,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         final Rezept rezept = (Rezept) tv.getTag();
                         if (rezept!=null) {
 
-                            //AlertDialog - um Tippfehler auszuschließen
-                            //final CharSequence[] choose = {"Ansehen", "Austauschen", "Entfernen","Cancel" };
 
-                            //Austausch
                             final String [] choose=getResources().getStringArray(R.array.operations_1);
 
-                           // final CharSequence[] choose = R.array.operations_1;
                             AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.activity);
                             alert.setTitle("Was tun mit "+rezept.getTitel() + " ?");
                             alert.setItems(choose, new DialogInterface.OnClickListener() {

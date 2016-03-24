@@ -110,7 +110,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
     public void createDB() throws IOException{
         if (existDB()){
-            System.out.println("CheckDB: found already exiting db");
+            System.out.println("CheckDB: found already existing db");
         }
         else{
             try{
@@ -256,7 +256,6 @@ public class DBHelper extends SQLiteOpenHelper {
         Iterator i = rezepte.iterator();
         while(i.hasNext()){
             rezept=(Rezept)i.next();
-            System.out.println(rezept.getTitel());
         }
         db.close();
         return rezepte;
@@ -280,7 +279,7 @@ public class DBHelper extends SQLiteOpenHelper {
         String[]selectionArgs={String.valueOf(0)};
         String  order="ANZAHL ASC";
         String limit = "4";
-        Cursor c = db.query(dbName, TABELLE1_COLUMNS, whereClause,selectionArgs,null,null,order,limit);
+        Cursor c = db.query(dbName, TABELLE1_COLUMNS, whereClause, selectionArgs, null, null, order, limit);
         c.moveToFirst();
         while (!c.isAfterLast()) {
             //(int id,String titel,String anleitung, String zutaten,int typ, int anzahl){
@@ -332,6 +331,7 @@ public class DBHelper extends SQLiteOpenHelper {
     /**
      * Holt die Rezepte anhand der Häufigkeit aus der DB mit Berücksichtigung des Typs (vegetarisch, Fleisch, Fisch etc.)
      * Holt keine Rezepte, die bereits in der Planung stecken
+     * 24.05.2016 randomize a bit
      * @return rezepte
      */
     public ArrayList <Rezept> getKochplanNeu(int typ,int anzahl,ArrayList<Rezept> plannedReceipts) {
@@ -365,7 +365,6 @@ public class DBHelper extends SQLiteOpenHelper {
 
         }
         for (int i=0;i<selectionArgs.length;i++){
-            System.out.println("index "+i+" = "+selectionArgs[i]);
         }
 
         Rezept rezept;
@@ -374,8 +373,8 @@ public class DBHelper extends SQLiteOpenHelper {
         String whereClause=TABELLE1_5+" =? and "+TABELLE1_8+" =? and " +TABELLE1_1+" not in ("+fragezeichen+")";; //geblockte Rezepte sollen nicht geholt werden
         //String[]selectionArgs={String.valueOf(typ),"0"};
         String  order="ANZAHL ASC";
-        String limit = String.valueOf(anzahl);
-        Cursor c = myDB.query(dbName, TABELLE1_COLUMNS, whereClause,selectionArgs,null,null,order,limit);
+        String limit = String.valueOf(anzahl*3); //*2 to randomize
+        Cursor c = myDB.query(dbName, TABELLE1_COLUMNS, whereClause, selectionArgs, null, null, order, limit);
         c.moveToFirst();
         while (!c.isAfterLast()) {
             try{
@@ -389,6 +388,17 @@ public class DBHelper extends SQLiteOpenHelper {
 
             c.moveToNext();
         }
+        //if enough receipts in db to randomize:
+        if(rezepteNeu.size()>anzahl){
+
+            Collections.shuffle(rezepteNeu);
+            for (int i= rezepteNeu.size()-1;i>=anzahl;i--){
+                rezepteNeu.remove(i);
+            }
+
+        }
+
+
 
 
 
@@ -522,7 +532,7 @@ public class DBHelper extends SQLiteOpenHelper {
         c.moveToFirst();
         while (!c.isAfterLast()) {
                    rezept = new Rezept(c.getInt(0),c.getString(1),c.getString(2),c.getString(3),c.getInt(4),c.getInt(5),c.getString(6),c.getInt(7));
-            System.out.println("Habe ein neues Rezept für dich= "+rezept.getTitel());
+           // System.out.println("Habe ein neues Rezept für dich= "+rezept.getTitel());
             c.moveToNext();
 
         }
@@ -549,7 +559,7 @@ public class DBHelper extends SQLiteOpenHelper {
         int anzahlFragezeichen=0;
         String[]selectionArgs;
 
-        System.out.println("blocker länge = " + blocker.size());
+       // System.out.println("blocker länge = " + blocker.size());
 
         anzahlFragezeichen = tempSplit.length+blocker.size(); //um Anzahl der Items in Blocker verlängert
         selectionArgs = new String[anzahlFragezeichen+1]; //
@@ -572,13 +582,10 @@ public class DBHelper extends SQLiteOpenHelper {
             }
             else{
                 if(i<=tempSplit.length) {
-                    System.out.println("in I steht jetzt = "+i);
                     selectionArgs[i] = tempSplit[i - 1];
                 }
                 else{
-                    System.out.println("in I (else) steht jetzt = " + i);
                     //jetzt die Inhalte aus dem Blocker einfügen
-                    System.out.println("in Blocker steht "+blocker.get(i2));
                     selectionArgs[i]= (String)blocker.get(i2);
                     i2++;
                 }
@@ -595,7 +602,7 @@ public class DBHelper extends SQLiteOpenHelper {
         c.moveToFirst();
         while (!c.isAfterLast()) {
             rezept = new Rezept(c.getInt(0),c.getString(1),c.getString(2),c.getString(3),c.getInt(4),c.getInt(5),c.getString(6),c.getInt(7));
-            System.out.println("Habe ein neues Rezept für dich= " + rezept.getTitel());
+           // System.out.println("Habe ein neues Rezept für dich= " + rezept.getTitel());
             c.moveToNext();
 
         }
@@ -1059,6 +1066,26 @@ public class DBHelper extends SQLiteOpenHelper {
         }
         db.close();
     }
+
+    public ArrayList<ShoppingListItem> getMissingItems(){
+
+        ShoppingListItem item;
+        ArrayList<ShoppingListItem> items = new ArrayList<>();
+        Rezept rezept;
+        String whereClause =TABELLE3_3+" = ?";
+        String[] selectionArgs;
+        selectionArgs=new String[]{"0"};
+        Cursor c = myDB.query(TABELLE3, TABELLE3_COLUMNS, whereClause, selectionArgs, null, null, null, null);
+        c.moveToFirst();
+        while (!c.isAfterLast()) {
+            item = new ShoppingListItem(c.getInt(0),c.getString(1),c.getInt(2),c.getInt(3));
+            items.add(item);
+            c.moveToNext();
+        }
+
+        return items;
+    }
+
 
 
 

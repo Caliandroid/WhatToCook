@@ -105,6 +105,35 @@ public class Worker {
 
     }
 
+    public String getMailTextMissingItems(ArrayList<ShoppingListItem> items){
+        StringBuffer sb=new StringBuffer();
+        String mailText="Fehler - Konnte keinen Wochenplan generieren";
+        ShoppingListItem item;
+        Iterator i = items.iterator();
+        sb.append("Aktuell fehlen noch folgende Zutaten\n");
+        String lastTitle="";
+        String rezeptTitle=null;
+        int counter = 1;
+        while(i.hasNext()) {
+            item = (ShoppingListItem) i.next();
+            String [] selectionArgs={String.valueOf(item.getRezept_id())};
+            rezeptTitle=helper.getRezept("_id = ?",selectionArgs,null,null).getTitel();
+
+            if(!rezeptTitle.equals(lastTitle)){
+                sb.append("\n*********************\n\n"+rezeptTitle+":\n");
+                lastTitle=rezeptTitle;
+                counter=1;
+            }
+            sb.append(counter+". "+item.getZutat());
+            sb.append("\n");
+            counter++;
+        }
+
+        mailText=sb.toString();
+        return mailText;
+
+    }
+
 
     public ArrayList<Rezept> bereinigeListe(ArrayList<Rezept>rezepte, int id){
         Rezept r;
