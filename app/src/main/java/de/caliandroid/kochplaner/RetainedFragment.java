@@ -9,6 +9,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
 
 
 /**
@@ -24,7 +26,7 @@ public class RetainedFragment extends Fragment {
 
 
     interface TaskCallbacks {
-        void onPreExecute();
+        ArrayList<Rezept> onPreExecute();
         void onProgressUpdate(int percent);
         void onCancelled();
         void onPostExecute(ArrayList<Rezept> rezepte);
@@ -108,54 +110,57 @@ public class RetainedFragment extends Fragment {
         protected Void doInBackground(Void... ignore) {
             DBHelper helper  = DBHelper.getInstance(MainActivity.activity);
             helper.openDB();
-
             int i=0;
 
-            helper.deleteAllPlanned();
-            helper.deleteAllFromShoppinglist();
-            rezepte.clear();
+            //24.03.2016 keep receipts
+           // helper.deleteAllPlanned();
+            //helper.deleteAllFromShoppinglist();
+           // rezepte.clear();
             //neue Wochenplanung durchführen
+
+            rezepte = mCallbacks.onPreExecute();
+            System.out.println("Habe Rezepte erhalten = "+rezepte.size());
+            ArrayList<Rezept> neueRezepte=new ArrayList<>();
+
 
 
             //vegetarisch=0
-            rezepte= helper.getKochplanNeu(0, Integer.valueOf(sharedPreferences.getString("vegetarisch", "2")), rezepte);
+            neueRezepte.addAll(helper.getKochplanNeu(0, Integer.valueOf(sharedPreferences.getString("vegetarisch", "1")),rezepte));
             i++;
             publishProgress(i);
             //Fleisch=1
-            rezepte= helper.getKochplanNeu(1,Integer.valueOf(sharedPreferences.getString("fleisch","1")),rezepte);
+            neueRezepte.addAll(helper.getKochplanNeu(1, Integer.valueOf(sharedPreferences.getString("fleisch", "1")),rezepte));
             i++;
             publishProgress(i);
             //Fisch=2
-            rezepte= helper.getKochplanNeu(2,Integer.valueOf(sharedPreferences.getString("fisch","1")),rezepte);
+            neueRezepte.addAll(helper.getKochplanNeu(2, Integer.valueOf(sharedPreferences.getString("fisch", "1")),rezepte));
             i++;
             publishProgress(i);
             //Süß=3
-            rezepte= helper.getKochplanNeu(3,Integer.valueOf(sharedPreferences.getString("suess","1")),rezepte);
+            neueRezepte.addAll(helper.getKochplanNeu(3, Integer.valueOf(sharedPreferences.getString("suess", "1")),rezepte));
             i++;
             publishProgress(i);
             //Dessert=4
-            rezepte= helper.getKochplanNeu(4,Integer.valueOf(sharedPreferences.getString("nachtisch","1")),rezepte);
+            neueRezepte.addAll(helper.getKochplanNeu(4, Integer.valueOf(sharedPreferences.getString("nachtisch", "1")),rezepte));
             i++;
             publishProgress(i);
             //Snack=5
-            rezepte =helper.getKochplanNeu(5,Integer.valueOf(sharedPreferences.getString("snack","1")),rezepte);
+            neueRezepte.addAll(helper.getKochplanNeu(5, Integer.valueOf(sharedPreferences.getString("snack", "1")),rezepte));
             i++;
             publishProgress(i);
 
-            //wenn fertig, dann noch in die Planned Tabelle einfügen
-            //dieser Teil dauert lange, vielleicht lieber in Thread auslagern
+            Collections.shuffle(neueRezepte);
 
-            //neue Wochenplanung durchführen
-            /**
-             * Alte Variante statisch rezepte = helper.getKochplan();
-             * TODO
-             * in der neuen Variante wird aus den SharedPrefs ausgelesen, wie die Planung aussehen soll und dann jeweils die Kochliste aufgerufen
-             *
-             **/
-            //wenn fertig, dann noch in die Planned Tabelle einfügen
+            Iterator i1 = neueRezepte.iterator();
+            while(i1.hasNext()){
+                i++;
+                publishProgress(i);
+                Rezept r = (Rezept)i1.next();
+                helper.insertIntoShoppinglist(r);
+            }
 
-
-            helper.insertPlanned(rezepte);
+            helper.insertPlanned(neueRezepte);
+            rezepte.addAll(neueRezepte);
             i++;
             publishProgress(i);
             runs=false;

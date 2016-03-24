@@ -242,6 +242,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         helper.deleteAllPlanned();
                         helper.deleteAllFromShoppinglist();
                         dataAdapter.clear();
+                        rezepte.clear();
                         // dataAdapter.notifyDataSetChanged();
 
                     } catch (SQLiteException e) {
@@ -401,7 +402,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     //Mehtoden des Interfaces TaskCallbacks
 
     @Override
-    public void onPreExecute() {
+    public ArrayList<Rezept> onPreExecute() {
+        return this.rezepte;
+
 
     }
 
@@ -441,15 +444,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      * Angepaßter Adapter, der die Rezepte samt einer Auswahlcheckbox anzeigen soll
      */
     private class MyCustomAdapter extends ArrayAdapter<Rezept> {
-
-        //private ArrayList<Rezept> rezepte1;
         int i=0; //für die Farben in der Liste
 
         public MyCustomAdapter(Context context, int textViewResourceId,
                                ArrayList<Rezept> rezepte) {
             super(context, textViewResourceId, rezepte);
-            // benötige keine lokale Version, da ich direkt mit der AL rezepte arbeiten kann
-           // this.rezepte1 = new ArrayList<Rezept>(); this.rezepte1.addAll(rezepte);
+
         }
 
         private class ViewHolder{
@@ -458,8 +458,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             CheckBox selected;
 
         }
-
-
 
          @Override
         public View getView(final int position, View convertView, ViewGroup parent) {
@@ -483,9 +481,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         final CheckBox cb = (CheckBox) v;
                         final Rezept rezept = (Rezept) cb.getTag();
 
-                       // if (rezept.getBlocked()==1) { hier gibts nichts zu prüfen. Wenn gekocht, dann fliegt das Item aus der Liste
-
-                            //AlertDialog - um Tippfehler auszuschließen
+                           //AlertDialog - um Tippfehler auszuschließen
                             AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.activity);
                             alert.setTitle("Wurde " + rezept.getTitel() + " gekocht?");
                             alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
@@ -525,7 +521,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         final CheckBox cb = (CheckBox) v;
                         final Rezept rezept = (Rezept) cb.getTag();
 
-                        //rezept.setSelected(cb.isChecked());
                         if (cb.isChecked()) { //prepared ist bereits gecheckt
 
                             //AlertDialog - um Tippfehler auszuschließen
@@ -698,34 +693,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             //TODO Wenn ein Rezept komplett aus der DB gelöscht wurde aber in den geplanten Rezepten existiert,
              Rezept rezept = rezepte.get(position);
              holder.name.setText(rezept.getTitel());
-
              holder.prepared.setTag(rezept);
-            holder.prepared.setChecked(helper.isPrepared(rezept));
-            /**
-             * Variante 1, um die Checkbox Prepared korrekt zu markieren
-             * In der Planned DB anhand der RezeptID prüfen, wie der Zustand von prepared ist und dann hier markieren
-             */
+             holder.prepared.setChecked(helper.isPrepared(rezept));
+             holder.selected.setTag(rezept);
+             holder.name.setTag(rezept);
+             i++;
 
-
-           // holder.selected.setChecked(rezept.isSelected());
-            // holder.selected.setChecked(false); //darf nie vorab aktiviert sein
-            holder.selected.setTag(rezept);
-
-            holder.name.setTag(rezept);
-            i++;
-
-            return convertView;
-
-
+             return convertView;
         }
 
     }
 
-
     @Override
     public void onSaveInstanceState(Bundle bundle){
         super.onSaveInstanceState(bundle);
-
 
     }
 

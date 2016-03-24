@@ -331,35 +331,68 @@ public class DBHelper extends SQLiteOpenHelper {
 
     /**
      * Holt die Rezepte anhand der Häufigkeit aus der DB mit Berücksichtigung des Typs (vegetarisch, Fleisch, Fisch etc.)
+     * Holt keine Rezepte, die bereits in der Planung stecken
      * @return rezepte
      */
-    public ArrayList <Rezept> getKochplanNeu(int typ,int anzahl, ArrayList<Rezept> rezepte) {
-        //SQLiteDatabase db =this.getReadableDatabase();
+    public ArrayList <Rezept> getKochplanNeu(int typ,int anzahl,ArrayList<Rezept> plannedReceipts) {
+        ArrayList<Rezept> rezepteNeu=new ArrayList<>();
+        Worker worker = new Worker(context);
+        String ids= worker.getIDs(plannedReceipts);
+        StringBuffer fragezeichen=new StringBuffer();
+        String []tempSplit=ids.split(",");
+
+        int anzahlFragezeichen = tempSplit.length;
+        for (int i=0;i<anzahlFragezeichen;i++){
+            if(i==0){
+                fragezeichen.append("?");}
+            else{
+                fragezeichen.append(",?");}
+        }
+
+
+
+        String[]selectionArgs = new String[anzahlFragezeichen+2];
+        for(int i=0;i<selectionArgs.length;i++){
+            if(i==0){
+                selectionArgs[i]=String.valueOf(typ);
+            }
+            else if(i==1 )
+            {
+                selectionArgs[i]="0";
+            } else  {
+                selectionArgs[i]=tempSplit[i-2];
+            }
+
+        }
+        for (int i=0;i<selectionArgs.length;i++){
+            System.out.println("index "+i+" = "+selectionArgs[i]);
+        }
+
         Rezept rezept;
         //die Variablen
         String dbName ="rezepte";
-        String whereClause ="typ=? and blocked=?"; //geblockte Rezepte sollen nicht geholt werden
-        String[]selectionArgs={String.valueOf(typ),"0"};
+        String whereClause=TABELLE1_5+" =? and "+TABELLE1_8+" =? and " +TABELLE1_1+" not in ("+fragezeichen+")";; //geblockte Rezepte sollen nicht geholt werden
+        //String[]selectionArgs={String.valueOf(typ),"0"};
         String  order="ANZAHL ASC";
         String limit = String.valueOf(anzahl);
         Cursor c = myDB.query(dbName, TABELLE1_COLUMNS, whereClause,selectionArgs,null,null,order,limit);
         c.moveToFirst();
         while (!c.isAfterLast()) {
-            //(int id,String titel,String anleitung, String zutaten,int typ, int anzahl){
+            try{
+                rezept = new Rezept(c.getInt(0),c.getString(1),c.getString(2),c.getString(3),c.getInt(4),c.getInt(5),c.getString(6),c.getInt(7));
+                rezepteNeu.add(rezept);
+                // erst wird noch umsortiert insertIntoShoppinglist(rezept);
+            }
+            catch(SQLiteException e){
+                e.printStackTrace();
+            }
 
-            rezept = new Rezept(c.getInt(0),c.getString(1),c.getString(2),c.getString(3),c.getInt(4),c.getInt(5),c.getString(6),c.getInt(7));
-            rezepte.add(rezept);
-            //Füge in Planned ein
-           // insertPlanned(rezept); ---> Darf nicht vor dem Collections.shuffle passieren, sonst verliere ich jegliche Reihenfolge
-            //Füge in shoppinglist ein
-            insertIntoShoppinglist(rezept);
             c.moveToNext();
         }
 
-        //Rezepte zufällig anordnen und in der Planned Tabelle eintragen ( in der gleichen Reihenfolge)
-        Collections.shuffle(rezepte, new Random(System.nanoTime()));
-       // db.close();
-        return rezepte;
+
+
+        return rezepteNeu;
 
     }
 
