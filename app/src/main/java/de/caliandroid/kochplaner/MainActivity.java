@@ -109,7 +109,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
 
-        //Hier eine Textmail mit den Rezepten samt Details erstellen
+        //Send textmail
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -141,16 +141,29 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
                             else if (choose[item].equals(choose[1])) { //fehlende Zutaten
-                                Snackbar.make(view1,"Fehlende Zutaten versenden", Snackbar.LENGTH_SHORT)
-                                        .setAction("Action", null).show();
 
-                                SimpleDateFormat sdf = new SimpleDateFormat("dd.mm HH:mm", Locale.getDefault());
-                                Worker worker = new Worker(getApplicationContext());
-                                Intent intent = new Intent(Intent.ACTION_SEND);
-                                intent.setType("text/html");
-                                intent.putExtra(Intent.EXTRA_SUBJECT, "Fehlende Zutaten Stand: " + sdf.format(new Date()));
-                                intent.putExtra(Intent.EXTRA_TEXT, worker.getMailTextMissingItems(helper.getMissingItems()));
-                                startActivity(Intent.createChooser(intent, "Send Email"));
+                                ArrayList<ShoppingListItem> items = helper.getMissingItems();
+                                if(items.size()==0){ //no missing items
+                                    Snackbar.make(view1, "Alle Zutaten bereits vorhanden", Snackbar.LENGTH_SHORT)
+                                            .setAction("Action", null).show();
+                                }
+                                else {
+                                    //create missing items mail
+                                    Snackbar.make(view1, "Fehlende Zutaten versenden", Snackbar.LENGTH_SHORT)
+                                            .setAction("Action", null).show();
+
+
+                                    SimpleDateFormat sdf = new SimpleDateFormat("dd.mm HH:mm", Locale.getDefault());
+                                    Worker worker = new Worker(getApplicationContext());
+
+                                    Intent intent = new Intent(Intent.ACTION_SEND);
+                                    intent.setType("text/html");
+
+                                    intent.putExtra(Intent.EXTRA_SUBJECT, "Fehlende Zutaten Stand: " + sdf.format(new Date()));
+                                    intent.putExtra(Intent.EXTRA_TEXT,worker.getMailTextMissingItems(items));
+
+                                    startActivity(Intent.createChooser(intent, "Send Email"));
+                                }
                             }
                             else if (choose[item].equals(choose[2])) { //cancel
                                 dialog.dismiss();
