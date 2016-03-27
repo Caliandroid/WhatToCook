@@ -511,19 +511,26 @@ public class DBHelper extends SQLiteOpenHelper {
                 fragezeichen.append(",?");}
         }
 
-        String[]selectionArgs = new String[anzahlFragezeichen+1];
-        for(int i=0;i<=anzahlFragezeichen;i++){
-            if(i==0){
-                selectionArgs[i]=String.valueOf(r.getTyp());
-            }
-            else{
-                selectionArgs[i]=tempSplit[i-1];
+        String[]selectionArgs = new String[anzahlFragezeichen+2];
+        for(int i=0;i<selectionArgs.length;i++){
+
+            switch (i){
+
+                case 0:
+                    selectionArgs[i]=String.valueOf(r.getTyp());
+
+                case 1:
+                    selectionArgs[i]="0";
+
+                default:
+                    selectionArgs[i]=tempSplit[i-2];
             }
 
         }
 
         //die Variablen
-        String whereClause = TABELLE1_5+" = ? and "+TABELLE1_1+"  not in ("+fragezeichen+")";
+        String whereClause = TABELLE1_5+" = ?  and "+ TABELLE1_8+" = ?  and "+TABELLE1_1+"  not in ("+fragezeichen+")";
+        System.out.println("Whereclause = "+whereClause);
         //String[]selectionArgs={String.valueOf(r.getTyp()), ids};
         String  order="ANZAHL ASC";
         String limit =(String.valueOf(1));
@@ -562,7 +569,7 @@ public class DBHelper extends SQLiteOpenHelper {
        // System.out.println("blocker länge = " + blocker.size());
 
         anzahlFragezeichen = tempSplit.length+blocker.size(); //um Anzahl der Items in Blocker verlängert
-        selectionArgs = new String[anzahlFragezeichen+1]; //
+        selectionArgs = new String[anzahlFragezeichen+2]; //
 
 
 
@@ -576,24 +583,34 @@ public class DBHelper extends SQLiteOpenHelper {
 
 
         int i2=0;
-        for(int i=0;i<=anzahlFragezeichen;i++){
+        for(int i=0;i<selectionArgs.length;i++){
+
             if(i==0){ //das ist der Rezept-Typ
                 selectionArgs[i]=String.valueOf(r.getTyp());
             }
             else{
-                if(i<=tempSplit.length) {
-                    selectionArgs[i] = tempSplit[i - 1];
+                if(i==1){
+                    selectionArgs[i] = "0"; //no blocked receipts
                 }
                 else{
-                    //jetzt die Inhalte aus dem Blocker einfügen
-                    selectionArgs[i]= (String)blocker.get(i2);
-                    i2++;
+                    if(i<tempSplit.length+2) {
+                        System.out.println("tempSplit Länge = "+tempSplit.length);
+                        selectionArgs[i] = tempSplit[i - 2];
+                    }
+                    else{
+                        //jetzt die Inhalte aus dem Blocker einfügen
+                        selectionArgs[i]= (String)blocker.get(i2);
+                        i2++;
+                    }
+
                 }
+
             }
 
         }
 
-        String whereClause = TABELLE1_5+" = ? and "+TABELLE1_1+"  not in ("+fragezeichen+")";
+        String whereClause = TABELLE1_5+" = ?  and "+ TABELLE1_8+" = ?  and "+TABELLE1_1+"  not in ("+fragezeichen+")";
+        System.out.println("Whereclause = "+whereClause);
         //String[]selectionArgs={String.valueOf(r.getTyp()), ids};
         String  order="ANZAHL ASC";
         String limit =(String.valueOf(1));

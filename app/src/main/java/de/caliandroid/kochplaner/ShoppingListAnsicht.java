@@ -14,19 +14,23 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  * Created by stefan on 07.03.16.
  */
-public class ShoppingListAnsicht extends AppCompatActivity implements View.OnClickListener, View.OnTouchListener, ListView.OnItemClickListener {
+public class ShoppingListAnsicht extends AppCompatActivity implements View.OnClickListener, View.OnTouchListener, ListView.OnItemClickListener, Spinner.OnItemSelectedListener {
     private Rezept rezept;
     public static ArrayList<Rezept> rezepte;
     private ArrayList<ShoppingListItem> items;
     private ShoppingListItem item;
+    private Spinner spinner;
+    private boolean alreadyCreated=false;
 
     public ShoppingListAnsicht(){
     }
@@ -36,11 +40,20 @@ public class ShoppingListAnsicht extends AppCompatActivity implements View.OnCli
 
 
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         super.setTitle("Shoppingliste");
         setContentView(R.layout.shopping_list_single);
+
+        //Spinner
+        spinner = (Spinner)findViewById(R.id.spinner2);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                R.array.shoppinglist_filter, android.R.layout.simple_spinner_item);
+        spinner.setAdapter(adapter);
+        spinner.setOnItemSelectedListener(this);
+
         //ShoplistItems holen
         items=helper.getShoppinglist(rezepte);
         System.out.println("Länge ITems Arry: "+items.size());
@@ -49,6 +62,7 @@ public class ShoppingListAnsicht extends AppCompatActivity implements View.OnCli
         listView.setAdapter(dataAdapter);
         listView.setOnItemClickListener(this);
         dataAdapter.notifyDataSetChanged();
+
     }
 
     @Override
@@ -64,6 +78,43 @@ public class ShoppingListAnsicht extends AppCompatActivity implements View.OnCli
     @Override
     public boolean onTouch(View v, MotionEvent event) {
         return false;
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+        if (spinner.getSelectedItemPosition() == 0 && !alreadyCreated){
+            //init. - do nothing
+            alreadyCreated=true;
+        }
+
+        if (spinner.getSelectedItemPosition() == 0 && alreadyCreated){
+            //Alle zeigen
+            items=helper.getShoppinglist(rezepte);
+        }
+
+        if (spinner.getSelectedItemPosition() == 1){
+            //nur fehlende
+          //  ArrayList<ShoppingListItem> newItems= new ArrayList<>();
+            Iterator i = items.iterator();
+            while(i.hasNext()){
+                ShoppingListItem item = (ShoppingListItem) i.next();
+                if(item.getShopped()==1){
+                    i.remove();
+                }
+            }
+            dataAdapter.clear();
+            dataAdapter.addAll(items);
+
+
+
+        }
+
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+
     }
 
 

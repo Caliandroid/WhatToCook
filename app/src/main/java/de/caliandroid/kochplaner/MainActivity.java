@@ -129,7 +129,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             if (choose[item].equals(choose[0])) { //Komplette Mail
                                 Snackbar.make(view1, "Infomail versenden", Snackbar.LENGTH_SHORT)
                                         .setAction("Action", null).show();
-                                SimpleDateFormat sdf = new SimpleDateFormat("dd.mm HH:mm", Locale.getDefault());
+                                SimpleDateFormat sdf = new SimpleDateFormat("dd.MM HH:mm", Locale.getDefault());
                                 Worker worker = new Worker(getApplicationContext());
                                 Intent intent = new Intent(Intent.ACTION_SEND);
                                 intent.setType("text/html");
@@ -141,11 +141,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
                             else if (choose[item].equals(choose[1])) { //fehlende Zutaten
-
                                 ArrayList<ShoppingListItem> items = helper.getMissingItems();
                                 if(items.size()==0){ //no missing items
                                     Snackbar.make(view1, "Alle Zutaten bereits vorhanden", Snackbar.LENGTH_SHORT)
                                             .setAction("Action", null).show();
+
                                 }
                                 else {
                                     //create missing items mail
@@ -153,7 +153,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                             .setAction("Action", null).show();
 
 
-                                    SimpleDateFormat sdf = new SimpleDateFormat("dd.mm HH:mm", Locale.getDefault());
+                                    SimpleDateFormat sdf = new SimpleDateFormat("dd.MM HH:mm", Locale.getDefault());
                                     Worker worker = new Worker(getApplicationContext());
 
                                     Intent intent = new Intent(Intent.ACTION_SEND);
@@ -619,7 +619,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                     new DialogInterface.OnClickListener() {
                                         public void onClick(DialogInterface dialog, int whichButton) {
                                             //deselektieren
-                                            cb.setChecked(false);
+                                            cb.setChecked(true);
                                         }
                                     });
 
@@ -646,7 +646,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 holder.name.setOnLongClickListener(new View.OnLongClickListener() {
                     @Override
                     public boolean onLongClick(View v) {
-                                                final  TextView tv = (TextView)v;
+                        final  TextView tv = (TextView)v;
                         final Rezept rezept = (Rezept) tv.getTag();
                         if (rezept!=null) {
 
@@ -668,6 +668,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                             helper.insertIntoShoppinglist(newRezept);
                                             rezepte.remove(rezept);
                                             Toast.makeText(getApplicationContext(), "Rezept ausgetauscht", Toast.LENGTH_SHORT).show();
+                                            Snackbar.make(tv, "Rezept ausgetauscht", Snackbar.LENGTH_SHORT)
+                                                    .setAction("Action", null).show();
                                             dataAdapter.clear();
                                             dataAdapter.addAll(rezepte);//dataAdapter.notifyDataSetChanged(); //da AL rezepte verkürzt wurde
                                             blocker.add(String.valueOf(rezept.getId()));
