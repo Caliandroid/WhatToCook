@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
 
             super.onCreate(savedInstanceState);
-            System.out.println("OnCreate läuft");
+            //System.out.println("OnCreate läuft");
             setContentView(R.layout.activity_main);
             activity = this;
             progressText=(TextView)findViewById(R.id.textView17);
@@ -365,7 +365,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     protected void onResume(){
         super.onResume();
-        System.out.println("OnResume läuft");
+        //System.out.println("OnResume läuft");
         //planned Rezepte laden
        // rezepte = helper.getPlannedReceipts(null,null,null,null);
         dataAdapter.notifyDataSetChanged();
@@ -374,7 +374,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onStop() {
         super.onStop();
-        System.out.println("OnStopCalled");
+        //System.out.println("OnStopCalled");
         //saveSharedPrefs();
         //DB Verbindung schließen
        // helper.close();

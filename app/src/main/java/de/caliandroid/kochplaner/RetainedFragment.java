@@ -21,6 +21,7 @@ public class RetainedFragment extends Fragment {
     // data object we want to retain
     private boolean runs=false;
     SharedPreferences sharedPreferences;
+    private Context context;
 
 
 
@@ -40,6 +41,7 @@ public class RetainedFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+        this.context=context;
         mCallbacks = (TaskCallbacks) context;
     }
 
@@ -79,12 +81,21 @@ public class RetainedFragment extends Fragment {
         mCallbacks = null;
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        //28.03.2016 Test to close the DB here
+        System.out.println("Close DB!");
+        DBHelper.getInstance(context).close();
+
+    }
+
 
 
 
 
     public void setRunning(boolean runs){
-        System.out.println("Wurde gesetzt auf "+runs);
+       // System.out.println("Wurde gesetzt auf "+runs);
         this.runs=runs;
     }
 
@@ -119,7 +130,6 @@ public class RetainedFragment extends Fragment {
             //neue Wochenplanung durchführen
 
             rezepte = mCallbacks.onPreExecute();
-            System.out.println("Habe Rezepte erhalten = "+rezepte.size());
             ArrayList<Rezept> neueRezepte=new ArrayList<>();
 
 
