@@ -5,6 +5,7 @@ import android.app.Application;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.database.sqlite.SQLiteException;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
@@ -81,12 +82,19 @@ public class RetainedFragment extends Fragment {
         mCallbacks = null;
     }
 
+
+    //TODO reicht die MainActivity Methode bereits aus? DB Connection leaked Warnung verhindern
     @Override
     public void onDestroy() {
         super.onDestroy();
         //28.03.2016 Test to close the DB here
-        System.out.println("Close DB!");
-        DBHelper.getInstance(context).close();
+        System.out.println("Close DB in OnDestroy!");
+        try {
+            DBHelper.getInstance(context).close();
+        }
+        catch(SQLiteException e){
+            e.printStackTrace();
+        }
 
     }
 

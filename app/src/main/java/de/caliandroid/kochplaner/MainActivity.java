@@ -382,6 +382,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        //28.03.2016 Test to close the DB here
+        System.out.println("Close DB in OnDestroy MainAct!");
+        try {
+            DBHelper.getInstance(this).close();
+        }
+        catch(SQLiteException e){
+            e.printStackTrace();
+        }
+
+    }
+
 
     @Override
     public boolean onMenuItemClick(MenuItem item) {
@@ -702,8 +716,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                                 helper.updateHaeufigkeit(rezept.getId());
                                                 helper.deletePlanned(rezept.getId());
                                                 rezepte.remove(position);
+                                                dataAdapter.clear();
+                                                dataAdapter.addAll(rezepte);
                                                 Toast.makeText(getApplicationContext(), rezept.getTitel() + " gekocht :)", Toast.LENGTH_LONG).show();
-                                                dataAdapter.notifyDataSetChanged(); //da AL rezepte verkürzt wurde
+                                                //dataAdapter.notifyDataSetChanged(); //da AL rezepte verkürzt wurde
 
                                             }
                                         });

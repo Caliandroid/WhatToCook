@@ -157,10 +157,23 @@ public class DBHelper extends SQLiteOpenHelper {
 
     @Override
     public synchronized void close() {
-
-        if(myDB != null)
-            myDB.close();
         super.close();
+        if(myDB != null)
+
+            if(myDB.isOpen()){
+
+                while( myDB.isDbLockedByCurrentThread()){
+                //Warten bis befreit
+                }
+                myDB.close();
+                System.out.println("DB connection closed");
+            }
+        else{
+                System.out.println("DB connection already closed");
+            }
+
+
+
 
     }
 
