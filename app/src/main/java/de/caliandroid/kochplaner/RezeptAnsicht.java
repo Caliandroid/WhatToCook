@@ -71,8 +71,12 @@ public class RezeptAnsicht extends AppCompatActivity implements View.OnClickList
 
         //Daten holen
         id = getIntent().getIntExtra("id",-1);
-        tvTitel.setText(getIntent().getStringExtra("titel"));
-        tvZutaten.setText("ZUTATEN:\n"+getIntent().getStringExtra("zutaten")+"\n\n");
+        tvTitel.setText(getIntent().getStringExtra("titel")+"\n");
+        //Format Zutaten
+
+        tvZutaten.setText("ZUTATEN:\n"+getIntent().getStringExtra("zutaten").replace("#","\n")+"\n\n");
+
+
         tvAnleitung.setText("ANLEITUNG:\n" + getIntent().getStringExtra("anleitung"));
         tvAnzahl.setText("Bisher gekocht: " + String.valueOf(getIntent().getIntExtra("anzahl", 0)) + " mal");
         if( getIntent().getIntExtra("blocked", 0)==1 ){
