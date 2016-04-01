@@ -83,19 +83,18 @@ public class ShoppingListAnsicht extends AppCompatActivity implements View.OnCli
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 
-        if (spinner.getSelectedItemPosition() == 0 && !alreadyCreated){
+       // if (spinner.getSelectedItemPosition() == 0 && !alreadyCreated){
             //init. - do nothing
             alreadyCreated=true;
-        }
+       // }
 
-        if (spinner.getSelectedItemPosition() == 0 && alreadyCreated){
+        //if (spinner.getSelectedItemPosition() == 0 && alreadyCreated){
+        if (spinner.getSelectedItemPosition() == 0){
             //Alle zeigen
             items=helper.getShoppinglist(rezepte);
-            dataAdapter.clear();
-            dataAdapter.addAll(items);
         }
 
-        if (spinner.getSelectedItemPosition() == 1){
+        else{
             //nur fehlende
           //  ArrayList<ShoppingListItem> newItems= new ArrayList<>();
             Iterator i = items.iterator();
@@ -105,9 +104,10 @@ public class ShoppingListAnsicht extends AppCompatActivity implements View.OnCli
                     i.remove();
                 }
             }
-            dataAdapter.clear();
-            dataAdapter.addAll(items);
+
         }
+        dataAdapter.clear();
+        dataAdapter.addAll(items);
 
 
     }
@@ -120,6 +120,7 @@ public class ShoppingListAnsicht extends AppCompatActivity implements View.OnCli
     @Override
     protected void onResume() {
         super.onResume();
+        System.out.println("onResume");
         items=helper.getShoppinglist(rezepte);
         if (spinner.getSelectedItemPosition() == 1){
             //nur fehlende
@@ -131,6 +132,7 @@ public class ShoppingListAnsicht extends AppCompatActivity implements View.OnCli
                 }
             }
         }
+        dataAdapter.clear();
         dataAdapter.addAll(items);
 
     }
