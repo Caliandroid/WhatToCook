@@ -91,6 +91,8 @@ public class ShoppingListAnsicht extends AppCompatActivity implements View.OnCli
         if (spinner.getSelectedItemPosition() == 0 && alreadyCreated){
             //Alle zeigen
             items=helper.getShoppinglist(rezepte);
+            dataAdapter.clear();
+            dataAdapter.addAll(items);
         }
 
         if (spinner.getSelectedItemPosition() == 1){
@@ -105,10 +107,8 @@ public class ShoppingListAnsicht extends AppCompatActivity implements View.OnCli
             }
             dataAdapter.clear();
             dataAdapter.addAll(items);
-
-
-
         }
+
 
     }
 
@@ -117,6 +117,40 @@ public class ShoppingListAnsicht extends AppCompatActivity implements View.OnCli
 
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        items=helper.getShoppinglist(rezepte);
+        if (spinner.getSelectedItemPosition() == 1){
+            //nur fehlende
+            Iterator i = items.iterator();
+            while(i.hasNext()){
+                ShoppingListItem item = (ShoppingListItem) i.next();
+                if(item.getShopped()==1){
+                    i.remove();
+                }
+            }
+        }
+        dataAdapter.addAll(items);
+
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+
+        //rezepte=helper.getRezepte(null,null,"TITEL ASC",null);
+        // adapter.notifyDataSetChanged();
+    }
+
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        //rezepte=helper.getRezepte(null,null,"TITEL ASC",null);
+        // adapter.notifyDataSetChanged();
+    }
 
     /**
      * Eigener Adapter zur Darstellung der Zutatenliste
