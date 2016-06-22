@@ -824,6 +824,20 @@ public class DBHelper extends SQLiteOpenHelper {
 
     }
 
+    public void deleteFailureEntry(){
+        //String sID =String.valueOf(rezeptid);
+        String whereClause=TABELLE1_2+" like ?";
+        String []whereArgs={"\"%"};
+
+        try{
+            myDB.delete(TABELLE1, whereClause, whereArgs);
+        }
+        catch(SQLiteException e){
+            e.printStackTrace();
+        }
+
+    }
+
     public void updatePlannedRezeptID(int alt, int neu){
         //SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();

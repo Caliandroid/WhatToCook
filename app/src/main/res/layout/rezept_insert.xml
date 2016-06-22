@@ -59,7 +59,8 @@
         android:ems="10"
         android:id="@+id/etAnleitung"
         android:layout_weight="0.24"
-        android:nestedScrollingEnabled="true" />
+        android:nestedScrollingEnabled="true"
+        android:autoText="true" />
 
     <LinearLayout
         android:orientation="horizontal"

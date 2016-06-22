@@ -74,7 +74,7 @@ public class Worker {
             sb.append("\n");
             sb.append("Zutaten:");
             sb.append("\n");
-            sb.append(rezept.getZutaten());
+            sb.append(rezept.getZutaten().replace("#","\n"));
             sb.append("\n");
             //Anleitung weglassen, sonst platzt die Mail :)
 
@@ -209,6 +209,9 @@ public class Worker {
         Rezept r;
 
         while ((line = br.readLine()) != null){
+            //falls das letzte Zeichen im String line kein Zeilenumbruch ist, sollte es weitergehen
+
+
             temp= line.split(delimiter);
 
             if(temp.length==7){
@@ -256,9 +259,22 @@ public class Worker {
         Rezept rezept;
         Iterator iterator = rezepte.iterator();
 
+
         while(iterator.hasNext()){
             rezept = (Rezept) iterator.next();
-            bufferedWriter.write(rezept.getTitel()+delimiter+rezept.getZutaten()+delimiter+rezept.getAnleitung()+delimiter+rezept.getTyp()+delimiter+rezept.getAnzahl()+delimiter+rezept.getImageUri()+delimiter+rezept.getBlocked());
+            //String um Zeilenumbrüche bereinigen
+            String anleitung = rezept.getAnleitung();
+            anleitung = anleitung.replace("\n"," ");
+            anleitung = anleitung.replace("\r"," ");
+            anleitung = anleitung.replace("CR"," ");
+            anleitung = anleitung.replace("CRLF"," ");
+
+            String zutaten = rezept.getZutaten();
+            zutaten = zutaten.replace("\n"," ");
+            zutaten = zutaten.replace("\r"," ");
+            zutaten = zutaten.replace("CR"," ");
+            zutaten = zutaten.replace("CRLF"," ");
+            bufferedWriter.write(rezept.getTitel()+delimiter+zutaten+delimiter+anleitung+delimiter+rezept.getTyp()+delimiter+rezept.getAnzahl()+delimiter+rezept.getImageUri()+delimiter+rezept.getBlocked());
             bufferedWriter.write("\n");
         }
         bufferedWriter.close();

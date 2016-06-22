@@ -708,6 +708,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                                     } else if (choose[item].equals(choose[1])) { //als gekocht markieren und entfernen
 
+
+
                                         AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.activity);
                                         alert.setTitle("Wurde " + rezept.getTitel() + " gekocht?");
                                         alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
@@ -715,6 +717,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                                 //falls selektiert, dann entfernen und Häufigkeit hochsetzen
                                                 helper.updateHaeufigkeit(rezept.getId());
                                                 helper.deletePlanned(rezept.getId());
+                                                //15.05.2016 das sollte bisher gefehlt haben - ToDO:Testen
+                                                helper.deleteItemFromShoppinglist(rezept.getId());
                                                 rezepte.remove(position);
                                                 dataAdapter.clear();
                                                 dataAdapter.addAll(rezepte);

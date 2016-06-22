@@ -46,7 +46,7 @@ public class AddEditRezept extends AppCompatActivity implements View.OnClickList
     private static final String IMAGELOCATIONPREFIX="file://";
     private static final String IMAGE_FOLDER ="/images";  //geladen werden soll dann noch /storage/sdcard1/kochplaner
 
-    private static final String IMAGELOCATION="/storage/sdcard1/kochplaner/images";
+    //private static final String IMAGELOCATION="/storage/sdcard1/kochplaner/images";
     private static final int CAMERADATA = 0;
     public static final String MY_PREFS = "MyPrefs";
 
@@ -68,6 +68,9 @@ public class AddEditRezept extends AppCompatActivity implements View.OnClickList
     String restoredPath;
     SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss",Locale.getDefault());
 
+    //Wileyfox
+    File sdcard;
+
 
 
 
@@ -82,6 +85,10 @@ public class AddEditRezept extends AppCompatActivity implements View.OnClickList
         sharedpreferences = getSharedPreferences(MY_PREFS, MODE_PRIVATE);
         restoredPath = sharedpreferences.getString("storagePath", null);
 
+        //Wileyfox CynOS12.1 Workaround
+        //restoredPath="/kochplaner";
+        sdcard =Environment.getExternalStorageDirectory();
+        System.out.println("External Storage Directory = "+sdcard.getAbsolutePath());
 
         setContentView(R.layout.rezept_insert);
         etTitel=(EditText)findViewById(R.id.etTitel);
