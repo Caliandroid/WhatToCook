@@ -35,7 +35,7 @@ public class RezeptAnsicht extends AppCompatActivity implements View.OnClickList
     private static final String IMAGE_FOLDER ="/images";  //geladen werden soll dann noch /storage/sdcard1/kochplaner
 
 
-    private TextView tvTitel,tvZutaten,tvAnleitung,tvAnzahl,tvBlocked;
+    private TextView tvTitel,tvZutaten,tvAnleitung,tvAnzahl,tvBlocked,tvSaison;
     private int id;
     private Button bZurueck,bEdit,bDelete;
     public static Activity activity;
@@ -68,6 +68,7 @@ public class RezeptAnsicht extends AppCompatActivity implements View.OnClickList
         ImageView imageView =(ImageView)findViewById(R.id.imageView);
         imageView.setOnClickListener(this);
         tvBlocked = (TextView)findViewById(R.id.textView4);
+        tvSaison = (TextView)findViewById(R.id.tvSaison);
 
         //Daten holen
         id = getIntent().getIntExtra("id",-1);
