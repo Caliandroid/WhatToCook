@@ -68,7 +68,7 @@ public class RezeptAnsicht extends AppCompatActivity implements View.OnClickList
         ImageView imageView =(ImageView)findViewById(R.id.imageView);
         imageView.setOnClickListener(this);
         tvBlocked = (TextView)findViewById(R.id.textView4);
-        tvSaison = (TextView)findViewById(R.id.tvSaison);
+        tvSaison = (TextView)findViewById(R.id.tvSeason);
 
         //Daten holen
         id = getIntent().getIntExtra("id",-1);
@@ -80,6 +80,8 @@ public class RezeptAnsicht extends AppCompatActivity implements View.OnClickList
 
         tvAnleitung.setText("ANLEITUNG:\n" + getIntent().getStringExtra("anleitung"));
         tvAnzahl.setText("Bisher gekocht: " + String.valueOf(getIntent().getIntExtra("anzahl", 0)) + " mal");
+
+        tvSaison.setText("Saison: " + getIntent().getStringExtra("saison"));
         if( getIntent().getIntExtra("blocked", 0)==1 ){
             tvBlocked.setText("geblockt!");
         }
@@ -152,6 +154,7 @@ public class RezeptAnsicht extends AppCompatActivity implements View.OnClickList
             i.putExtra("typ",this.getIntent().getIntExtra("typ",0));
             i.putExtra("imageUri",this.getIntent().getStringExtra("imageUri"));
             i.putExtra("blocked",this.getIntent().getIntExtra("blocked",0));
+            i.putExtra( "saison", this.getIntent().getStringExtra("saison"));
             startActivityForResult(i, 1);
 
 

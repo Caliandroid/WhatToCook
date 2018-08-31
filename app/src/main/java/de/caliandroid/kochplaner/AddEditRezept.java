@@ -53,7 +53,7 @@ public class AddEditRezept extends AppCompatActivity implements View.OnClickList
     private static final int SELECT_FILE = 100;
     private static final int REQUEST_CAMERA = 110;
 
-    private EditText etTitel,etZutaten,etAnleitung,etAnzahl;
+    private EditText etTitel,etZutaten,etAnleitung,etAnzahl,etSeason;
     private CheckBox blocked;
     private TextView tvImageUri;
     private int rezeptID,iBlocked;
@@ -95,6 +95,7 @@ public class AddEditRezept extends AppCompatActivity implements View.OnClickList
         etZutaten=(EditText)findViewById(R.id.etZutaten);
         etAnleitung=(EditText)findViewById(R.id.etAnleitung);
         etAnzahl=(EditText)findViewById(R.id.etAnzahl);
+        etSeason = (EditText)findViewById(R.id.etSeason);
         button =(Button)findViewById(R.id.bEditRezept);
         button.setOnClickListener(this);
         bKamera =(Button)findViewById(R.id.bKamera);
@@ -125,6 +126,7 @@ public class AddEditRezept extends AppCompatActivity implements View.OnClickList
                 bKamera.setText("Foto aktualisieren");
                 tvImageUri.setText(filename);
             }
+            etSeason.setText(getIntent().getStringExtra("saison"));
             //Spinner setzen
             spType.setSelection(getIntent().getIntExtra("typ", 0));
             iBlocked=getIntent().getIntExtra("blocked",0);
@@ -253,6 +255,9 @@ public class AddEditRezept extends AppCompatActivity implements View.OnClickList
                 if (etAnzahl.getText().toString().isEmpty()) {
                     etAnzahl.setText("0");
                 }
+                if (etSeason.getText().toString().isEmpty()){
+                    etSeason.setText("01,02,03,04,05,06,07,08,09,10,11,12");
+                }
                 if (blocked.isChecked()) {
                     iBlocked = 1;
                 } else {
@@ -266,7 +271,7 @@ public class AddEditRezept extends AppCompatActivity implements View.OnClickList
                     if (bInsert) {//NEUES REZEPT
 
 
-                        Rezept r = new Rezept(-1, etTitel.getText().toString(), etZutaten.getText().toString(), etAnleitung.getText().toString(), spType.getSelectedItemPosition(), Integer.valueOf(etAnzahl.getText().toString()), filename, iBlocked);
+                        Rezept r = new Rezept(-1, etTitel.getText().toString(), etZutaten.getText().toString(), etAnleitung.getText().toString(), spType.getSelectedItemPosition(), Integer.valueOf(etAnzahl.getText().toString()), filename, iBlocked, etSeason.getText().toString());
                         if (!helper.doesAlreadyExist(r)) {
                             helper.insertRezept(r);
                             //TODO einen Toast anzeigen, dann Ansicht schließen
@@ -285,7 +290,7 @@ public class AddEditRezept extends AppCompatActivity implements View.OnClickList
                          */
 
 
-                        Rezept r = new Rezept(getIntent().getIntExtra("id", -1), etTitel.getText().toString(), etZutaten.getText().toString(), etAnleitung.getText().toString(), spType.getSelectedItemPosition(), Integer.valueOf(etAnzahl.getText().toString()), filename, iBlocked);
+                        Rezept r = new Rezept(getIntent().getIntExtra("id", -1), etTitel.getText().toString(), etZutaten.getText().toString(), etAnleitung.getText().toString(), spType.getSelectedItemPosition(), Integer.valueOf(etAnzahl.getText().toString()), filename, iBlocked,etSeason.getText().toString());
                         if (!helper.doesAlreadyExist(r)) { //Duplettengenerierung bei Update vermeiden
                             helper.updateRezept(r);
                             Toast.makeText(getApplicationContext(), "Erfolgreich aktualisiert", Toast.LENGTH_LONG).show();

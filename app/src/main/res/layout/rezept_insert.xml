@@ -101,6 +101,22 @@
         android:layout_height="wrap_content"
         android:id="@+id/spType" />
 
+    <TextView
+        android:id="@+id/tvSeason"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Season"
+        android:textAppearance="@android:style/TextAppearance.Material.Medium" />
+
+    <EditText
+        android:id="@+id/etSeason"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.24"
+        android:ems="10"
+        android:inputType="textMultiLine"
+        android:text="01,02,03,04,05,06,07,08,09,10,11,12" />
+
     <CheckBox
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

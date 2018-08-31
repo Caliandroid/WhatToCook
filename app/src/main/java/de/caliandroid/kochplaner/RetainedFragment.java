@@ -9,8 +9,11 @@ import android.database.sqlite.SQLiteException;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Iterator;
 
 
@@ -141,29 +144,39 @@ public class RetainedFragment extends Fragment {
             ArrayList<Rezept> neueRezepte=new ArrayList<>();
 
 
+            //30.08.2018 Saison feature
+            //aktueller Monat holen, falls Monatsanfang oder Monatsende noch den Vor- bzw. Folgemonat integrieren
+            DateFormat dateFormat = new SimpleDateFormat("MM");
+            Date dateCurrent = new Date();
+            String monthCurrent = dateFormat.format(dateCurrent);
+            // inactive: leading 0 is currently needed!
+            // String monthCurrent = dateFormat.format(dateCurrent).replaceFirst("^0+(?!$)", ""); //removes leading zero
+            monthCurrent = "%"+monthCurrent+"%";
+
+
 
             //vegetarisch=0
-            neueRezepte.addAll(helper.getKochplanNeu(0, Integer.valueOf(sharedPreferences.getString("vegetarisch", "1")),rezepte));
+            neueRezepte.addAll(helper.getKochplanNeu(0, Integer.valueOf(sharedPreferences.getString("vegetarisch", "1")),monthCurrent,rezepte));
             i++;
             publishProgress(i);
             //Fleisch=1
-            neueRezepte.addAll(helper.getKochplanNeu(1, Integer.valueOf(sharedPreferences.getString("fleisch", "1")),rezepte));
+            neueRezepte.addAll(helper.getKochplanNeu(1, Integer.valueOf(sharedPreferences.getString("fleisch", "1")),monthCurrent,rezepte));
             i++;
             publishProgress(i);
             //Fisch=2
-            neueRezepte.addAll(helper.getKochplanNeu(2, Integer.valueOf(sharedPreferences.getString("fisch", "1")),rezepte));
+            neueRezepte.addAll(helper.getKochplanNeu(2, Integer.valueOf(sharedPreferences.getString("fisch", "1")),monthCurrent,rezepte));
             i++;
             publishProgress(i);
             //Süß=3
-            neueRezepte.addAll(helper.getKochplanNeu(3, Integer.valueOf(sharedPreferences.getString("suess", "1")),rezepte));
+            neueRezepte.addAll(helper.getKochplanNeu(3, Integer.valueOf(sharedPreferences.getString("suess", "1")),monthCurrent,rezepte));
             i++;
             publishProgress(i);
             //Dessert=4
-            neueRezepte.addAll(helper.getKochplanNeu(4, Integer.valueOf(sharedPreferences.getString("nachtisch", "1")),rezepte));
+            neueRezepte.addAll(helper.getKochplanNeu(4, Integer.valueOf(sharedPreferences.getString("nachtisch", "1")),monthCurrent,rezepte));
             i++;
             publishProgress(i);
             //Snack=5
-            neueRezepte.addAll(helper.getKochplanNeu(5, Integer.valueOf(sharedPreferences.getString("snack", "1")),rezepte));
+            neueRezepte.addAll(helper.getKochplanNeu(5, Integer.valueOf(sharedPreferences.getString("snack", "1")),monthCurrent,rezepte));
             i++;
             publishProgress(i);
 
