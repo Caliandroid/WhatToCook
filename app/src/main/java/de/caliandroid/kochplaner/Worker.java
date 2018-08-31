@@ -169,9 +169,9 @@ public class Worker {
         while ((line = br.readLine()) != null){
                 temp= line.split(delimiter);
 
-                if(temp.length==7){
+                if(temp.length==8){
                     //TODO versuche ein Rezeptobjekt zu erstellen
-                    r= new Rezept(-1,temp[0],temp[1],temp[2],Integer.valueOf(temp[3]),Integer.valueOf(temp[4]),temp[5],Integer.valueOf(temp[6]));
+                    r= new Rezept(-1,temp[0],temp[1],temp[2],Integer.valueOf(temp[3]),Integer.valueOf(temp[4]),temp[5],Integer.valueOf(temp[6]),temp[7]);
                     if(!helper.doesAlreadyExist(r)){
                         helper.insertRezept(r);
                         Log.v("CSV Import" , "Rezept " + r.getTitel() + " erfolgreich importiert");
@@ -214,9 +214,9 @@ public class Worker {
 
             temp= line.split(delimiter);
 
-            if(temp.length==7){
+            if(temp.length==8){
                 //TODO versuche ein Rezeptobjekt zu erstellen
-                r= new Rezept(-1,temp[0],temp[1],temp[2],Integer.valueOf(temp[3]),Integer.valueOf(temp[4]),temp[5],Integer.valueOf(temp[6]));
+                r= new Rezept(-1,temp[0],temp[1],temp[2],Integer.valueOf(temp[3]),Integer.valueOf(temp[4]),temp[5],Integer.valueOf(temp[6]),temp[7]);
                 if(!helper.doesAlreadyExist(r)){
                     helper.insertRezept(r);
                     Log.v("CSV Import" , "Rezept " + r.getTitel() + " erfolgreich importiert");
@@ -224,7 +224,7 @@ public class Worker {
 
                 }
                 else{
-                    Log.v("INFO","Rezept existiert schon in DB:: "+line);
+                   // Log.v("INFO","Rezept existiert schon in DB:: "+line);
                     results[1]++;
                 }
 
@@ -274,7 +274,7 @@ public class Worker {
             zutaten = zutaten.replace("\r"," ");
             zutaten = zutaten.replace("CR"," ");
             zutaten = zutaten.replace("CRLF"," ");
-            bufferedWriter.write(rezept.getTitel()+delimiter+zutaten+delimiter+anleitung+delimiter+rezept.getTyp()+delimiter+rezept.getAnzahl()+delimiter+rezept.getImageUri()+delimiter+rezept.getBlocked());
+            bufferedWriter.write(rezept.getTitel()+delimiter+zutaten+delimiter+anleitung+delimiter+rezept.getTyp()+delimiter+rezept.getAnzahl()+delimiter+rezept.getImageUri()+delimiter+rezept.getBlocked()+delimiter+rezept.getSaison());
             bufferedWriter.write("\n");
         }
         bufferedWriter.close();

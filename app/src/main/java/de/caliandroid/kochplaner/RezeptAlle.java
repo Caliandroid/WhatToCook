@@ -131,6 +131,7 @@ public class RezeptAlle extends AppCompatActivity implements View.OnClickListene
             i.putExtra("typ", rezept.getTyp());
             i.putExtra("imageUri",rezept.getImageUri());
             i.putExtra("blocked",rezept.getBlocked());
+            i.putExtra("saison", rezept.getSaison());
             i.putExtra("position",iPosition);  //um bei Löschoperation das Rezept aus dem Array zu entfernen
             startActivityForResult(i, 1);
         }

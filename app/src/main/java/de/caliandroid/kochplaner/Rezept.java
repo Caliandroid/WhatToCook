@@ -6,10 +6,10 @@ package de.caliandroid.kochplaner;
 public class Rezept {
 
     private int id,typ,anzahl,blocked;
-    private String titel,anleitung,zutaten,imageUri;
+    private String titel,anleitung,zutaten,imageUri,saison;
 
 
-    public Rezept(int id,String titel,String zutaten, String anleitung,int typ, int anzahl,String imageUri, int blocked){
+    public Rezept(int id,String titel,String zutaten, String anleitung,int typ, int anzahl,String imageUri, int blocked, String saison){
         this.id = id;
         this.titel=titel;
         this.zutaten=zutaten;
@@ -18,6 +18,7 @@ public class Rezept {
         this.anzahl=anzahl;
         this.imageUri=imageUri;
         this.blocked = blocked;
+        this.saison = saison;
     }
 
     public int getId(){
@@ -49,6 +50,9 @@ public class Rezept {
     public void setBlocked(int blocked) {
         this.blocked = blocked;
     }
+    public String getSaison() {  return this.saison; }
+
+
 
 }
 
