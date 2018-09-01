@@ -71,8 +71,41 @@ public class RezeptAnsicht extends AppCompatActivity implements View.OnClickList
         tvSaison = (TextView)findViewById(R.id.tvSeason);
 
         //Daten holen
+
+        //01.09.2018 add typ to the title, f.e.  Sushi => Sushi [Fish]
+        String sTyp="";
+        int iTyp  = getIntent().getIntExtra("typ", 0);
+        switch (iTyp){
+            case 0:
+                sTyp="Vegtarisch";
+                break;
+            case 1:
+                sTyp="Fleisch";
+                break;
+            case 2:
+                sTyp="Fisch";
+                break;
+            case 3:
+                sTyp="Süßspeise";
+                break;
+            case 4:
+                sTyp="Dessert";
+                break;
+            case 5:
+                sTyp="Snack";
+                break;
+
+
+
+        }
+
+
         id = getIntent().getIntExtra("id",-1);
-        tvTitel.setText(getIntent().getStringExtra("titel")+"\n");
+        tvTitel.setText(getIntent().getStringExtra("titel")+" ["+sTyp+"]\n");
+
+
+
+
         //Format Zutaten
 
         tvZutaten.setText("ZUTATEN:\n"+getIntent().getStringExtra("zutaten").replace("#","\n")+"\n\n");
