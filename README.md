@@ -1,6 +1,7 @@
 # WhatToCook
 
-![alt text](https://github.com/Caliandroid/WhatToCook/blob/master/Screenshot_20191210-120717_Kochplaner.jpg "Screenshot1")
+
+![Main window](https://github.com/Caliandroid/WhatToCook/blob/master/Screenshot_20191210-120717_Kochplaner.png "Screenshot1")
 
 My private project KOCHPLANER (engl. cooking planer): 
 
@@ -12,7 +13,22 @@ One-click android app that helps me
 
 What you still got to do: Record your favorite receipts including the ingredients (for grocery list). 
 
-The app is in a very early state and only with german interface but already functional.
+The app is still in development and only with german interface but already functional and stable enough for daily usage
 
-If you want to test it, please send me a messsage.
+If you want to test it, build it yourself and send me a messsage.
+
+
+
+![GUI Screenshot1 WhatToCook Main window](https://github.com/Caliandroid/WhatToCook/blob/maste/Screenshot_20191210-120717_Kochplaner.png "Screenshot4")
+
+![GUI Screenshot WhatToCook Main send mail](https://github.com/Caliandroid/WhatToCook/blob/master/Screenshot_20191210-120748_Kochplaner.png "Screenshot3")
+
+
+![GUI Screenshot1 WhatToCook Mail content in Mail application](https://github.com/Caliandroid/WhatToCook/blob/master/Screenshot_20191210-120807_FairEmail.png "Screenshot5")
+
+![GUI Screenshot1 WhatToCook Shopping List](https://github.com/Caliandroid/WhatToCook/blob/master/Screenshot_20191210-120839_Kochplaner.png "Screenshot6")
+
+![GUI Screenshot1 WhatToCook Receipt detail with image](https://github.com/Caliandroid/WhatToCook/blob/master/Screenshot_20191210-120934_Kochplaner.png "Screenshot7")
+
+![GUI Screenshot1 WhatToCook Settings window](https://github.com/Caliandroid/WhatToCook/blob/master/Screenshot_20191210-120855_Kochplaner.png "Screenshot8")
 
