@@ -1,5 +1,7 @@
 # WhatToCook
 
+![alt text](https://github.com/Caliandroid/WhatToCook/blob/master/Screenshot_20191210-120717_Kochplaner.jpg "Screenshot1")
+
 My private project KOCHPLANER (engl. cooking planer): 
 
 One-click android app that helps me 
