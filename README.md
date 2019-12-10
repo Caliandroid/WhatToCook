@@ -17,18 +17,7 @@ The app is still in development and only with german interface but already funct
 
 If you want to test it, build it yourself and send me a messsage.
 
-
-
-![GUI Screenshot1 WhatToCook Main window](https://github.com/Caliandroid/WhatToCook/blob/maste/Screenshot_20191210-120717_Kochplaner.png "Screenshot4")
-
-![GUI Screenshot WhatToCook Main send mail](https://github.com/Caliandroid/WhatToCook/blob/master/Screenshot_20191210-120748_Kochplaner.png "Screenshot3")
-
-
-![GUI Screenshot1 WhatToCook Mail content in Mail application](https://github.com/Caliandroid/WhatToCook/blob/master/Screenshot_20191210-120807_FairEmail.png "Screenshot5")
-
-![GUI Screenshot1 WhatToCook Shopping List](https://github.com/Caliandroid/WhatToCook/blob/master/Screenshot_20191210-120839_Kochplaner.png "Screenshot6")
-
-![GUI Screenshot1 WhatToCook Receipt detail with image](https://github.com/Caliandroid/WhatToCook/blob/master/Screenshot_20191210-120934_Kochplaner.png "Screenshot7")
-
-![GUI Screenshot1 WhatToCook Settings window](https://github.com/Caliandroid/WhatToCook/blob/master/Screenshot_20191210-120855_Kochplaner.png "Screenshot8")
+|   |   |   |   |
+|![GUI Screenshot WhatToCook Main send mail](https://github.com/Caliandroid/WhatToCook/blob/master/Screenshot_20191210-120748_Kochplaner.png "Screenshot3")|![GUI Screenshot1 WhatToCook Mail content in Mail application](https://github.com/Caliandroid/WhatToCook/blob/master/Screenshot_20191210-120807_FairEmail.png "Screenshot5")|![GUI Screenshot1 WhatToCook Shopping List](https://github.com/Caliandroid/WhatToCook/blob/master/Screenshot_20191210-120839_Kochplaner.png "Screenshot6")|![GUI Screenshot1 WhatToCook Receipt detail with image](https://github.com/Caliandroid/WhatToCook/blob/master/Screenshot_20191210-120934_Kochplaner.png "Screenshot7")|![GUI Screenshot1 WhatToCook Settings window](https://github.com/Caliandroid/WhatToCook/blob/master/Screenshot_20191210-120855_Kochplaner.png "Screenshot8")
+| | | | |
 
